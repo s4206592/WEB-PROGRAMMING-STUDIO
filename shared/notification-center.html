@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Notification Center — StudioTrade</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="logo">STUDIOTRADE</div>
+    <nav>
+      <a href="../shared/product-listing.html">Products</a>
+      <a href="../discussion-forum/forum-landing.html">Forum</a>
+      <a href="../blog/blog-listing.html">Blog</a>
+      <a href="../wishlist/wishlist-landing.html">Wishlist</a>
+      <a href="../shopping-cart/shopping-cart.html">Cart</a>
+    </nav>
+    <div class="user-icons">
+      <a class="icon-box" href="../wishlist/wishlist-landing.html" style="text-decoration:none;color:#333;">♡<span class="badge">3</span></a>
+      <a class="icon-box" href="../shopping-cart/shopping-cart.html" style="text-decoration:none;color:#333;">🛒<span class="badge">2</span></a>
+      <a class="icon-box" href="../shared/notification-center.html" style="text-decoration:none;color:#333;">🔔<span class="badge">5</span></a>
+      <a class="icon-box" href="../account/profile-view.html" style="text-decoration:none;color:#333;">👤</a>
+    </div>
+  </header>
+
+  <div class="breadcrumb">Home / Notification Center</div>
+
+  <div class="page-wrap">
+    <div class="wf-note">Shared hub page — receives events from Discussion Forum (replies, votes, mod actions), Blog (approvals, comments), and Wishlist (price drops, saved-search matches).</div>
+
+    <div class="two-col">
+      <aside class="box">
+        <div class="box-title">Filter by Source</div>
+        <label><input type="checkbox" checked> All</label>
+        <label><input type="checkbox"> Forum</label>
+        <label><input type="checkbox"> Blog</label>
+        <label><input type="checkbox"> Wishlist</label>
+        <label><input type="checkbox"> Orders / Escrow</label>
+        <a class="btn small secondary" style="margin-top:10px;" href="#">Mark all as read</a>
+      </aside>
+      <main class="box">
+        <div class="box-title">Recent Notifications</div>
+        <div class="notif-item"><div class="dot"></div><div><strong>[Wishlist]</strong> Price drop: Godox SL60W Studio Light is now 10% off.<div class="time">2 minutes ago</div></div></div>
+        <div class="notif-item"><div class="dot"></div><div><strong>[Forum]</strong> tranminh_photo replied to your post "Best budget softbox for portraits?"<div class="time">18 minutes ago</div></div></div>
+        <div class="notif-item"><div class="dot"></div><div><strong>[Blog]</strong> Your submission "5 Tips for Buying Secondhand Cameras" was approved.<div class="time">1 hour ago</div></div></div>
+        <div class="notif-item read"><div class="dot"></div><div><strong>[Wishlist]</strong> Saved search "Sony mirrorless under 25,000,000₫" has 2 new matches.<div class="time">Yesterday</div></div></div>
+        <div class="notif-item read"><div class="dot"></div><div><strong>[Orders]</strong> Escrow release for order #10432 scheduled in 3 days.<div class="time">2 days ago</div></div></div>
+      </main>
+    </div>
+  
+  </div>
+
+  <footer class="sitefooter">
+    <span>StudioTrade — Notification Center</span>
+    <span>Fed by: Discussion Forum · Blog · Wishlist · Orders/Escrow</span>
+    <span class="wf-label" style="display:flex; gap:10px;">
+      <a href="../sitemap/sitemap.html" style="color:#666;">Sitemap</a> ·
+      <a href="../account/login.html" style="color:#666;">Login</a> ·
+      <a href="../account/register.html" style="color:#666;">Register</a> ·
+      <a href="../administration/administration-page.html" style="color:#666;">Admin</a>
+    </span>
+  </footer>
+</body>
+</html>

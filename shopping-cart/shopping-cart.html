@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Shopping Cart (SC) — StudioTrade</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="logo">STUDIOTRADE</div>
+    <nav>
+      <a href="../shared/product-listing.html">Products</a>
+      <a href="../discussion-forum/forum-landing.html">Forum</a>
+      <a href="../blog/blog-listing.html">Blog</a>
+      <a href="../wishlist/wishlist-landing.html">Wishlist</a>
+      <a href="../shopping-cart/shopping-cart.html" class="current">Cart</a>
+    </nav>
+    <div class="user-icons">
+      <a class="icon-box" href="../wishlist/wishlist-landing.html" style="text-decoration:none;color:#333;">♡<span class="badge">3</span></a>
+      <a class="icon-box" href="../shopping-cart/shopping-cart.html" style="text-decoration:none;color:#333;">🛒<span class="badge">2</span></a>
+      <a class="icon-box" href="../shared/notification-center.html" style="text-decoration:none;color:#333;">🔔<span class="badge">5</span></a>
+      <a class="icon-box" href="../account/profile-view.html" style="text-decoration:none;color:#333;">👤</a>
+    </div>
+  </header>
+
+  <div class="breadcrumb">Home / Shopping Cart</div>
+
+  <div class="page-wrap">
+    <div class="wf-note">Main page of the Shopping Cart module and a shared hub — reached from Individual Product ("Add to Cart") and Wishlist ("Move to Cart"). Continues into the checkout flow below.</div>
+
+    <div class="three-col">
+      <main>
+        <div class="section-bar" style="margin-top:0;"><h2>Your Cart (2 items)</h2></div>
+        <div class="row-item">
+          <div class="placeholder-img">IMG</div>
+          <div class="row-info"><strong>Godox SL60W Studio Light</strong><div class="wf-label">Secondhand · Seller: Hanoi Studio Gear</div><div class="price">1,250,000₫</div></div>
+          <div class="row-actions"><span class="wf-label">Qty: [ - ] 1 [ + ]</span><a class="btn small secondary" href="#">Remove</a><a class="btn small secondary" href="../wishlist/wishlist-landing.html">Move to Wishlist</a></div>
+        </div>
+        <div class="row-item">
+          <div class="placeholder-img">IMG</div>
+          <div class="row-info"><strong>Softbox 80x80cm Kit</strong><div class="wf-label">New · Seller: Saigon Photo Supplies</div><div class="price">890,000₫</div></div>
+          <div class="row-actions"><span class="wf-label">Qty: [ - ] 1 [ + ]</span><a class="btn small secondary" href="#">Remove</a><a class="btn small secondary" href="../wishlist/wishlist-landing.html">Move to Wishlist</a></div>
+        </div>
+        <div class="wf-note" style="border-color:#999; color:#666; background:#f7f7f7;">Empty-cart state (not shown): "Your cart is empty" message with a button back to Product Listing.</div>
+        <a class="btn secondary" href="../shared/product-listing.html">← Continue Shopping</a>
+      </main>
+      <aside class="box">
+        <div class="box-title">Order Summary</div>
+        <table class="wf-table">
+          <tr><td>Subtotal</td><td>2,140,000₫</td></tr>
+          <tr><td>Shipping</td><td>30,000₫</td></tr>
+          <tr><td>Escrow Hold Fee</td><td>0₫</td></tr>
+          <tr><th>Total</th><th>2,170,000₫</th></tr>
+        </table>
+        <a class="btn" style="width:100%; margin-top:12px;" href="checkout-delivery.html">Proceed to Checkout →</a>
+      </aside>
+    </div>
+  
+  </div>
+
+  <footer class="sitefooter">
+    <span>StudioTrade — Shopping Cart (SC)</span>
+    <span>Linked from: Individual Product · Wishlist → Continues to: Checkout · Order Confirmation · Delivery Tracking</span>
+    <span class="wf-label" style="display:flex; gap:10px;">
+      <a href="../sitemap/sitemap.html" style="color:#666;">Sitemap</a> ·
+      <a href="../account/login.html" style="color:#666;">Login</a> ·
+      <a href="../account/register.html" style="color:#666;">Register</a> ·
+      <a href="../administration/administration-page.html" style="color:#666;">Admin</a>
+    </span>
+  </footer>
+</body>
+</html>

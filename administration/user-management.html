@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>User Management — StudioTrade</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="logo">STUDIOTRADE</div>
+    <nav>
+      <a href="../shared/product-listing.html">Products</a>
+      <a href="../discussion-forum/forum-landing.html">Forum</a>
+      <a href="../blog/blog-listing.html">Blog</a>
+      <a href="../wishlist/wishlist-landing.html">Wishlist</a>
+      <a href="../shopping-cart/shopping-cart.html">Cart</a>
+    </nav>
+    <div class="user-icons">
+      <a class="icon-box" href="../wishlist/wishlist-landing.html" style="text-decoration:none;color:#333;">♡<span class="badge">3</span></a>
+      <a class="icon-box" href="../shopping-cart/shopping-cart.html" style="text-decoration:none;color:#333;">🛒<span class="badge">2</span></a>
+      <a class="icon-box" href="../shared/notification-center.html" style="text-decoration:none;color:#333;">🔔<span class="badge">5</span></a>
+      <a class="icon-box" href="../account/profile-view.html" style="text-decoration:none;color:#333;">👤</a>
+    </div>
+  </header>
+
+  <div class="breadcrumb">Home / Administration / User Management</div>
+
+  <div class="page-wrap">
+    <div class="wf-note">Sub-page of Administration. Displays all user accounts with options to edit, suspend, or delete — pulled from the same database as User Account Management.</div>
+
+    <div class="section-bar" style="margin-top:0;"><span class="search-box" style="width:260px;">🔍 Search users…</span></div>
+    <table class="wf-table">
+      <tr><th>Username</th><th>Email</th><th>Joined</th><th>Status</th><th>Actions</th></tr>
+      <tr><td>tranminh_photo</td><td>tranminh@•••.com</td><td>Mar 2025</td><td>Active</td><td><a class="btn small secondary" href="#">Edit</a> <a class="btn small secondary" href="#">Suspend</a></td></tr>
+      <tr><td>fake_seller_02</td><td>seller02@•••.com</td><td>Jun 2026</td><td>Suspended</td><td><a class="btn small secondary" href="#">Edit</a> <a class="btn small secondary" href="#">Reinstate</a></td></tr>
+      <tr><td>lena.studio</td><td>lena@•••.com</td><td>Jan 2025</td><td>Active</td><td><a class="btn small secondary" href="#">Edit</a> <a class="btn small secondary" href="#">Suspend</a></td></tr>
+    </table>
+  
+  </div>
+
+  <footer class="sitefooter">
+    <span>StudioTrade — User Management</span>
+    <span>Reached from: Administration Page → shares data with: Profile (View), Register</span>
+    <span class="wf-label" style="display:flex; gap:10px;">
+      <a href="../sitemap/sitemap.html" style="color:#666;">Sitemap</a> ·
+      <a href="../account/login.html" style="color:#666;">Login</a> ·
+      <a href="../account/register.html" style="color:#666;">Register</a> ·
+      <a href="../administration/administration-page.html" style="color:#666;">Admin</a>
+    </span>
+  </footer>
+</body>
+</html>

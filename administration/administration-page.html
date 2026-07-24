@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Administration Page — StudioTrade</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="logo">STUDIOTRADE</div>
+    <nav>
+      <a href="../shared/product-listing.html">Products</a>
+      <a href="../discussion-forum/forum-landing.html">Forum</a>
+      <a href="../blog/blog-listing.html">Blog</a>
+      <a href="../wishlist/wishlist-landing.html">Wishlist</a>
+      <a href="../shopping-cart/shopping-cart.html">Cart</a>
+    </nav>
+    <div class="user-icons">
+      <a class="icon-box" href="../wishlist/wishlist-landing.html" style="text-decoration:none;color:#333;">♡<span class="badge">3</span></a>
+      <a class="icon-box" href="../shopping-cart/shopping-cart.html" style="text-decoration:none;color:#333;">🛒<span class="badge">2</span></a>
+      <a class="icon-box" href="../shared/notification-center.html" style="text-decoration:none;color:#333;">🔔<span class="badge">5</span></a>
+      <a class="icon-box" href="../account/profile-view.html" style="text-decoration:none;color:#333;">👤</a>
+    </div>
+  </header>
+
+  <div class="breadcrumb">Home / Administration</div>
+
+  <div class="page-wrap">
+    <div class="wf-note">Central hub for admin tools. Reached only by admin login — not exposed in the main nav bar (linked from footer "Admin" for wireframe navigation purposes). Oversees user accounts, transactions, content, and analytics.</div>
+
+    <div class="wf-note" style="border-color:#a33; color:#a33; background:#fff5f5;">Admin-only area — assume a separate admin authentication gate sits in front of this page.</div>
+    <div class="card-grid" style="grid-template-columns:repeat(4,1fr);">
+      <div class="box"><div class="box-title">User Management</div><p class="wf-label">1,204 accounts</p><a class="btn small" href="user-management.html">Open →</a></div>
+      <div class="box"><div class="box-title">Transaction Records</div><p class="wf-label">312 active orders</p><a class="btn small" href="transaction-records.html">Open →</a></div>
+      <div class="box"><div class="box-title">Content Moderation</div><p class="wf-label">11 flagged items</p><a class="btn small" href="content-moderation.html">Open →</a></div>
+      <div class="box"><div class="box-title">Analytics Dashboard</div><p class="wf-label">System metrics</p><a class="btn small" href="analytics-dashboard.html">Open →</a></div>
+    </div>
+    <div class="section-bar"><h2>Recent Admin Activity</h2></div>
+    <div class="notif-item"><div class="dot"></div><div>Suspended account "fake_seller_02" for policy violation<div class="time">1 hour ago</div></div></div>
+    <div class="notif-item read"><div class="dot"></div><div>Approved flagged forum post after review<div class="time">Yesterday</div></div></div>
+  
+  </div>
+
+  <footer class="sitefooter">
+    <span>StudioTrade — Administration Page</span>
+    <span>Admin only — links to: User Management · Transaction Records · Content Moderation · Analytics</span>
+    <span class="wf-label" style="display:flex; gap:10px;">
+      <a href="../sitemap/sitemap.html" style="color:#666;">Sitemap</a> ·
+      <a href="../account/login.html" style="color:#666;">Login</a> ·
+      <a href="../account/register.html" style="color:#666;">Register</a> ·
+      <a href="../administration/administration-page.html" style="color:#666;">Admin</a>
+    </span>
+  </footer>
+</body>
+</html>
