@@ -1,0 +1,24 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<div class="page-wrap">
+  <div class="section-bar" style="margin-top:0;"><h2>Admin audit log</h2><span class="wf-label">Most recent 100 actions</span></div>
+  <% if (!actions.length) { %>
+    <%- include('../partials/empty', { emptyTitle: 'No actions recorded', emptyBody: 'Suspensions, bans, role changes, listing removals and dispute decisions are all logged here.', emptyCta: { href: '/admin', label: 'Back to admin' } }) %>
+  <% } else { %>
+    <table class="wf-table">
+      <thead><tr><th>When</th><th>Admin</th><th>Action</th><th>Target</th><th>Reason</th></tr></thead>
+      <tbody>
+      <% actions.forEach(function(a){ %>
+        <tr>
+          <td class="nowrap muted"><%= new Date(a.createdAt).toLocaleString('en-GB') %></td>
+          <td><%= a.adminId ? a.adminId.username : '—' %></td>
+          <td><strong><%= a.action.replace(/_/g,' ') %></strong></td>
+          <td class="muted"><%= a.targetType || '—' %></td>
+          <td class="muted"><%= a.reason || '—' %></td>
+        </tr>
+      <% }) %>
+      </tbody>
+    </table>
+  <% } %>
+</div>
+<%- include('../partials/footer') %>

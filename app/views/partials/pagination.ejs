@@ -1,0 +1,9 @@
+<% if (totalPages > 1) { %>
+<div class="pagination">
+  <% var base = typeof baseUrl !== 'undefined' ? baseUrl : path; %>
+  <% var qs = typeof qsExtra !== 'undefined' ? qsExtra : ''; %>
+  <% if (page > 1) { %><a class="btn small secondary" href="<%= base %>?page=<%= page - 1 %><%= qs %>">‹ Prev</a><% } %>
+  <span class="wf-label">Page <%= page %> of <%= totalPages %></span>
+  <% if (page < totalPages) { %><a class="btn small secondary" href="<%= base %>?page=<%= page + 1 %><%= qs %>">Next ›</a><% } %>
+</div>
+<% } %>

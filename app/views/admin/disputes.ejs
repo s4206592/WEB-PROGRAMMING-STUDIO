@@ -1,0 +1,63 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<div class="page-wrap">
+  <div class="section-bar" style="margin-top:0;"><h2>Disputes</h2></div>
+  <% if (!disputes.length) { %>
+    <%- include('../partials/empty', { emptyTitle: 'No disputes', emptyBody: 'A buyer can open a dispute only while the 15-day return window is open. Nothing has been raised.', emptyCta: { href: '/admin', label: 'Back to admin' } }) %>
+  <% } else { %>
+    <% disputes.forEach(function(d){ %>
+      <div class="box" style="margin-bottom:14px;">
+        <div class="section-bar" style="margin:0 0 8px;">
+          <h2 style="font-size:14px;">
+            <%= d.orderId ? d.orderId.orderNumber : 'Order removed' %> — <%= d.reason.replace(/_/g,' ') %>
+          </h2>
+          <span class="pill <%= d.status === 'resolved' ? 'ok' : 'warn' %>"><%= d.status.replace(/_/g,' ') %></span>
+        </div>
+        <div class="wf-label">
+          raised by <%= d.raisedBy ? d.raisedBy.username : '—' %> against <%= d.against ? d.against.username : '—' %> ·
+          <%= timeAgo(d.createdAt) %>
+          <% if (d.slaDueAt) { %> · due <%= new Date(d.slaDueAt).toLocaleDateString('en-GB') %><% } %>
+        </div>
+        <p><%= d.description %></p>
+        <% if (d.evidence && d.evidence.length) { %>
+          <div class="review-media">
+            <% d.evidence.forEach(function(e){ %><img src="<%= e.url %>" alt="Evidence"><% }) %>
+          </div>
+        <% } %>
+
+        <% if (d.status !== 'resolved') { %>
+          <hr class="rule">
+          <form method="post" action="/admin/disputes/<%= d._id %>/resolve">
+            <div class="form-grid">
+              <div class="form-row"><label for="score<%= d._id %>">Condition score (0–100)</label>
+                <input id="score<%= d._id %>" type="number" name="conditionScore" min="0" max="100"></div>
+              <div class="form-row"><label for="out<%= d._id %>">Outcome</label>
+                <select id="out<%= d._id %>" name="outcome">
+                  <option value="release_to_seller">Reject — release to seller</option>
+                  <option value="refund_partial">Partial refund</option>
+                  <option value="refund_full">Full refund</option>
+                  <option value="return_and_refund">Return and refund</option>
+                  <option value="rejected">Dismiss the claim</option>
+                </select></div>
+              <div class="form-row"><label for="amt<%= d._id %>">Refund amount (₫)</label>
+                <input id="amt<%= d._id %>" type="text" name="refundAmount"
+                       placeholder="<%= d.orderId ? d.orderId.totals.grandTotal : '' %>"></div>
+            </div>
+            <div class="form-row"><label for="find<%= d._id %>">Assessment findings</label>
+              <textarea id="find<%= d._id %>" name="findings" rows="2"></textarea></div>
+            <div class="form-row"><label for="rat<%= d._id %>">Rationale shown to both parties</label>
+              <textarea id="rat<%= d._id %>" name="rationale" rows="2"></textarea></div>
+            <button class="btn" type="submit">Resolve dispute</button>
+          </form>
+        <% } else if (d.resolution) { %>
+          <div class="muted">
+            Resolved: <strong><%= d.resolution.outcome.replace(/_/g,' ') %></strong>
+            <% if (d.resolution.refundAmount) { %> — refunded <%= formatVND(d.resolution.refundAmount) %><% } %>
+            <div><%= d.resolution.rationale %></div>
+          </div>
+        <% } %>
+      </div>
+    <% }) %>
+  <% } %>
+</div>
+<%- include('../partials/footer') %>

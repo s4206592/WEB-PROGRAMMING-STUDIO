@@ -1,0 +1,70 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<div class="wide">
+  <div class="tabs">
+    <a class="active" href="/checkout/delivery">1. Delivery</a>
+    <a href="/checkout/payment">2. Payment</a>
+    <a href="/checkout/review">3. Review order</a>
+  </div>
+
+  <div class="box">
+    <div class="box-title">Where should this go?</div>
+    <form method="post" action="/checkout/delivery">
+      <% if (addresses.length) { %>
+        <div class="form-row">
+          <div class="field-label">Saved addresses</div>
+          <% addresses.forEach(function(a){ %>
+            <label style="display:block;font-size:13px;text-transform:none;letter-spacing:0;color:#222;padding:6px;border:1px solid #ddd;margin-bottom:6px;">
+              <input type="radio" name="savedAddressId" value="<%= a._id %>" <%= a.isDefault ? 'checked' : '' %>>
+              <strong><%= a.label %></strong> — <%= a.recipient %>, <%= a.phone %><br>
+              <span class="muted"><%= [a.line1, a.ward, a.district, a.province].filter(Boolean).join(', ') %></span>
+            </label>
+          <% }) %>
+          <label style="font-size:13px;text-transform:none;letter-spacing:0;color:#222;">
+            <input type="radio" name="savedAddressId" value=""> Use a new address instead
+          </label>
+        </div>
+        <hr class="rule">
+      <% } %>
+
+      <div class="form-grid">
+        <div class="form-row"><label for="recipient">Recipient name</label>
+          <input id="recipient" type="text" name="recipient" value="<%= (draft.deliveryInfo && draft.deliveryInfo.recipient) || currentUser.fullName || '' %>"></div>
+        <div class="form-row"><label for="phone">Phone</label>
+          <input id="phone" type="tel" name="phone" value="<%= (draft.deliveryInfo && draft.deliveryInfo.phone) || currentUser.phone || '' %>"></div>
+        <div class="form-row"><label for="line1">Street address</label>
+          <input id="line1" type="text" name="line1" value="<%= (draft.deliveryInfo && draft.deliveryInfo.line1) || '' %>"></div>
+        <div class="form-row"><label for="ward">Ward</label>
+          <input id="ward" type="text" name="ward" value="<%= (draft.deliveryInfo && draft.deliveryInfo.ward) || '' %>"></div>
+        <div class="form-row"><label for="district">District</label>
+          <input id="district" type="text" name="district" value="<%= (draft.deliveryInfo && draft.deliveryInfo.district) || '' %>"></div>
+        <div class="form-row"><label for="province">Province</label>
+          <select id="province" name="province">
+            <option value="">Choose…</option>
+            <% VN_PROVINCES.forEach(function(p){ %>
+              <option value="<%= p %>" <%= draft.deliveryInfo && draft.deliveryInfo.province === p ? 'selected' : '' %>><%= p %></option>
+            <% }) %>
+          </select></div>
+      </div>
+
+      <div class="form-row">
+        <label for="method">Shipping method</label>
+        <select id="method" name="method">
+          <option value="standard">Standard — 30,000₫</option>
+          <option value="express">Express — 60,000₫</option>
+          <option value="pickup">Collect in person — free</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label for="notes">Delivery notes</label>
+        <textarea id="notes" name="notes" rows="2" placeholder="Building access, preferred time, landmark…"><%= (draft.deliveryInfo && draft.deliveryInfo.notes) || '' %></textarea>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn" type="submit">Continue to payment</button>
+        <a class="btn secondary" href="/cart">Back to cart</a>
+      </div>
+    </form>
+  </div>
+</div>
+<%- include('../partials/footer') %>

@@ -1,0 +1,38 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<div class="page-wrap">
+  <div class="box">
+    <div class="box-title">Alternatives to <%= source.title %></div>
+    <div class="muted">
+      Asking <%= formatVND(source.price) %> · <%= CONDITION_LABELS[source.condition] %>
+      <% if (source.brand) { %> · <%= source.brand %><% } %>
+    </div>
+    <a class="btn small secondary" href="/products/<%= source.slug %>" style="margin-top:8px;">Back to the listing</a>
+  </div>
+
+  <div class="section-bar"><h2>Similar listings <span class="wf-label">(<%= matches.length %>)</span></h2></div>
+  <p class="wf-label">Ranked by category match, price proximity (±25%), brand and condition.</p>
+
+  <% if (!matches.length) { %>
+    <%- include('../partials/empty', { emptyTitle: 'Nothing comparable listed', emptyBody: 'No other listing is close enough on category, price and condition to be a useful alternative. Save a search and we will tell you when one appears.', emptyCta: { href: '/wishlist/saved-searches', label: 'Create a saved search' } }) %>
+  <% } else { %>
+    <div class="card-grid">
+      <% matches.forEach(function(p){ %>
+        <div class="product-card">
+          <div class="placeholder-img" <% if (primaryImage(p)) { %>style="background-image:url('<%= primaryImage(p) %>');background-size:cover;background-position:center;"<% } %>><%= primaryImage(p) ? '' : 'No image' %></div>
+          <span class="tag"><%= p.isSecondhand ? 'Secondhand' : 'New' %></span>
+          <span class="pill ok"><%= p.matchScore %>% match</span>
+          <div class="card-title"><%= p.title %></div>
+          <div class="price"><%= formatVND(p.price) %>
+            <% if (p.price < source.price) { %>
+              <span class="pill ok"><%= formatVND(source.price - p.price) %> less</span>
+            <% } %>
+          </div>
+          <div class="stars"><%= stars(p.ratingSummary.average) %> (<%= p.ratingSummary.count %>)</div>
+          <a class="btn small" href="/products/<%= p.slug %>">View</a>
+        </div>
+      <% }) %>
+    </div>
+  <% } %>
+</div>
+<%- include('../partials/footer') %>

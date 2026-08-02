@@ -1,0 +1,46 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<div class="wide">
+  <div class="box">
+    <div class="box-title">
+      <%= other ? other.username : 'Conversation' %>
+      <% if (conv.subject) { %><span class="wf-label">— <%= conv.subject %></span><% } %>
+    </div>
+
+    <% if (conv.context === 'listing' && conv.productId) { %>
+      <a class="btn small secondary" href="/products/<%= conv.productId %>">Open the listing</a>
+      <hr class="rule">
+    <% } %>
+
+    <div class="chat-scroll">
+      <% if (!messages.length) { %>
+        <p class="muted">No messages yet. Ask whether the item is still available, request extra photos, or agree on a meeting point.</p>
+      <% } %>
+      <% messages.forEach(function(m){ %>
+        <% if (m.isSystem) { %>
+          <div class="msg system"><%= m.body %> <span class="msg-time"><%= timeAgo(m.createdAt) %></span></div>
+        <% } else { %>
+          <div class="msg <%= m.senderId && String(m.senderId._id) === String(currentUser._id) ? 'mine' : '' %>">
+            <strong><%= m.senderId ? m.senderId.username : 'Unknown' %></strong>
+            <div><%= m.body %></div>
+            <span class="msg-time"><%= timeAgo(m.createdAt) %></span>
+          </div>
+        <% } %>
+      <% }) %>
+    </div>
+
+    <form method="post" action="/messages/<%= conv._id %>/send" style="margin-top:14px;">
+      <div class="form-row"><textarea name="body" rows="3" maxlength="2000" placeholder="Write a message…" required></textarea></div>
+      <div class="form-actions">
+        <button class="btn" type="submit">Send</button>
+        <a class="btn secondary" href="/messages">Back to inbox</a>
+      </div>
+    </form>
+  </div>
+
+  <form method="post" action="/messages/<%= conv._id %>/archive" style="margin-top:12px;">
+    <button class="linkbtn" type="submit">Archive this conversation</button>
+    <div class="hint">Archiving hides it from your inbox only — the other person still sees the thread.</div>
+  </form>
+</div>
+<%- include('../partials/footer') %>

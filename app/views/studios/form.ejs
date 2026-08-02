@@ -1,0 +1,111 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<%
+  var v = function (key, fallback) {
+    if (form && form[key] !== undefined) return form[key];
+    if (studio && studio[key] !== undefined && studio[key] !== null) return studio[key];
+    return fallback === undefined ? '' : fallback;
+  };
+  var addr = (studio && studio.address) || {};
+  var contact = (studio && studio.contact) || {};
+  var pricing = (studio && studio.pricing && studio.pricing.length) ? studio.pricing : [{unit:'hour'},{unit:'day'}];
+  var equipment = (studio && studio.equipment && studio.equipment.length) ? studio.equipment : [{},{},{}];
+  var chosenAmenities = form.amenity ? [].concat(form.amenity) : ((studio && studio.amenities) || []);
+%>
+<div class="wide">
+  <div class="box">
+    <div class="box-title"><%= studio ? 'Edit studio' : 'List your studio' %></div>
+    <% if (errors.length) { %><div class="wf-note"><% errors.forEach(function(e){ %><div><%= e %></div><% }) %></div><% } %>
+
+    <form method="post" action="<%= studio ? '/studios/' + studio._id + '/edit' : '/studios/new' %>">
+      <div class="form-row"><label for="name">Studio name</label>
+        <input id="name" type="text" name="name" required value="<%= v('name') %>"></div>
+      <div class="form-row"><label for="description">Description</label>
+        <textarea id="description" name="description" rows="5" placeholder="Size, natural light, what kind of shoots it suits, house rules."><%= v('description') %></textarea></div>
+      <div class="form-row"><label for="coverImageUrl">Cover image URL</label>
+        <input id="coverImageUrl" type="url" name="coverImageUrl" value="<%= v('coverImageUrl') %>"></div>
+      <div class="form-row">
+        <div class="field-label">Gallery image URLs</div>
+        <% var gal = (studio && studio.gallery || []).map(function(g){ return g.url; }); while (gal.length < 3) gal.push(''); %>
+        <% gal.slice(0,10).forEach(function(u){ %>
+          <div class="form-row"><input type="url" name="galleryUrl" value="<%= u %>" placeholder="https://…"></div>
+        <% }) %>
+      </div>
+
+      <hr class="rule">
+      <div class="form-grid">
+        <div class="form-row"><label for="line1">Street address</label>
+          <input id="line1" type="text" name="line1" value="<%= form.line1 || addr.line1 || '' %>"></div>
+        <div class="form-row"><label for="ward">Ward</label>
+          <input id="ward" type="text" name="ward" value="<%= form.ward || addr.ward || '' %>"></div>
+        <div class="form-row"><label for="district">District</label>
+          <input id="district" type="text" name="district" value="<%= form.district || addr.district || '' %>"></div>
+        <div class="form-row"><label for="province">Province</label>
+          <select id="province" name="province" required>
+            <option value="">Choose…</option>
+            <% provinces.forEach(function(p){ %>
+              <option value="<%= p %>" <%= (form.province || addr.province) === p ? 'selected' : '' %>><%= p %></option>
+            <% }) %>
+          </select></div>
+        <div class="form-row"><label for="areaSqm">Area (m²)</label>
+          <input id="areaSqm" type="number" name="areaSqm" value="<%= v('areaSqm') %>"></div>
+        <div class="form-row"><label for="capacity">Capacity (people)</label>
+          <input id="capacity" type="number" name="capacity" value="<%= v('capacity') %>"></div>
+      </div>
+
+      <hr class="rule">
+      <div class="form-row">
+        <div class="field-label">Rates</div>
+        <% pricing.slice(0,3).forEach(function(p){ %>
+          <div class="form-row inline">
+            <div style="flex:1;">
+              <select name="priceUnit">
+                <option value="hour" <%= p.unit === 'hour' ? 'selected' : '' %>>Per hour</option>
+                <option value="half_day" <%= p.unit === 'half_day' ? 'selected' : '' %>>Per half day</option>
+                <option value="day" <%= p.unit === 'day' ? 'selected' : '' %>>Per day</option>
+              </select>
+            </div>
+            <div style="flex:1;"><input type="text" name="priceAmount" value="<%= p.price || '' %>" placeholder="Amount ₫"></div>
+          </div>
+        <% }) %>
+      </div>
+
+      <div class="form-row">
+        <div class="field-label">Equipment on site</div>
+        <% equipment.slice(0,8).forEach(function(e){ %>
+          <div class="form-row inline">
+            <div style="flex:2;"><input type="text" name="equipName" value="<%= e.name || '' %>" placeholder="Aputure 300D, 3m white cyclorama…"></div>
+            <div style="flex:1;"><input type="number" name="equipQty" value="<%= e.quantity || 1 %>" min="1"></div>
+          </div>
+        <% }) %>
+      </div>
+
+      <div class="form-row">
+        <div class="field-label">Amenities</div>
+        <% AMENITIES.forEach(function(a){ %>
+          <label style="display:inline-block;margin-right:14px;font-size:13px;text-transform:none;letter-spacing:0;color:#222;">
+            <input type="checkbox" name="amenity" value="<%= a %>" <%= chosenAmenities.includes(a) ? 'checked' : '' %>> <%= a.replace(/_/g,' ') %>
+          </label>
+        <% }) %>
+      </div>
+
+      <hr class="rule">
+      <div class="form-grid">
+        <div class="form-row"><label for="phone">Phone</label>
+          <input id="phone" type="tel" name="phone" value="<%= form.phone || contact.phone || '' %>"></div>
+        <div class="form-row"><label for="email">Email</label>
+          <input id="email" type="email" name="email" value="<%= form.email || contact.email || '' %>"></div>
+        <div class="form-row"><label for="website">Website</label>
+          <input id="website" type="url" name="website" value="<%= form.website || contact.website || '' %>"></div>
+        <div class="form-row"><label for="facebook">Facebook</label>
+          <input id="facebook" type="text" name="facebook" value="<%= form.facebook || contact.facebook || '' %>"></div>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn" type="submit"><%= studio ? 'Save changes' : 'Publish studio' %></button>
+        <a class="btn secondary" href="/studios/dashboard">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+<%- include('../partials/footer') %>

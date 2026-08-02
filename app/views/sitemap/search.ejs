@@ -1,0 +1,40 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<div class="wide">
+  <div class="box">
+    <div class="box-title">Search the sitemap</div>
+    <p class="muted">Find a page by name or by URL, without hunting through the tree.</p>
+    <form method="get" action="/sitemap/search">
+      <div class="form-row inline">
+        <div style="flex:1;"><input type="search" name="q" value="<%= q %>" placeholder="checkout, wishlist, forum…" autofocus></div>
+        <button class="btn" type="submit">Search</button>
+        <a class="btn secondary" href="/sitemap">Full sitemap</a>
+      </div>
+    </form>
+  </div>
+
+  <% if (q) { %>
+    <div class="section-bar"><h2>Results <span class="wf-label">(<%= results.length %>)</span></h2></div>
+    <% if (!results.length) { %>
+      <div class="box"><p class="muted">No page matched "<%= q %>". Try a shorter word.</p></div>
+    <% } else { %>
+      <table class="wf-table">
+        <thead><tr><th>Page</th><th>Path</th><th>Module</th><th>Type</th></tr></thead>
+        <tbody>
+        <% results.forEach(function(r){ %>
+          <tr>
+            <td><a href="<%= r.path %>"><%= r.title %></a></td>
+            <td class="muted"><%= r.path %></td>
+            <td class="muted"><%= r.module %></td>
+            <td>
+              <span class="pill neutral"><%= r.isDynamic ? r.sourceType : 'static' %></span>
+              <% if (r.requiresAuth) { %><span class="pill warn">sign-in</span><% } %>
+            </td>
+          </tr>
+        <% }) %>
+        </tbody>
+      </table>
+    <% } %>
+  <% } %>
+</div>
+<%- include('../partials/footer') %>

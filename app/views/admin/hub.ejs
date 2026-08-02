@@ -1,0 +1,77 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<div class="page-wrap">
+  <div class="section-bar" style="margin-top:0;"><h2>Administration</h2><span class="wf-label">Signed in as <%= currentUser.username %></span></div>
+
+  <div class="stat-grid">
+    <div class="stat"><div class="stat-value"><%= counts.users %></div><div class="stat-label">Users</div></div>
+    <div class="stat"><div class="stat-value"><%= counts.listings %></div><div class="stat-label">Active listings</div></div>
+    <div class="stat"><div class="stat-value"><%= counts.orders %></div><div class="stat-label">Orders</div></div>
+    <div class="stat"><div class="stat-value"><%= counts.reviews %></div><div class="stat-label">Reviews</div></div>
+    <div class="stat"><div class="stat-value"><%= counts.threads %></div><div class="stat-label">Forum threads</div></div>
+    <div class="stat"><div class="stat-value"><%= counts.articles %></div><div class="stat-label">Published articles</div></div>
+  </div>
+
+  <div class="section-bar"><h2>Needs attention</h2></div>
+  <div class="card-grid cols-3">
+    <div class="box"><div class="box-title">Reported content</div>
+      <div class="stat-value"><%= queues.pendingReports %></div>
+      <a class="btn small secondary" href="/admin/moderation">Open moderation</a></div>
+    <div class="box"><div class="box-title">Open disputes</div>
+      <div class="stat-value"><%= queues.openDisputes %></div>
+      <a class="btn small secondary" href="/admin/disputes">Review disputes</a></div>
+    <div class="box"><div class="box-title">Articles awaiting review</div>
+      <div class="stat-value"><%= queues.pendingBlogs %></div>
+      <a class="btn small secondary" href="/blog/review-dashboard">Open queue</a></div>
+    <div class="box"><div class="box-title">Unanswered questions</div>
+      <div class="stat-value"><%= queues.newQuestions %></div>
+      <a class="btn small secondary" href="/admin/faq">Answer them</a></div>
+    <div class="box"><div class="box-title">Studios pending verification</div>
+      <div class="stat-value"><%= queues.pendingStudios %></div>
+      <a class="btn small secondary" href="/admin/studios">Verify studios</a></div>
+  </div>
+
+  <div class="section-bar"><h2>Admin tools</h2></div>
+  <div class="card-grid cols-3">
+    <div class="box"><div class="box-title">User Management</div>
+      <p class="muted">Search accounts, change roles, suspend, ban, restore or anonymise.</p>
+      <a class="btn small" href="/admin/users">Open</a></div>
+    <div class="box"><div class="box-title">Transaction Records</div>
+      <p class="muted">Every order with its payment state, delivery progress and return window.</p>
+      <a class="btn small" href="/admin/transactions">Open</a></div>
+    <div class="box"><div class="box-title">Content Moderation</div>
+      <p class="muted">Reported listings, reviews, posts, comments and studios.</p>
+      <a class="btn small" href="/admin/moderation">Open</a></div>
+    <div class="box"><div class="box-title">Analytics Dashboard</div>
+      <p class="muted">Users, listings, GMV, offers, reviews and community activity.</p>
+      <a class="btn small" href="/admin/analytics">Open</a></div>
+    <div class="box"><div class="box-title">Listings</div>
+      <p class="muted">Browse every listing by state and take one down.</p>
+      <a class="btn small" href="/admin/listings">Open</a></div>
+    <div class="box"><div class="box-title">FAQ Management</div>
+      <p class="muted">Write FAQ entries and answer questions sent to staff.</p>
+      <a class="btn small" href="/admin/faq">Open</a></div>
+    <div class="box"><div class="box-title">Audit Log</div>
+      <p class="muted">Every privileged action, who did it and when.</p>
+      <a class="btn small" href="/admin/audit">Open</a></div>
+    <div class="box"><div class="box-title">SEO &amp; Sitemap</div>
+      <p class="muted">Rebuild the sitemap and check what is indexable.</p>
+      <a class="btn small" href="/sitemap/seo">Open</a></div>
+  </div>
+
+  <div class="section-bar"><h2>Recent admin actions</h2></div>
+  <div class="box">
+    <% if (!recentActions.length) { %>
+      <p class="muted">No privileged actions recorded yet.</p>
+    <% } else { %>
+      <% recentActions.forEach(function(a){ %>
+        <div style="padding:6px 0;border-bottom:1px solid #eee;font-size:13px;">
+          <strong><%= a.action.replace(/_/g,' ') %></strong>
+          <span class="muted">on <%= a.targetType || '—' %></span>
+          <span class="wf-label">by <%= a.adminId ? a.adminId.username : '—' %> · <%= timeAgo(a.createdAt) %></span>
+        </div>
+      <% }) %>
+    <% } %>
+  </div>
+</div>
+<%- include('../partials/footer') %>

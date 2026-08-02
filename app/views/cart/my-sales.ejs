@@ -1,0 +1,35 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<div class="page-wrap">
+  <div class="tabs">
+    <a href="/orders">Orders I placed</a>
+    <a class="active" href="/orders/sales">Orders to fulfil</a>
+  </div>
+  <% if (!orders.length) { %>
+    <%- include('../partials/empty', { emptyTitle: 'No sales yet', emptyBody: 'When someone buys one of your listings, the order lands here so you can confirm payment and mark it shipped.', emptyCta: { href: '/sell/new', label: 'List an item' } }) %>
+  <% } else { %>
+    <table class="wf-table">
+      <thead><tr><th>Order</th><th>Buyer</th><th>My items</th><th>Payment</th><th>Status</th><th class="num">My total</th><th></th></tr></thead>
+      <tbody>
+      <% orders.forEach(function(o){ %>
+        <% var mine = o.items.filter(function(i){ return String(i.sellerId) === meId; }); %>
+        <tr>
+          <td><%= o.orderNumber %><div class="wf-label"><%= timeAgo(o.placedAt) %></div></td>
+          <td><%= o.buyerId ? o.buyerId.username : '—' %></td>
+          <td><%= mine.map(function(i){ return i.title + ' ×' + i.quantity; }).join(', ') %></td>
+          <td>
+            <span class="pill <%= ['confirmed_by_seller','auto_confirmed','paid'].includes(o.paymentInfo.status) ? 'ok' : (o.paymentInfo.status === 'contested' ? 'bad' : 'warn') %>">
+              <%= o.paymentInfo.status.replace(/_/g,' ') %>
+            </span>
+            <div class="wf-label"><%= o.paymentInfo.method.replace(/_/g,' ') %></div>
+          </td>
+          <td><span class="pill neutral"><%= o.status.replace(/_/g,' ') %></span></td>
+          <td class="num"><%= formatVND(mine.reduce(function(n,i){ return n + i.lineTotal; }, 0)) %></td>
+          <td><a class="btn small secondary" href="/orders/<%= o._id %>">Manage</a></td>
+        </tr>
+      <% }) %>
+      </tbody>
+    </table>
+  <% } %>
+</div>
+<%- include('../partials/footer') %>

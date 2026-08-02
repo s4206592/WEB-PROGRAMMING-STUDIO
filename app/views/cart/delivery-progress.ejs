@@ -1,0 +1,230 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<div class="page-wrap">
+  <div class="three-col">
+    <main>
+      <div class="box">
+        <div class="box-title">Order <%= order.orderNumber %></div>
+        <dl class="kv">
+          <dt>Placed</dt><dd><%= new Date(order.placedAt).toLocaleString('en-GB') %></dd>
+          <dt>Status</dt><dd><span class="pill <%= order.status === 'completed' ? 'ok' : (['cancelled','refunded','disputed'].includes(order.status) ? 'bad' : 'warn') %>"><%= order.status.replace(/_/g,' ') %></span></dd>
+          <dt>Buyer</dt><dd><%= order.buyerId ? order.buyerId.username : '—' %></dd>
+          <dt>Deliver to</dt><dd><%= order.deliveryInfo.recipient %> · <%= order.deliveryInfo.phone %><br><%= [order.deliveryInfo.line1, order.deliveryInfo.ward, order.deliveryInfo.district, order.deliveryInfo.province].filter(Boolean).join(', ') %></dd>
+          <dt>Payment</dt><dd><%= order.paymentInfo.method.replace(/_/g,' ') %> — <span class="pill neutral"><%= order.paymentInfo.status.replace(/_/g,' ') %></span></dd>
+          <dt>Grand total</dt><dd><strong><%= formatVND(order.totals.grandTotal) %></strong></dd>
+        </dl>
+      </div>
+
+      <% if (!deliveries.length) { %>
+        <div class="box" style="margin-top:16px;">
+          <div class="box-title">Delivery not started</div>
+          <p class="muted">Delivery cannot begin until the payment is confirmed. For a bank transfer, the buyer marks the order as paid and the seller confirms the money arrived.</p>
+        </div>
+      <% } %>
+
+      <% deliveries.forEach(function(d){ %>
+        <div class="box" style="margin-top:16px;">
+          <div class="box-title">
+            Delivery from <%= sellerById.get(String(d.sellerId)) ? sellerById.get(String(d.sellerId)).username : 'seller' %>
+            <span class="pill neutral"><%= d.currentStatus.replace(/_/g,' ') %></span>
+          </div>
+          <% if (d.trackingNumber) { %>
+            <div class="wf-label">Carrier <%= d.carrier || '—' %> · Tracking <%= d.trackingNumber %></div>
+          <% } %>
+          <ul class="milestones" style="margin-top:12px;">
+            <% var seq = ['confirmed','packed','shipped','in_transit','delivered','received'];
+               var LAB = { confirmed:'Order confirmed', packed:'Packed', shipped:'Shipped', in_transit:'In transit', delivered:'Delivered', received:'Received' };
+               var doneCodes = d.milestones.map(function(m){ return m.code; }); %>
+            <% seq.forEach(function(code){ %>
+              <% var hit = d.milestones.filter(function(m){ return m.code === code; }).pop(); %>
+              <li class="<%= hit ? 'done' : '' %>">
+                <span class="m-label"><%= LAB[code] %></span>
+                <% if (hit) { %>
+                  <div class="m-time"><%= new Date(hit.occurredAt).toLocaleString('en-GB') %><%= hit.note ? ' — ' + hit.note : '' %></div>
+                <% } else { %>
+                  <div class="m-time">Pending</div>
+                <% } %>
+              </li>
+            <% }) %>
+          </ul>
+        </div>
+      <% }) %>
+
+      <div class="box" style="margin-top:16px;">
+        <div class="box-title">Items</div>
+        <% order.items.forEach(function(i){ %>
+          <div class="row-item">
+            <div class="placeholder-img" <% if (i.imageUrl) { %>style="background-image:url('<%= i.imageUrl %>');background-size:cover;background-position:center;"<% } %>></div>
+            <div class="row-info">
+              <strong><%= i.title %></strong>
+              <div class="muted"><%= i.quantity %> × <%= formatVND(i.unitPrice) %> = <%= formatVND(i.lineTotal) %></div>
+              <span class="pill neutral"><%= i.itemStatus %></span>
+            </div>
+            <div class="row-actions">
+              <% if (viewerIsBuyer && i.itemStatus === 'received') { %>
+                <% if (reviewedItems.has(String(i._id))) { %>
+                  <span class="pill ok">Reviewed</span>
+                <% } else { %>
+                  <a class="btn small" href="/reviews/new/<%= order._id %>/<%= i._id %>">Write a review</a>
+                <% } %>
+              <% } %>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+
+      <div class="box" style="margin-top:16px;">
+        <div class="box-title">History</div>
+        <% order.statusHistory.forEach(function(h){ %>
+          <div style="font-size:13px;padding:4px 0;border-bottom:1px solid #eee;">
+            <strong><%= h.status.replace(/_/g,' ') %></strong>
+            <span class="wf-label"><%= new Date(h.at).toLocaleString('en-GB') %></span>
+            <% if (h.note) { %><div class="muted"><%= h.note %></div><% } %>
+          </div>
+        <% }) %>
+      </div>
+    </main>
+
+    <aside>
+      <div class="box">
+        <div class="box-title">Return window</div>
+        <% var rw = order.returnWindow; %>
+        <% if (rw.status === 'not_open') { %>
+          <p class="muted">Not open yet. The clock starts when the courier marks the order delivered.</p>
+        <% } else if (rw.status === 'locked_in_transit') { %>
+          <p class="muted">Locked while the item is in transit. Neither side can cancel or return until it lands — this stops a cancellation leaving a package in motion with no order behind it.</p>
+        <% } else if (rw.status === 'open') { %>
+          <p><span class="pill ok"><%= daysRemaining(order) %> day<%= daysRemaining(order) === 1 ? '' : 's' %> left</span></p>
+          <div class="muted">Opened <%= new Date(rw.opensAt).toLocaleDateString('en-GB') %>, closes <%= new Date(rw.closesAt).toLocaleDateString('en-GB') %>.</div>
+        <% } else { %>
+          <p><span class="pill neutral"><%= rw.status.replace(/_/g,' ') %></span></p>
+          <% if (rw.closedAt) { %><div class="muted">Closed <%= new Date(rw.closedAt).toLocaleDateString('en-GB') %><%= rw.closedBy ? ' by ' + rw.closedBy.replace(/_/g,' ') : '' %>.</div><% } %>
+        <% } %>
+        <div class="hint">The <%= RETURN_WINDOW_DAYS %> days govern what you can still ask for. It is not a period in which anyone holds your money.</div>
+      </div>
+
+      <% if (viewerIsBuyer) { %>
+        <% if (order.paymentInfo.status === 'unpaid' && order.paymentInfo.method !== 'cod') { %>
+          <div class="box" style="margin-top:16px;">
+            <div class="box-title">Pay the seller</div>
+            <p class="muted">Transfer <strong><%= formatVND(order.totals.grandTotal) %></strong> using <strong><%= order.orderNumber %></strong> as the reference, then mark it here.</p>
+            <form method="post" action="/orders/<%= order._id %>/mark-paid">
+              <div class="form-row">
+                <label for="proofUrl">Link to your transfer receipt (optional)</label>
+                <input id="proofUrl" type="url" name="proofUrl" placeholder="https://…">
+              </div>
+              <button class="btn" type="submit" style="width:100%;">I have transferred the money</button>
+              <div class="hint">This is a claim, not a confirmation. The seller checks their account and confirms.</div>
+            </form>
+          </div>
+        <% } %>
+
+        <% if (order.returnWindow.status === 'open') { %>
+          <div class="box" style="margin-top:16px;">
+            <div class="box-title">Confirm receipt</div>
+            <form method="post" action="/orders/<%= order._id %>/confirm-receipt"
+                  onsubmit="return confirm('Confirming receipt is final. It closes your return window immediately and forfeits the remaining days. Continue?');">
+              <button class="btn" type="submit" style="width:100%;">Everything arrived — complete this order</button>
+            </form>
+            <div class="hint"><strong>This cannot be undone.</strong> It ends the return window early and forfeits the remaining <%= daysRemaining(order) %> day(s). It also unlocks reviewing.</div>
+          </div>
+
+          <div class="box" style="margin-top:16px;">
+            <div class="box-title">Something wrong?</div>
+            <form method="post" action="/orders/<%= order._id %>/dispute">
+              <div class="form-row">
+                <label for="reason">What happened</label>
+                <select id="reason" name="reason">
+                  <option value="not_as_described">Not as described</option>
+                  <option value="damaged">Arrived damaged</option>
+                  <option value="missing_parts">Missing parts</option>
+                  <option value="wrong_item">Wrong item</option>
+                  <option value="counterfeit">Counterfeit</option>
+                  <option value="not_received">Never received</option>
+                  <option value="other">Something else</option>
+                </select>
+              </div>
+              <div class="form-row"><label for="description">Details</label>
+                <textarea id="description" name="description" rows="3" required></textarea></div>
+              <div class="form-row"><label for="evidenceUrl">Photo evidence URL</label>
+                <input id="evidenceUrl" type="url" name="evidenceUrl" placeholder="https://…"></div>
+              <button class="btn danger" type="submit" style="width:100%;">Open a dispute</button>
+            </form>
+          </div>
+        <% } %>
+
+        <% if (['awaiting_payment','payment_submitted','payment_confirmed','confirmed'].includes(order.status)) { %>
+          <div class="box" style="margin-top:16px;">
+            <div class="box-title">Cancel</div>
+            <form method="post" action="/orders/<%= order._id %>/cancel">
+              <div class="form-row"><label for="creason">Reason</label>
+                <input id="creason" type="text" name="reason"></div>
+              <button class="btn danger" type="submit" style="width:100%;">Cancel this order</button>
+              <div class="hint">Only possible before the item ships.</div>
+            </form>
+          </div>
+        <% } %>
+      <% } %>
+
+      <% if (viewerIsSeller) { %>
+        <% if (order.paymentInfo.status === 'submitted_by_buyer') { %>
+          <div class="box" style="margin-top:16px;">
+            <div class="box-title">Buyer says they paid</div>
+            <% if (order.paymentInfo.buyerProof && order.paymentInfo.buyerProof.length) { %>
+              <% order.paymentInfo.buyerProof.forEach(function(p){ %>
+                <a class="btn small secondary" href="<%= p.url %>" target="_blank" rel="noopener">View receipt</a>
+              <% }) %>
+            <% } %>
+            <p class="muted" style="margin-top:8px;">Check your own account before confirming. Confirming unlocks delivery.</p>
+            <form method="post" action="/orders/<%= order._id %>/confirm-payment">
+              <button class="btn" type="submit" style="width:100%;">Confirm the money arrived</button>
+            </form>
+            <hr class="rule">
+            <form method="post" action="/orders/<%= order._id %>/contest-payment">
+              <div class="form-row"><label for="preason">Nothing arrived?</label>
+                <input id="preason" type="text" name="reason" placeholder="What you checked"></div>
+              <button class="btn danger" type="submit" style="width:100%;">Contest this payment</button>
+            </form>
+          </div>
+        <% } %>
+
+        <% if (deliveries.length) { %>
+          <div class="box" style="margin-top:16px;">
+            <div class="box-title">Update delivery</div>
+            <form method="post" action="/orders/<%= order._id %>/milestone">
+              <div class="form-row">
+                <label for="code">Milestone</label>
+                <select id="code" name="code">
+                  <option value="packed">Packed</option>
+                  <option value="shipped">Shipped</option>
+                  <option value="in_transit">In transit</option>
+                  <option value="delivered">Delivered</option>
+                </select>
+              </div>
+              <div class="form-grid">
+                <div class="form-row"><label for="carrier">Carrier</label>
+                  <input id="carrier" type="text" name="carrier" placeholder="GHN, Viettel Post…"></div>
+                <div class="form-row"><label for="trackingNumber">Tracking number</label>
+                  <input id="trackingNumber" type="text" name="trackingNumber"></div>
+              </div>
+              <div class="form-row"><label for="note">Note</label>
+                <input id="note" type="text" name="note"></div>
+              <button class="btn" type="submit" style="width:100%;">Record milestone</button>
+              <div class="hint">Marking it delivered opens the buyer's 15-day return window.</div>
+            </form>
+          </div>
+        <% } %>
+      <% } %>
+
+      <div class="box" style="margin-top:16px;">
+        <div class="box-title">Links</div>
+        <div class="stack">
+          <a class="btn small secondary" href="/orders/<%= order._id %>/confirmation">Order confirmation</a>
+          <a class="btn small secondary" href="/messages">Message the other party</a>
+          <a class="btn small secondary" href="<%= viewerIsBuyer ? '/orders' : '/orders/sales' %>">Back to list</a>
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>
+<%- include('../partials/footer') %>

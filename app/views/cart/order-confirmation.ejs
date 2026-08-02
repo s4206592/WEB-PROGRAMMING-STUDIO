@@ -1,0 +1,33 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<div class="wide">
+  <div class="box">
+    <div class="box-title">Order placed</div>
+    <p>Your reference is <strong><%= order.orderNumber %></strong>. Keep it — sellers use it to match a bank transfer to your order.</p>
+
+    <dl class="kv">
+      <dt>Placed</dt><dd><%= new Date(order.placedAt).toLocaleString('en-GB') %></dd>
+      <dt>Status</dt><dd><span class="pill warn"><%= order.status.replace(/_/g,' ') %></span></dd>
+      <dt>Payment</dt><dd><%= order.paymentInfo.method.replace(/_/g,' ') %> — <%= order.paymentInfo.status.replace(/_/g,' ') %></dd>
+      <dt>Deliver to</dt><dd><%= order.deliveryInfo.recipient %>, <%= [order.deliveryInfo.line1, order.deliveryInfo.ward, order.deliveryInfo.district, order.deliveryInfo.province].filter(Boolean).join(', ') %></dd>
+      <dt>Grand total</dt><dd><strong><%= formatVND(order.totals.grandTotal) %></strong></dd>
+    </dl>
+
+    <hr class="rule">
+    <table class="wf-table">
+      <thead><tr><th>Item</th><th class="num">Qty</th><th class="num">Line total</th></tr></thead>
+      <tbody>
+      <% order.items.forEach(function(i){ %>
+        <tr><td><%= i.title %></td><td class="num"><%= i.quantity %></td><td class="num"><%= formatVND(i.lineTotal) %></td></tr>
+      <% }) %>
+      </tbody>
+    </table>
+
+    <div class="form-actions">
+      <a class="btn" href="/orders/<%= order._id %>">Track this order</a>
+      <a class="btn secondary" href="/orders">All my orders</a>
+      <a class="btn secondary" href="/products">Keep shopping</a>
+    </div>
+  </div>
+</div>
+<%- include('../partials/footer') %>

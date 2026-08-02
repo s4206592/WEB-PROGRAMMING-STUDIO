@@ -1,0 +1,33 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<div class="page-wrap">
+  <div class="section-bar" style="margin-top:0;"><h2>Studio verification</h2></div>
+  <% if (!studios.length) { %>
+    <%- include('../partials/empty', { emptyTitle: 'No studios listed', emptyBody: 'Studio listings appear here for verification once owners create them.', emptyCta: { href: '/admin', label: 'Back to admin' } }) %>
+  <% } else { %>
+    <table class="wf-table">
+      <thead><tr><th>Studio</th><th>Owner</th><th>Location</th><th>Verification</th><th>Status</th><th>Decide</th></tr></thead>
+      <tbody>
+      <% studios.forEach(function(s){ %>
+        <tr>
+          <td><a href="/studios/<%= s.slug %>"><%= s.name %></a></td>
+          <td><%= s.ownerId ? s.ownerId.username : '—' %></td>
+          <td class="muted"><%= [s.address.district, s.address.province].filter(Boolean).join(', ') %></td>
+          <td><span class="pill <%= s.verification.status === 'verified' ? 'ok' : (s.verification.status === 'rejected' ? 'bad' : 'warn') %>"><%= s.verification.status %></span></td>
+          <td><span class="pill neutral"><%= s.status %></span></td>
+          <td>
+            <form method="post" action="/admin/studios/<%= s._id %>/verify" style="display:flex;gap:4px;">
+              <select name="decision">
+                <option value="verified">Verify</option>
+                <option value="rejected">Reject</option>
+              </select>
+              <button class="btn small" type="submit">Apply</button>
+            </form>
+          </td>
+        </tr>
+      <% }) %>
+      </tbody>
+    </table>
+  <% } %>
+</div>
+<%- include('../partials/footer') %>

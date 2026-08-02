@@ -1,0 +1,66 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<div class="wide">
+  <div class="box">
+    <div class="box-title">Ask staff a question</div>
+    <p class="muted">For anything the FAQ does not cover. If it turns out to be a common question, staff may publish the answer to the public FAQ.</p>
+    <% if (errors.length) { %><div class="wf-note"><% errors.forEach(function(e){ %><div><%= e %></div><% }) %></div><% } %>
+
+    <form method="post" action="/faq/submit">
+      <% if (!currentUser) { %>
+        <div class="form-row">
+          <label for="guestEmail">Your email</label>
+          <input id="guestEmail" type="email" name="guestEmail" required value="<%= form.guestEmail || '' %>">
+          <div class="hint">So staff can reply. <a href="/register">Create an account</a> to track your questions here instead.</div>
+        </div>
+      <% } %>
+      <div class="form-row">
+        <label for="categoryId">Topic</label>
+        <select id="categoryId" name="categoryId">
+          <option value="">Not sure</option>
+          <% categories.forEach(function(c){ %>
+            <option value="<%= c._id %>" <%= String(form.categoryId) === String(c._id) ? 'selected' : '' %>><%= c.name %></option>
+          <% }) %>
+        </select>
+      </div>
+      <div class="form-row">
+        <label for="subject">Subject</label>
+        <input id="subject" type="text" name="subject" maxlength="160" value="<%= form.subject || '' %>">
+      </div>
+      <div class="form-row">
+        <label for="question">Your question</label>
+        <textarea id="question" name="question" rows="6" maxlength="2000" required><%= form.question || '' %></textarea>
+      </div>
+      <div class="form-actions">
+        <button class="btn" type="submit">Send to staff</button>
+        <a class="btn secondary" href="/faq">Back to the FAQ</a>
+      </div>
+    </form>
+  </div>
+
+  <% if (currentUser) { %>
+    <div class="box" style="margin-top:16px;">
+      <div class="box-title">My questions</div>
+      <% if (!mine.length) { %>
+        <p class="muted">You have not asked staff anything yet.</p>
+      <% } else { %>
+        <% mine.forEach(function(m){ %>
+          <div class="review-item">
+            <div class="review-head">
+              <strong><%= m.subject || 'Question' %></strong>
+              <span class="pill <%= m.status === 'answered' || m.status === 'published_as_faq' ? 'ok' : 'warn' %>"><%= m.status.replace(/_/g,' ') %></span>
+            </div>
+            <p><%= m.question %></p>
+            <% if (m.answer && m.answer.body) { %>
+              <div style="padding:8px;background:#f6f6f6;border-left:3px solid #999;">
+                <strong>Staff answer</strong> <span class="wf-label"><%= timeAgo(m.answer.answeredAt) %></span>
+                <p style="margin:4px 0 0;"><%= m.answer.body %></p>
+              </div>
+            <% } %>
+          </div>
+        <% }) %>
+      <% } %>
+    </div>
+  <% } %>
+</div>
+<%- include('../partials/footer') %>

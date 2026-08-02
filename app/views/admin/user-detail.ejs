@@ -1,0 +1,112 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<div class="page-wrap">
+  <div class="three-col">
+    <main>
+      <div class="box">
+        <div class="box-title"><%= user.username %> <span class="pill <%= user.status === 'active' ? 'ok' : 'bad' %>"><%= user.status %></span></div>
+        <dl class="kv">
+          <dt>Full name</dt><dd><%= user.fullName || '—' %></dd>
+          <dt>Email</dt><dd><%= user.email %> <%= user.verification.emailVerified ? '(verified)' : '' %></dd>
+          <dt>Phone</dt><dd><%= user.phone %> <%= user.verification.phoneVerified ? '(verified)' : '' %></dd>
+          <dt>Joined</dt><dd><%= new Date(user.createdAt).toLocaleString('en-GB') %></dd>
+          <dt>Last sign-in</dt><dd><%= user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleString('en-GB') : 'never' %></dd>
+          <dt>Reputation</dt><dd><%= user.reputation.points %> pts</dd>
+          <% if (user.sellerProfile && user.sellerProfile.joinedAsSellerAt) { %>
+            <dt>Seller since</dt><dd><%= new Date(user.sellerProfile.joinedAsSellerAt).toLocaleDateString('en-GB') %></dd>
+            <dt>Seller rating</dt><dd><%= stars(user.sellerProfile.rating) %> (<%= user.sellerProfile.ratingCount %>)</dd>
+            <dt>Completed sales</dt><dd><%= user.sellerProfile.totalSales %></dd>
+          <% } %>
+          <% if (user.suspension && user.suspension.reason) { %>
+            <dt>Suspension</dt><dd><%= user.suspension.reason %><%= user.suspension.until ? ' — until ' + new Date(user.suspension.until).toLocaleDateString('en-GB') : '' %></dd>
+          <% } %>
+        </dl>
+      </div>
+
+      <div class="box" style="margin-top:16px;">
+        <div class="box-title">Listings (<%= listings.length %>)</div>
+        <% if (!listings.length) { %><p class="muted">None.</p><% } %>
+        <% listings.forEach(function(p){ %>
+          <div style="padding:5px 0;border-bottom:1px solid #eee;font-size:13px;">
+            <a href="/products/<%= p.slug %>"><%= p.title %></a>
+            <span class="pill neutral"><%= p.status %></span>
+            <span class="wf-label"><%= formatVND(p.price) %></span>
+          </div>
+        <% }) %>
+      </div>
+
+      <div class="box" style="margin-top:16px;">
+        <div class="box-title">Orders (<%= orders.length %>)</div>
+        <% if (!orders.length) { %><p class="muted">None.</p><% } %>
+        <% orders.forEach(function(o){ %>
+          <div style="padding:5px 0;border-bottom:1px solid #eee;font-size:13px;">
+            <a href="/orders/<%= o._id %>"><%= o.orderNumber %></a>
+            <span class="pill neutral"><%= o.status.replace(/_/g,' ') %></span>
+            <span class="wf-label"><%= formatVND(o.totals.grandTotal) %> · <%= timeAgo(o.placedAt) %></span>
+          </div>
+        <% }) %>
+      </div>
+
+      <div class="box" style="margin-top:16px;">
+        <div class="box-title">Community (<%= reviews.length %> reviews, <%= threads.length %> threads)</div>
+        <% reviews.forEach(function(r){ %>
+          <div style="padding:5px 0;border-bottom:1px solid #eee;font-size:13px;">
+            <span class="stars"><%= stars(r.rating) %></span> <%= (r.comment || '').slice(0,90) %>
+            <span class="pill neutral"><%= r.status %></span>
+          </div>
+        <% }) %>
+        <% threads.forEach(function(t){ %>
+          <div style="padding:5px 0;border-bottom:1px solid #eee;font-size:13px;">
+            <a href="/forum/<%= t.slug %>"><%= t.title %></a>
+            <span class="pill neutral"><%= t.status %></span>
+          </div>
+        <% }) %>
+      </div>
+    </main>
+
+    <aside>
+      <div class="box">
+        <div class="box-title">Roles</div>
+        <form method="post" action="/admin/users/<%= user._id %>/roles">
+          <% ['buyer','seller','studio_owner','moderator','staff','admin'].forEach(function(r){ %>
+            <label style="display:block;font-size:13px;text-transform:none;letter-spacing:0;color:#222;">
+              <input type="checkbox" name="role" value="<%= r %>" <%= user.roles.includes(r) ? 'checked' : '' %>> <%= r.replace(/_/g,' ') %>
+            </label>
+          <% }) %>
+          <button class="btn small" type="submit" style="margin-top:8px;">Update roles</button>
+        </form>
+      </div>
+
+      <div class="box" style="margin-top:16px;">
+        <div class="box-title">Account actions</div>
+        <% if (user.status === 'active') { %>
+          <form method="post" action="/admin/users/<%= user._id %>/suspend">
+            <div class="form-row"><label for="days">Suspend for (days)</label>
+              <input id="days" type="number" name="days" value="7" min="1"></div>
+            <div class="form-row"><label for="reason">Reason</label>
+              <input id="reason" type="text" name="reason" required></div>
+            <button class="btn" type="submit" style="width:100%;">Suspend</button>
+          </form>
+          <hr class="rule">
+          <form method="post" action="/admin/users/<%= user._id %>/ban"
+                onsubmit="return confirm('Banning also takes down every active listing this user has. Continue?');">
+            <div class="form-row"><label for="banReason">Ban reason</label>
+              <input id="banReason" type="text" name="reason" required></div>
+            <button class="btn danger" type="submit" style="width:100%;">Ban permanently</button>
+          </form>
+        <% } else if (user.status !== 'deleted') { %>
+          <form method="post" action="/admin/users/<%= user._id %>/restore">
+            <button class="btn" type="submit" style="width:100%;">Restore this account</button>
+          </form>
+        <% } %>
+        <hr class="rule">
+        <form method="post" action="/admin/users/<%= user._id %>/anonymise"
+              onsubmit="return confirm('This scrubs the name, email and phone but keeps their orders, reviews and posts. It cannot be undone. Continue?');">
+          <button class="btn danger" type="submit" style="width:100%;">Anonymise (soft delete)</button>
+          <div class="hint">Accounts are never hard-deleted — that would orphan order and payment records.</div>
+        </form>
+      </div>
+    </aside>
+  </div>
+</div>
+<%- include('../partials/footer') %>

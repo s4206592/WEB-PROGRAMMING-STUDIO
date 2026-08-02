@@ -1,0 +1,59 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<div class="wide">
+  <div class="box">
+    <div class="box-title">Write an article</div>
+    <% if (errors.length) { %><div class="wf-note"><% errors.forEach(function(e){ %><div><%= e %></div><% }) %></div><% } %>
+    <% if (!currentUser.roles.includes('staff') && !currentUser.roles.includes('admin')) { %>
+      <p class="muted">Community submissions go to staff for review before they are published. You will be notified either way.</p>
+    <% } %>
+
+    <form method="post" action="/blog/submit">
+      <div class="form-row"><label for="title">Title</label>
+        <input id="title" type="text" name="title" maxlength="160" required value="<%= form.title || '' %>"></div>
+      <div class="form-row"><label for="categoryId">Category</label>
+        <select id="categoryId" name="categoryId" required>
+          <option value="">Choose…</option>
+          <% categories.forEach(function(c){ %>
+            <option value="<%= c._id %>" <%= String(form.categoryId) === String(c._id) ? 'selected' : '' %>><%= c.name %></option>
+          <% }) %>
+        </select></div>
+      <div class="form-row"><label for="excerpt">Summary</label>
+        <input id="excerpt" type="text" name="excerpt" maxlength="300" value="<%= form.excerpt || '' %>" placeholder="One or two sentences shown on the article card"></div>
+      <div class="form-row"><label for="coverImageUrl">Cover image URL</label>
+        <input id="coverImageUrl" type="url" name="coverImageUrl" value="<%= form.coverImageUrl || '' %>"></div>
+      <div class="form-row"><label for="body">Article</label>
+        <textarea id="body" name="body" rows="16" required><%= form.body || '' %></textarea>
+        <div class="hint">Plain text is fine — blank lines become paragraphs. Any HTML you paste is sanitised on the server before it is saved.</div></div>
+      <div class="form-row"><label for="tags">Tags</label>
+        <input id="tags" type="text" name="tags" value="<%= form.tags || '' %>" placeholder="lighting, budget, beginner"></div>
+      <div class="form-actions">
+        <button class="btn" type="submit">Submit for review</button>
+        <a class="btn secondary" href="/blog">Cancel</a>
+      </div>
+    </form>
+  </div>
+
+  <div class="box" style="margin-top:16px;">
+    <div class="box-title">My submissions</div>
+    <% if (!myPosts.length) { %>
+      <p class="muted">You have not submitted anything yet.</p>
+    <% } else { %>
+      <table class="wf-table">
+        <thead><tr><th>Title</th><th>Status</th><th>Submitted</th><th>Feedback</th><th></th></tr></thead>
+        <tbody>
+        <% myPosts.forEach(function(p){ %>
+          <tr>
+            <td><%= p.title %></td>
+            <td><span class="pill <%= p.status === 'published' ? 'ok' : (p.status === 'rejected' ? 'bad' : 'warn') %>"><%= p.status.replace(/_/g,' ') %></span></td>
+            <td class="muted"><%= timeAgo(p.createdAt) %></td>
+            <td class="muted"><%= p.review && p.review.feedback ? p.review.feedback : '—' %></td>
+            <td><a class="btn small secondary" href="/blog/<%= p.slug %>">View</a></td>
+          </tr>
+        <% }) %>
+        </tbody>
+      </table>
+    <% } %>
+  </div>
+</div>
+<%- include('../partials/footer') %>

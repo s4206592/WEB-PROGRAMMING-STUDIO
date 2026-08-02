@@ -1,0 +1,86 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<div class="page-wrap">
+  <div class="section-bar" style="margin-top:0;">
+    <h2>Shopping Cart <span class="wf-label">(<%= cart.items.length %> line<%= cart.items.length === 1 ? '' : 's' %>)</span></h2>
+    <a class="wf-label" href="/products">Continue shopping →</a>
+  </div>
+
+  <% if (changed) { %>
+    <div class="wf-note">Some lines were re-checked against the live listings and updated. Look over the highlighted rows before you order.</div>
+  <% } %>
+
+  <% if (!cart.items.length) { %>
+    <%- include('../partials/empty', { emptyTitle: 'Your cart is empty', emptyBody: 'Add a listing from a product page, or move something over from your wishlist.', emptyCta: { href: '/products', label: 'Browse listings' } }) %>
+  <% } else { %>
+    <div class="three-col">
+      <main>
+        <% groups.forEach(function(g){ %>
+          <div class="box" style="margin-bottom:16px;">
+            <div class="box-title">Sold by <%= g.seller.username %></div>
+            <% g.lines.forEach(function(l){ %>
+              <div class="row-item">
+                <div class="placeholder-img" <% if (l.imageSnapshot) { %>style="background-image:url('<%= l.imageSnapshot %>');background-size:cover;background-position:center;"<% } %>></div>
+                <div class="row-info">
+                  <% if (slugById.get(String(l.productId))) { %>
+                    <a href="/products/<%= slugById.get(String(l.productId)) %>"><strong><%= l.titleSnapshot %></strong></a>
+                  <% } else { %>
+                    <strong><%= l.titleSnapshot %></strong>
+                  <% } %>
+                  <div class="price"><%= formatVND(l.unitPrice) %>
+                    <% if (l.priceSource === 'negotiated') { %><span class="pill ok">Negotiated price</span><% } %>
+                    <% if (l.priceSource === 'bulk_tier') { %><span class="pill ok">Bulk price</span><% } %>
+                  </div>
+                  <% if (!l.isAvailable) { %>
+                    <span class="pill bad">
+                      <%= l.unavailableReason === 'sold' ? 'Sold out' : (l.unavailableReason === 'removed' ? 'Listing removed' : 'Unavailable') %>
+                    </span>
+                  <% } else if (l.unavailableReason === 'price_changed') { %>
+                    <span class="pill warn">Price updated since you added it</span>
+                  <% } else if (l.unavailableReason === 'out_of_stock') { %>
+                    <span class="pill warn">Quantity reduced to what is left</span>
+                  <% } %>
+                  <div class="wf-label">Added from <%= l.addedFrom.replace(/_/g,' ') %> · <%= timeAgo(l.addedAt) %></div>
+                </div>
+                <div class="row-actions">
+                  <form method="post" action="/cart/<%= l._id %>/update" style="display:flex;gap:4px;">
+                    <input type="number" name="quantity" value="<%= l.quantity %>" min="1" style="width:60px;padding:4px;border:1px solid #999;">
+                    <button class="btn small secondary" type="submit">Update</button>
+                  </form>
+                  <div class="right"><strong><%= formatVND(l.quantity * l.unitPrice) %></strong></div>
+                  <form method="post" action="/cart/<%= l._id %>/save-for-later">
+                    <button class="btn small secondary" type="submit">Save for later</button>
+                  </form>
+                  <form method="post" action="/cart/<%= l._id %>/remove">
+                    <button class="btn small danger" type="submit">Remove</button>
+                  </form>
+                </div>
+              </div>
+            <% }) %>
+          </div>
+        <% }) %>
+        <form method="post" action="/cart/clear">
+          <button class="linkbtn" type="submit">Empty the cart</button>
+        </form>
+      </main>
+
+      <aside>
+        <div class="box">
+          <div class="box-title">Order summary</div>
+          <dl class="kv">
+            <dt>Items</dt><dd><%= cart.items.filter(function(i){ return i.isAvailable; }).reduce(function(n,i){ return n + i.quantity; }, 0) %></dd>
+            <dt>Subtotal</dt><dd><strong><%= formatVND(subtotal) %></strong></dd>
+            <dt>Shipping</dt><dd class="muted">Calculated at checkout</dd>
+          </dl>
+          <hr class="rule">
+          <% if (blocking) { %>
+            <div class="wf-note">Fix the flagged lines before checking out — remove what is unavailable, or accept the updated quantity.</div>
+          <% } %>
+          <a class="btn <%= blocking || !subtotal ? 'disabled' : '' %>" href="<%= blocking || !subtotal ? '#' : '/checkout/delivery' %>" style="width:100%;">Proceed to checkout</a>
+          <div class="hint">Prices are re-checked against the live listing here and again when you place the order.</div>
+        </div>
+      </aside>
+    </div>
+  <% } %>
+</div>
+<%- include('../partials/footer') %>

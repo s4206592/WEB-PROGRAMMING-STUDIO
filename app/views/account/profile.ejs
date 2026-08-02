@@ -1,0 +1,120 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<div class="page-wrap">
+  <div class="two-col">
+    <aside class="box">
+      <div class="box-title"><%= profileUser.username %></div>
+      <p class="muted"><%= profileUser.fullName || '' %></p>
+      <% if (profileUser.bio) { %><p style="font-size:13px;"><%= profileUser.bio %></p><% } %>
+      <dl class="kv">
+        <dt>Member since</dt><dd><%= new Date(profileUser.createdAt).toLocaleDateString('en-GB') %></dd>
+        <dt>Reputation</dt><dd><%= profileUser.reputation.points %> pts</dd>
+        <% if (profileUser.sellerProfile && profileUser.sellerProfile.joinedAsSellerAt) { %>
+          <dt>Seller rating</dt><dd><%= stars(profileUser.sellerProfile.rating) %> (<%= profileUser.sellerProfile.ratingCount %>)</dd>
+          <dt>Sales</dt><dd><%= profileUser.sellerProfile.totalSales %></dd>
+        <% } %>
+        <dt>Roles</dt><dd><%= profileUser.roles.join(', ') %></dd>
+      </dl>
+      <% if (profileUser.reputation.badges.length) { %>
+        <div style="margin-top:10px;">
+          <% profileUser.reputation.badges.forEach(function(b){ %><span class="pill ok"><%= b.label %></span> <% }) %>
+        </div>
+      <% } %>
+      <hr class="rule">
+      <div class="stack">
+        <a class="btn small secondary" href="/account/settings">Account settings</a>
+        <a class="btn small secondary" href="/account/activity">Activity history</a>
+        <a class="btn small secondary" href="/account/u/<%= profileUser.username %>">View public profile</a>
+        <a class="btn small secondary" href="/sell/listings">My listings</a>
+        <a class="btn small secondary" href="/orders">My orders</a>
+        <a class="btn small secondary" href="/orders/sales">My sales</a>
+        <a class="btn small secondary" href="/offers">Offers</a>
+        <a class="btn small secondary" href="/messages">Messages</a>
+        <a class="btn small secondary" href="/forum/manage">My forum posts</a>
+        <a class="btn small secondary" href="/blog/submit">My articles</a>
+      </div>
+    </aside>
+
+    <main>
+      <div class="section-bar" style="margin-top:0;"><h2>My listings</h2><a class="wf-label" href="/sell/listings">Manage →</a></div>
+      <% if (!listings.length) { %>
+        <%- include('../partials/empty', { emptyTitle: 'Nothing listed yet', emptyBody: 'Sell a lamp, a lens, a whole lighting kit — listings appear here once you post one.', emptyCta: { href: '/sell/new', label: 'List an item' } }) %>
+      <% } else { %>
+        <div class="card-grid cols-3">
+          <% listings.forEach(function(p){ %><%- include('../partials/productcard', { p: p }) %><% }) %>
+        </div>
+      <% } %>
+
+      <div class="section-bar"><h2>Recent orders</h2><a class="wf-label" href="/orders">All →</a></div>
+      <% if (!orders.length) { %>
+        <div class="box"><p class="muted">No purchases yet.</p></div>
+      <% } else { %>
+        <table class="wf-table">
+          <thead><tr><th>Order</th><th>Placed</th><th>Status</th><th class="num">Total</th><th></th></tr></thead>
+          <tbody>
+          <% orders.forEach(function(o){ %>
+            <tr>
+              <td><%= o.orderNumber %></td>
+              <td><%= timeAgo(o.placedAt) %></td>
+              <td><span class="pill neutral"><%= o.status.replace(/_/g,' ') %></span></td>
+              <td class="num"><%= formatVND(o.totals.grandTotal) %></td>
+              <td><a class="btn small secondary" href="/orders/<%= o._id %>">Track</a></td>
+            </tr>
+          <% }) %>
+          </tbody>
+        </table>
+      <% } %>
+
+      <div class="section-bar"><h2>Saved items</h2><a class="wf-label" href="/wishlist">Wishlist →</a></div>
+      <% if (!wishlistItems.length) { %>
+        <div class="box"><p class="muted">Nothing saved. The heart icon on any listing adds it here.</p></div>
+      <% } else { %>
+        <div class="card-grid cols-3">
+          <% wishlistItems.forEach(function(w){ %>
+            <div class="product-card">
+              <div class="card-title"><%= w.productId.title %></div>
+              <div class="price"><%= formatVND(w.productId.price) %></div>
+              <a class="btn small" href="/products/<%= w.productId.slug %>">View</a>
+            </div>
+          <% }) %>
+        </div>
+      <% } %>
+
+      <div class="section-bar"><h2>My reviews</h2></div>
+      <% if (!reviews.length) { %>
+        <div class="box"><p class="muted">You can review an item once you have received it.</p></div>
+      <% } else { %>
+        <div class="box">
+        <% reviews.forEach(function(r){ %>
+          <div class="review-item">
+            <div class="review-head">
+              <strong><%= r.productId ? r.productId.title : 'Removed listing' %></strong>
+              <span class="stars"><%= stars(r.rating) %></span>
+            </div>
+            <p><%= r.comment %></p>
+          </div>
+        <% }) %>
+        </div>
+      <% } %>
+
+      <div class="section-bar"><h2>Community</h2></div>
+      <div class="box">
+        <p class="wf-label">Forum threads</p>
+        <% if (!threads.length) { %><p class="muted">None yet.</p><% } %>
+        <% threads.forEach(function(t){ %>
+          <div style="padding:4px 0;font-size:13px;"><a href="/forum/<%= t.slug %>"><%= t.title %></a> <span class="wf-label"><%= t.replyCount %> replies</span></div>
+        <% }) %>
+        <hr class="rule">
+        <p class="wf-label">Blog articles</p>
+        <% if (!articles.length) { %><p class="muted">None yet.</p><% } %>
+        <% articles.forEach(function(a){ %>
+          <div style="padding:4px 0;font-size:13px;">
+            <a href="/blog/<%= a.slug %>"><%= a.title %></a>
+            <span class="pill neutral"><%= a.status.replace(/_/g,' ') %></span>
+          </div>
+        <% }) %>
+      </div>
+    </main>
+  </div>
+</div>
+<%- include('../partials/footer') %>

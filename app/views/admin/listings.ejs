@@ -1,0 +1,39 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<div class="page-wrap">
+  <div class="tabs">
+    <% ['active','paused','sold','reserved','removed'].forEach(function(s){ %>
+      <a class="<%= status === s ? 'active' : '' %>" href="/admin/listings?status=<%= s %>"><%= s %></a>
+    <% }) %>
+  </div>
+  <% if (!listings.length) { %>
+    <%- include('../partials/empty', { emptyTitle: 'No listings in this state', emptyBody: 'Switch tabs, or wait for someone to post something.', emptyCta: { href: '/admin', label: 'Back to admin' } }) %>
+  <% } else { %>
+    <table class="wf-table">
+      <thead><tr><th>Listing</th><th>Seller</th><th class="num">Price</th><th class="num">Stock</th><th>Posted</th><th>Action</th></tr></thead>
+      <tbody>
+      <% listings.forEach(function(p){ %>
+        <tr>
+          <td><a href="/products/<%= p.slug %>"><%= p.title %></a>
+            <div class="wf-label"><%= p.isSecondhand ? 'Secondhand' : 'New' %> · <%= p.stats.views %> views</div></td>
+          <td><a href="/admin/users/<%= p.sellerId ? p.sellerId._id : '' %>"><%= p.sellerId ? p.sellerId.username : 'deleted' %></a></td>
+          <td class="num"><%= formatVND(p.price) %></td>
+          <td class="num"><%= availableQty(p) %></td>
+          <td class="nowrap muted"><%= timeAgo(p.createdAt) %></td>
+          <td>
+            <% if (p.status !== 'removed') { %>
+              <form method="post" action="/admin/listings/<%= p._id %>/remove" style="display:flex;gap:4px;">
+                <input type="text" name="reason" placeholder="Reason" style="width:130px;padding:4px;border:1px solid #999;">
+                <button class="btn small danger" type="submit">Remove</button>
+              </form>
+            <% } else { %>
+              <span class="muted">Removed</span>
+            <% } %>
+          </td>
+        </tr>
+      <% }) %>
+      </tbody>
+    </table>
+  <% } %>
+</div>
+<%- include('../partials/footer') %>

@@ -1,0 +1,56 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<div class="page-wrap">
+  <div class="section-bar" style="margin-top:0;"><h2>Transaction Records <span class="wf-label">(<%= total %>)</span></h2></div>
+
+  <div class="stat-grid" style="margin-bottom:14px;">
+    <div class="stat"><div class="stat-value"><%= total %></div><div class="stat-label">Orders total</div></div>
+    <div class="stat"><div class="stat-value"><%= completed %></div><div class="stat-label">Completed</div></div>
+    <div class="stat"><div class="stat-value" style="font-size:18px;"><%= formatVND(gmv) %></div><div class="stat-label">GMV (completed)</div></div>
+  </div>
+
+  <div class="box" style="margin-bottom:14px;">
+    <form method="get" action="/admin/transactions">
+      <div class="form-row inline">
+        <div style="flex:2;"><input type="search" name="q" value="<%= q %>" placeholder="Order number"></div>
+        <div style="flex:1;">
+          <select name="status">
+            <option value="">Any status</option>
+            <% ['awaiting_payment','payment_submitted','payment_confirmed','confirmed','partially_shipped','shipped','delivered','completed','cancelled','refunded','disputed'].forEach(function(s){ %>
+              <option value="<%= s %>" <%= activeStatus === s ? 'selected' : '' %>><%= s.replace(/_/g,' ') %></option>
+            <% }) %>
+          </select>
+        </div>
+        <button class="btn" type="submit">Filter</button>
+        <a class="btn secondary" href="/admin/transactions">Clear</a>
+      </div>
+    </form>
+  </div>
+
+  <% if (!orders.length) { %>
+    <%- include('../partials/empty', { emptyTitle: 'No orders', emptyBody: 'Orders appear here as soon as someone checks out.', emptyCta: { href: '/admin', label: 'Back to admin' } }) %>
+  <% } else { %>
+    <table class="wf-table">
+      <thead><tr><th>Order</th><th>Buyer</th><th>Items</th><th>Payment</th><th>Status</th><th>Return window</th><th class="num">Total</th><th></th></tr></thead>
+      <tbody>
+      <% orders.forEach(function(o){ %>
+        <tr>
+          <td><%= o.orderNumber %><div class="wf-label"><%= new Date(o.placedAt).toLocaleDateString('en-GB') %></div></td>
+          <td><%= o.buyerId ? o.buyerId.username : 'deleted' %></td>
+          <td class="muted"><%= o.items.length %></td>
+          <td>
+            <span class="pill <%= ['confirmed_by_seller','auto_confirmed','paid'].includes(o.paymentInfo.status) ? 'ok' : (o.paymentInfo.status === 'contested' ? 'bad' : 'warn') %>"><%= o.paymentInfo.status.replace(/_/g,' ') %></span>
+            <div class="wf-label"><%= o.paymentInfo.method.replace(/_/g,' ') %></div>
+          </td>
+          <td><span class="pill <%= o.status === 'completed' ? 'ok' : (['cancelled','refunded','disputed'].includes(o.status) ? 'bad' : 'neutral') %>"><%= o.status.replace(/_/g,' ') %></span></td>
+          <td class="muted"><%= o.returnWindow.status === 'open' ? daysRemaining(o) + ' days left' : o.returnWindow.status.replace(/_/g,' ') %></td>
+          <td class="num"><%= formatVND(o.totals.grandTotal) %></td>
+          <td><a class="btn small secondary" href="/orders/<%= o._id %>">Open</a></td>
+        </tr>
+      <% }) %>
+      </tbody>
+    </table>
+    <%- include('../partials/pagination') %>
+  <% } %>
+</div>
+<%- include('../partials/footer') %>

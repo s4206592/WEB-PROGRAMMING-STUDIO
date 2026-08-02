@@ -1,0 +1,160 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<%
+  // `product` when editing, `form` when a submission failed validation.
+  var v = function (key, fallback) {
+    if (form && form[key] !== undefined) return form[key];
+    if (product && product[key] !== undefined && product[key] !== null) return product[key];
+    return fallback === undefined ? '' : fallback;
+  };
+  var loc = (product && product.location) || {};
+  var ship = (product && product.shipping) || {};
+  var media = (product && product.media) || [];
+  var checkedNeg = form && Object.keys(form).length ? form.isNegotiable === 'on' : (product ? product.isNegotiable : true);
+  var cond = v('condition', 'good');
+  var lType = v('listingType', 'sale');
+%>
+<div class="wide">
+  <div class="box">
+    <div class="box-title"><%= product ? 'Edit listing' : 'Create a listing' %></div>
+    <% if (errors.length) { %>
+      <div class="wf-note"><% errors.forEach(function(e){ %><div><%= e %></div><% }) %></div>
+    <% } %>
+
+    <form method="post" action="<%= product ? '/sell/' + product._id + '/edit' : '/sell/new' %>">
+
+      <div class="form-row">
+        <label for="listingType">Listing type</label>
+        <select id="listingType" name="listingType">
+          <option value="sale" <%= lType === 'sale' ? 'selected' : '' %>>For sale — I have this item</option>
+          <option value="wanted" <%= lType === 'wanted' ? 'selected' : '' %>>Wanted — I am looking for this</option>
+        </select>
+      </div>
+
+      <div class="form-row">
+        <label for="title">Title</label>
+        <input id="title" type="text" name="title" maxlength="140" required value="<%= v('title') %>" placeholder="Godox SL60W studio light, boxed">
+      </div>
+
+      <div class="form-row">
+        <label for="description">Description</label>
+        <textarea id="description" name="description" maxlength="5000" placeholder="Age, usage, what is included, any faults. Honest wear notes get better offers."><%= v('description') %></textarea>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-row">
+          <label for="categoryId">Category</label>
+          <select id="categoryId" name="categoryId" required>
+            <option value="">Choose a category…</option>
+            <% categories.forEach(function(root){ %>
+              <optgroup label="<%= root.name %>">
+                <% root.children.forEach(function(c){ %>
+                  <option value="<%= c._id %>" <%= String(v('categoryId')) === String(c._id) ? 'selected' : '' %>><%= c.name %></option>
+                <% }) %>
+              </optgroup>
+            <% }) %>
+          </select>
+        </div>
+        <div class="form-row">
+          <label for="condition">Condition</label>
+          <select id="condition" name="condition">
+            <% ['new','like_new','good','fair','for_parts'].forEach(function(c){ %>
+              <option value="<%= c %>" <%= cond === c ? 'selected' : '' %>><%= CONDITION_LABELS[c] %></option>
+            <% }) %>
+          </select>
+          <div class="hint">Anything other than "New" is tagged as secondhand.</div>
+        </div>
+        <div class="form-row"><label for="brand">Brand</label>
+          <input id="brand" type="text" name="brand" value="<%= v('brand') %>" placeholder="Godox"></div>
+        <div class="form-row"><label for="model">Model</label>
+          <input id="model" type="text" name="model" value="<%= v('model') %>" placeholder="SL60W"></div>
+        <div class="form-row"><label for="yearMade">Year made</label>
+          <input id="yearMade" type="number" name="yearMade" value="<%= v('yearMade') %>" min="1950" max="2100"></div>
+        <div class="form-row"><label for="quantity">Quantity</label>
+          <input id="quantity" type="number" name="quantity" value="<%= v('quantity', 1) %>" min="1"></div>
+      </div>
+
+      <hr class="rule">
+      <div class="form-grid">
+        <div class="form-row">
+          <label for="price">Asking price (₫)</label>
+          <input id="price" type="text" name="price" value="<%= v('price') %>" placeholder="1250000">
+        </div>
+        <div class="form-row">
+          <label for="originalPrice">Original retail price (₫, optional)</label>
+          <input id="originalPrice" type="text" name="originalPrice" value="<%= v('originalPrice') %>">
+          <div class="hint">Shown struck through next to your price.</div>
+        </div>
+        <div class="form-row">
+          <label for="minAcceptable">Lowest you would accept (₫, private)</label>
+          <input id="minAcceptable" type="text" name="minAcceptable" value="<%= product && product.minAcceptable ? product.minAcceptable : (form.minAcceptable || '') %>">
+          <div class="hint">Never shown to buyers. Used to flag offers below your floor.</div>
+        </div>
+        <div class="form-row" style="align-self:end;">
+          <label style="font-size:13px;text-transform:none;letter-spacing:0;color:#222;">
+            <input type="checkbox" name="isNegotiable" <%= checkedNeg ? 'checked' : '' %>> Accept offers on this listing
+          </label>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="field-label">Bulk pricing tiers (optional)</div>
+        <% var tiers = (product && product.bulkPricing && product.bulkPricing.length) ? product.bulkPricing : [{},{}]; %>
+        <% tiers.slice(0,3).forEach(function(t){ %>
+          <div class="form-row inline">
+            <div style="flex:1;"><input type="number" name="bulkMinQty" placeholder="Min quantity" value="<%= t.minQty || '' %>" min="2"></div>
+            <div style="flex:1;"><input type="text" name="bulkUnitPrice" placeholder="Unit price ₫" value="<%= t.unitPrice || '' %>"></div>
+          </div>
+        <% }) %>
+        <div class="hint">Buying 5+ at a lower unit price, for example. Leave blank if not needed.</div>
+      </div>
+
+      <hr class="rule">
+      <div class="form-row">
+        <div class="field-label">Images</div>
+        <% var slots = media.length ? media.map(function(m){ return m.url; }) : ['']; %>
+        <% while (slots.length < 4) { slots.push(''); } %>
+        <% slots.slice(0,8).forEach(function(url, i){ %>
+          <div class="form-row">
+            <input type="url" name="mediaUrl" value="<%= url %>" placeholder="<%= i === 0 ? 'https://… (first image is the cover)' : 'https://…' %>">
+          </div>
+        <% }) %>
+        <div class="hint">Paste image URLs — this build does not host uploads, so images live wherever you already keep them (Imgur, Google Drive direct link, Cloudinary, and so on).</div>
+      </div>
+
+      <hr class="rule">
+      <div class="form-grid">
+        <div class="form-row">
+          <label for="province">Province</label>
+          <select id="province" name="province">
+            <option value="">Choose…</option>
+            <% VN_PROVINCES.forEach(function(p){ %>
+              <option value="<%= p %>" <%= (form.province || loc.province) === p ? 'selected' : '' %>><%= p %></option>
+            <% }) %>
+          </select>
+        </div>
+        <div class="form-row"><label for="district">District</label>
+          <input id="district" type="text" name="district" value="<%= form.district || loc.district || '' %>"></div>
+        <div class="form-row"><label for="shippingFee">Shipping fee (₫)</label>
+          <input id="shippingFee" type="text" name="shippingFee" value="<%= form.shippingFee || ship.feeFlat || 0 %>"></div>
+        <div class="form-row"><label for="handlingDays">Ships within (days)</label>
+          <input id="handlingDays" type="number" name="handlingDays" value="<%= form.handlingDays || ship.handlingDays || 2 %>" min="0"></div>
+      </div>
+      <div class="form-row">
+        <div class="field-label">Shipping methods</div>
+        <% var methods = (form.shippingMethod ? [].concat(form.shippingMethod) : (ship.methods || ['standard'])); %>
+        <% ['standard','express','pickup'].forEach(function(m){ %>
+          <label style="display:inline-block;margin-right:14px;font-size:13px;text-transform:none;letter-spacing:0;color:#222;">
+            <input type="checkbox" name="shippingMethod" value="<%= m %>" <%= methods.includes(m) ? 'checked' : '' %>> <%= m %>
+          </label>
+        <% }) %>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn" type="submit"><%= product ? 'Save changes' : 'Publish listing' %></button>
+        <a class="btn secondary" href="/sell/listings">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+<%- include('../partials/footer') %>

@@ -1,0 +1,35 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<div class="page-wrap">
+  <div class="tabs">
+    <a class="active" href="/orders">Orders I placed</a>
+    <a href="/orders/sales">Orders to fulfil</a>
+  </div>
+  <% if (!orders.length) { %>
+    <%- include('../partials/empty', { emptyTitle: 'No orders yet', emptyBody: 'Once you buy something it shows up here with its delivery milestones and return window.', emptyCta: { href: '/products', label: 'Browse listings' } }) %>
+  <% } else { %>
+    <table class="wf-table">
+      <thead><tr><th>Order</th><th>Items</th><th>Placed</th><th>Status</th><th>Return window</th><th class="num">Total</th><th></th></tr></thead>
+      <tbody>
+      <% orders.forEach(function(o){ %>
+        <tr>
+          <td><%= o.orderNumber %></td>
+          <td><%= o.items.map(function(i){ return i.title; }).join(', ').slice(0,60) %></td>
+          <td class="nowrap muted"><%= timeAgo(o.placedAt) %></td>
+          <td><span class="pill <%= o.status === 'completed' ? 'ok' : (['cancelled','refunded','disputed'].includes(o.status) ? 'bad' : 'warn') %>"><%= o.status.replace(/_/g,' ') %></span></td>
+          <td class="muted">
+            <% if (o.returnWindow.status === 'open') { %>
+              <span class="pill ok"><%= daysRemaining(o) %> day(s) left</span>
+            <% } else { %>
+              <%= o.returnWindow.status.replace(/_/g,' ') %>
+            <% } %>
+          </td>
+          <td class="num"><%= formatVND(o.totals.grandTotal) %></td>
+          <td><a class="btn small secondary" href="/orders/<%= o._id %>">Open</a></td>
+        </tr>
+      <% }) %>
+      </tbody>
+    </table>
+  <% } %>
+</div>
+<%- include('../partials/footer') %>

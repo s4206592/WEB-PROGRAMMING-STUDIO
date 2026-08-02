@@ -1,0 +1,39 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<div class="page-wrap">
+  <div class="box">
+    <div class="box-title">Search articles</div>
+    <form method="get" action="/blog/search">
+      <div class="form-row inline">
+        <div style="flex:2;"><input type="search" name="q" value="<%= q %>" placeholder="lighting, buying a used lens, avoiding scams…"></div>
+        <div style="flex:1;">
+          <select name="category">
+            <option value="">Any category</option>
+            <% categories.forEach(function(c){ %>
+              <option value="<%= c._id %>" <%= String(activeCategory) === String(c._id) ? 'selected' : '' %>><%= c.name %></option>
+            <% }) %>
+          </select>
+        </div>
+        <button class="btn" type="submit">Search</button>
+      </div>
+    </form>
+  </div>
+
+  <% if (q) { %>
+    <div class="section-bar"><h2>Results for "<%= q %>" <span class="wf-label">(<%= posts.length %>)</span></h2></div>
+    <% if (!posts.length) { %>
+      <%- include('../partials/empty', { emptyTitle: 'Nothing matched', emptyBody: 'Try a broader term, or clear the category filter.', emptyCta: { href: '/blog', label: 'Browse all articles' } }) %>
+    <% } else { %>
+      <% posts.forEach(function(p){ %>
+        <div class="thread-item">
+          <div class="thread-title"><a href="/blog/<%= p.slug %>"><%= p.title %></a></div>
+          <div class="thread-meta"><%= p.categoryId ? p.categoryId.name : '' %> · by <%= p.authorId ? p.authorId.username : 'unknown' %> · <%= timeAgo(p.publishedAt) %></div>
+          <p class="muted"><%= p.excerpt %></p>
+        </div>
+      <% }) %>
+    <% } %>
+  <% } else { %>
+    <div class="box" style="margin-top:16px;"><p class="muted">Type something above to search published articles by title, summary, tag or body text.</p></div>
+  <% } %>
+</div>
+<%- include('../partials/footer') %>

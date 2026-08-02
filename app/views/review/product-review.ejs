@@ -1,0 +1,88 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<div class="wide">
+  <div class="box">
+    <div class="box-title">Write a review</div>
+    <div class="row-item">
+      <div class="placeholder-img" <% if (item.imageUrl) { %>style="background-image:url('<%= item.imageUrl %>');background-size:cover;background-position:center;"<% } %>></div>
+      <div class="row-info">
+        <strong><%= item.title %></strong>
+        <div class="muted">Order <%= order.orderNumber %> · <%= item.quantity %> × <%= formatVND(item.unitPrice) %></div>
+        <span class="pill ok">Verified purchase</span>
+      </div>
+    </div>
+
+    <hr class="rule">
+    <form method="post" action="/reviews/new/<%= order._id %>/<%= item._id %>">
+      <div class="form-row">
+        <div class="field-label">Overall rating</div>
+        <div class="rate-select" id="rateSelect">
+          <% [1,2,3,4,5].forEach(function(n){ %>
+            <input type="radio" id="star<%= n %>" name="rating" value="<%= n %>" required>
+            <label for="star<%= n %>" data-value="<%= n %>">★</label>
+          <% }) %>
+        </div>
+        <div class="hint">1 = poor, 5 = excellent.</div>
+      </div>
+
+      <div class="form-row">
+        <label for="title">Headline</label>
+        <input id="title" type="text" name="title" maxlength="120" placeholder="Exactly as described, quick delivery">
+      </div>
+
+      <div class="form-row">
+        <label for="comment">Your review</label>
+        <textarea id="comment" name="comment" maxlength="2000" placeholder="How was the item's condition compared to the listing? How was the seller to deal with?"></textarea>
+      </div>
+
+      <div class="form-row">
+        <div class="field-label">Photos or video (URLs)</div>
+        <% [1,2,3].forEach(function(){ %>
+          <div class="form-row"><input type="url" name="mediaUrl" placeholder="https://…"></div>
+        <% }) %>
+        <div class="hint">Photos of the item as it arrived are the most useful thing you can add.</div>
+      </div>
+
+      <div class="form-row">
+        <div class="field-label">Rate specific aspects (optional)</div>
+        <div class="form-grid">
+          <% [['accuracy','As described'],['condition','Condition'],['communication','Communication'],['shipping','Shipping speed']].forEach(function(a){ %>
+            <div class="form-row">
+              <label for="<%= a[0] %>"><%= a[1] %></label>
+              <select id="<%= a[0] %>" name="<%= a[0] %>">
+                <option value="">—</option>
+                <% [1,2,3,4,5].forEach(function(n){ %><option value="<%= n %>"><%= n %></option><% }) %>
+              </select>
+            </div>
+          <% }) %>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn" type="submit">Publish review</button>
+        <a class="btn secondary" href="/orders/<%= order._id %>">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+<script>
+  (function () {
+    var wrap = document.getElementById('rateSelect');
+    if (!wrap) return;
+    var labels = Array.prototype.slice.call(wrap.querySelectorAll('label'));
+    function paint(n) {
+      labels.forEach(function (l) {
+        l.classList.toggle('on', Number(l.dataset.value) <= n);
+      });
+    }
+    labels.forEach(function (l) {
+      l.addEventListener('mouseenter', function () { paint(Number(l.dataset.value)); });
+      l.addEventListener('click', function () { paint(Number(l.dataset.value)); });
+    });
+    wrap.addEventListener('mouseleave', function () {
+      var checked = wrap.querySelector('input:checked');
+      paint(checked ? Number(checked.value) : 0);
+    });
+  })();
+</script>
+<%- include('../partials/footer') %>

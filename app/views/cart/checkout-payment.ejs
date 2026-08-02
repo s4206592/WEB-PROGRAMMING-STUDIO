@@ -1,0 +1,46 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<div class="wide">
+  <div class="tabs">
+    <a href="/checkout/delivery">1. Delivery</a>
+    <a class="active" href="/checkout/payment">2. Payment</a>
+    <a href="/checkout/review">3. Review order</a>
+  </div>
+
+  <div class="box">
+    <div class="box-title">How would you like to pay?</div>
+    <div class="wf-note">Payments here are simulated for this project. No real money moves and no real card details are ever stored — only a masked reference like **** 4242.</div>
+
+    <form method="post" action="/checkout/payment">
+      <div class="form-row">
+        <label style="display:block;font-size:13px;text-transform:none;letter-spacing:0;color:#222;padding:8px;border:1px solid #ddd;margin-bottom:8px;">
+          <input type="radio" name="method" value="cod" checked>
+          <strong>Cash on delivery</strong><br>
+          <span class="muted">Nothing to confirm upfront. Delivery starts straight away and money changes hands at handover.</span>
+        </label>
+        <label style="display:block;font-size:13px;text-transform:none;letter-spacing:0;color:#222;padding:8px;border:1px solid #ddd;margin-bottom:8px;">
+          <input type="radio" name="method" value="bank_transfer">
+          <strong>Bank transfer</strong><br>
+          <span class="muted">You transfer the seller directly, mark the order as paid, and the seller confirms it landed. Delivery unlocks only after that confirmation.</span>
+        </label>
+        <label style="display:block;font-size:13px;text-transform:none;letter-spacing:0;color:#222;padding:8px;border:1px solid #ddd;">
+          <input type="radio" name="method" value="card_sim">
+          <strong>Card (simulated)</strong><br>
+          <span class="muted">For demonstrating the flow. Type any fake digits.</span>
+        </label>
+      </div>
+
+      <div class="form-row">
+        <label for="cardNumber">Card number (simulated — only used if you picked card)</label>
+        <input id="cardNumber" type="text" name="cardNumber" placeholder="4242 4242 4242 4242" autocomplete="off">
+        <div class="hint">Do not enter a real card number. Only the last four digits are kept, as a display reference.</div>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn" type="submit">Continue to review</button>
+        <a class="btn secondary" href="/checkout/delivery">Back</a>
+      </div>
+    </form>
+  </div>
+</div>
+<%- include('../partials/footer') %>

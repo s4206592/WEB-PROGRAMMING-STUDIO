@@ -1,0 +1,48 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<div class="page-wrap">
+  <div class="two-col">
+    <aside class="box">
+      <div class="box-title">Filter</div>
+      <div class="stack">
+        <a class="btn small <%= !unreadOnly && !activeType ? '' : 'secondary' %>" href="/notifications">All</a>
+        <a class="btn small <%= unreadOnly ? '' : 'secondary' %>" href="/notifications?unread=1">Unread (<%= unreadCount %>)</a>
+      </div>
+      <hr class="rule">
+      <div class="wf-label">By type</div>
+      <% typeRows.forEach(function(t){ %>
+        <div style="font-size:12px;padding:3px 0;">
+          <a href="/notifications?type=<%= t._id %>"><%= t._id.replace(/_/g,' ') %></a> <span class="muted">(<%= t.n %>)</span>
+        </div>
+      <% }) %>
+      <hr class="rule">
+      <form method="post" action="/notifications/read-all"><button class="btn small secondary" type="submit">Mark all read</button></form>
+      <form method="post" action="/notifications/clear-read" style="margin-top:6px;"><button class="btn small secondary" type="submit">Clear read</button></form>
+    </aside>
+
+    <main>
+      <div class="section-bar" style="margin-top:0;"><h2>Notification Center</h2><span class="wf-label"><%= notifications.length %> shown</span></div>
+      <div class="box">
+        <% if (!notifications.length) { %>
+          <p class="muted">Nothing here yet. Price drops, offers, order updates, forum replies and blog decisions all arrive in this list.</p>
+        <% } else { %>
+          <% notifications.forEach(function(n){ %>
+            <div class="notif-item <%= n.isRead ? 'read' : '' %>">
+              <span class="dot"></span>
+              <div style="flex:1;">
+                <a href="/notifications/<%= n._id %>/open"><strong><%= n.title %></strong></a>
+                <% if (n.priority === 'high') { %><span class="pill bad">Important</span><% } %>
+                <div><%= n.body %></div>
+                <div class="time"><%= n.type.replace(/_/g,' ') %> · <%= timeAgo(n.createdAt) %></div>
+              </div>
+              <% if (!n.isRead) { %>
+                <form method="post" action="/notifications/<%= n._id %>/read"><button class="linkbtn" type="submit">Mark read</button></form>
+              <% } %>
+            </div>
+          <% }) %>
+        <% } %>
+      </div>
+    </main>
+  </div>
+</div>
+<%- include('../partials/footer') %>

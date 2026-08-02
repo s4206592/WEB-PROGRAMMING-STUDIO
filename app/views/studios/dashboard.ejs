@@ -1,0 +1,82 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<div class="page-wrap">
+  <div class="section-bar" style="margin-top:0;">
+    <h2>Studio Owner Dashboard</h2>
+    <a class="btn small" href="/studios/new">List another studio</a>
+  </div>
+
+  <div class="box">
+    <div class="box-title">My studios (<%= studios.length %>)</div>
+    <% if (!studios.length) { %>
+      <p class="muted">You have not listed a studio yet. A listing shows your space, equipment and rates, and gives people a way to send booking enquiries.</p>
+      <a class="btn" href="/studios/new">List your studio</a>
+    <% } else { %>
+      <% studios.forEach(function(s){ %>
+        <div class="row-item">
+          <div class="placeholder-img" <% if (s.coverImageUrl) { %>style="background-image:url('<%= s.coverImageUrl %>');background-size:cover;background-position:center;"<% } %>></div>
+          <div class="row-info">
+            <a href="/studios/<%= s.slug %>"><strong><%= s.name %></strong></a>
+            <div class="muted"><%= [s.address.district, s.address.province].filter(Boolean).join(', ') %></div>
+            <span class="pill <%= s.status === 'active' ? 'ok' : 'warn' %>"><%= s.status %></span>
+            <span class="pill <%= s.verification.status === 'verified' ? 'ok' : 'neutral' %>"><%= s.verification.status %></span>
+          </div>
+          <div class="row-actions">
+            <a class="btn small secondary" href="/studios/<%= s._id %>/edit">Edit</a>
+            <form method="post" action="/studios/<%= s._id %>/status">
+              <input type="hidden" name="status" value="<%= s.status === 'active' ? 'paused' : 'active' %>">
+              <button class="btn small secondary" type="submit"><%= s.status === 'active' ? 'Pause' : 'Activate' %></button>
+            </form>
+          </div>
+        </div>
+      <% }) %>
+    <% } %>
+  </div>
+
+  <div class="box" style="margin-top:16px;">
+    <div class="box-title">Enquiries and bookings (<%= bookings.length %>)</div>
+    <% if (!bookings.length) { %>
+      <p class="muted">No enquiries yet.</p>
+    <% } else { %>
+      <% bookings.forEach(function(b){ %>
+        <div class="review-item">
+          <div class="review-head">
+            <strong>
+              <%= b.userId ? b.userId.username : 'Someone' %> ·
+              <%= b.studioId ? b.studioId.name : 'studio' %>
+            </strong>
+            <span class="pill <%= b.status === 'confirmed' ? 'ok' : (['declined','cancelled'].includes(b.status) ? 'bad' : 'warn') %>"><%= b.status %></span>
+          </div>
+          <div class="wf-label">
+            <%= b.type %> · <%= timeAgo(b.createdAt) %>
+            <% if (b.startAt) { %> · <%= new Date(b.startAt).toLocaleString('en-GB') %> → <%= b.endAt ? new Date(b.endAt).toLocaleString('en-GB') : '?' %><% } %>
+            <% if (b.headcount) { %> · <%= b.headcount %> people<% } %>
+          </div>
+          <p><%= b.message %></p>
+          <% if (b.ownerResponse && b.ownerResponse.message) { %>
+            <div style="padding:8px;background:#f6f6f6;border-left:3px solid #999;">
+              You replied: <%= b.ownerResponse.message %>
+            </div>
+          <% } else { %>
+            <form method="post" action="/studios/bookings/<%= b._id %>/respond">
+              <div class="form-row inline">
+                <div style="flex:1;">
+                  <select name="decision">
+                    <option value="confirmed">Confirm</option>
+                    <option value="declined">Decline</option>
+                    <option value="completed">Mark completed</option>
+                    <option value="cancelled">Cancel</option>
+                  </select>
+                </div>
+                <div style="flex:1;"><input type="text" name="quotedPrice" placeholder="Quoted price ₫"></div>
+                <div style="flex:2;"><input type="text" name="message" placeholder="Reply to the enquirer"></div>
+                <button class="btn small" type="submit">Respond</button>
+              </div>
+            </form>
+          <% } %>
+        </div>
+      <% }) %>
+    <% } %>
+  </div>
+</div>
+<%- include('../partials/footer') %>

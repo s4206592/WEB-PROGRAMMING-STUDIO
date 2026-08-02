@@ -1,0 +1,125 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<div class="page-wrap">
+  <div class="three-col">
+    <main>
+      <div class="box">
+        <div class="placeholder-img" style="height:280px;<% if (studio.coverImageUrl) { %>background-image:url('<%= studio.coverImageUrl %>');background-size:cover;background-position:center;<% } %>"><%= studio.coverImageUrl ? '' : 'No cover image' %></div>
+        <h1 style="font-size:22px;margin:12px 0 4px;">
+          <%= studio.name %>
+          <% if (studio.verification.status === 'verified') { %><span class="pill ok">Verified</span><% } %>
+          <% if (studio.status !== 'active') { %><span class="pill warn"><%= studio.status %></span><% } %>
+        </h1>
+        <div class="muted"><%= [studio.address.line1, studio.address.ward, studio.address.district, studio.address.province].filter(Boolean).join(', ') %></div>
+        <hr class="rule">
+        <p style="white-space:pre-wrap;font-size:14px;"><%= studio.description || 'The owner has not written a description.' %></p>
+
+        <% if (studio.gallery && studio.gallery.length) { %>
+          <div class="gallery-thumbs">
+            <% studio.gallery.forEach(function(g){ %>
+              <div class="placeholder-img" style="width:120px;height:90px;background-image:url('<%= g.url %>');background-size:cover;background-position:center;"></div>
+            <% }) %>
+          </div>
+        <% } %>
+      </div>
+
+      <% if (studio.equipment && studio.equipment.length) { %>
+        <div class="box" style="margin-top:16px;">
+          <div class="box-title">Equipment on site</div>
+          <table class="wf-table">
+            <thead><tr><th>Item</th><th class="num">Qty</th></tr></thead>
+            <tbody>
+            <% studio.equipment.forEach(function(e){ %>
+              <tr><td><%= e.name %></td><td class="num"><%= e.quantity || 1 %></td></tr>
+            <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } %>
+
+      <% if (studio.amenities && studio.amenities.length) { %>
+        <div class="box" style="margin-top:16px;">
+          <div class="box-title">Amenities</div>
+          <% studio.amenities.forEach(function(a){ %><span class="tag"><%= a.replace(/_/g,' ') %></span> <% }) %>
+        </div>
+      <% } %>
+    </main>
+
+    <aside>
+      <div class="box">
+        <div class="box-title">Rates</div>
+        <% if (!studio.pricing || !studio.pricing.length) { %>
+          <p class="muted">The owner has not published rates. Send an enquiry for a quote.</p>
+        <% } else { %>
+          <table class="wf-table">
+            <tbody>
+            <% studio.pricing.forEach(function(p){ %>
+              <tr><td>per <%= p.unit.replace(/_/g,' ') %></td><td class="num"><strong><%= formatVND(p.price) %></strong></td></tr>
+            <% }) %>
+            </tbody>
+          </table>
+        <% } %>
+        <hr class="rule">
+        <dl class="kv">
+          <dt>Owner</dt><dd><a href="/account/u/<%= studio.ownerId.username %>"><%= studio.ownerId.username %></a></dd>
+          <% if (studio.capacity) { %><dt>Capacity</dt><dd><%= studio.capacity %> people</dd><% } %>
+          <% if (studio.areaSqm) { %><dt>Area</dt><dd><%= studio.areaSqm %> m²</dd><% } %>
+          <% if (studio.contact.phone) { %><dt>Phone</dt><dd><%= studio.contact.phone %></dd><% } %>
+          <% if (studio.contact.website) { %><dt>Website</dt><dd><a href="<%= studio.contact.website %>" target="_blank" rel="noopener">Visit</a></dd><% } %>
+        </dl>
+      </div>
+
+      <% if (isOwner) { %>
+        <div class="box" style="margin-top:16px;">
+          <div class="box-title">This is your studio</div>
+          <div class="stack">
+            <a class="btn secondary" href="/studios/<%= studio._id %>/edit">Edit details</a>
+            <a class="btn secondary" href="/studios/dashboard">Owner dashboard</a>
+          </div>
+        </div>
+      <% } else if (currentUser) { %>
+        <div class="box" style="margin-top:16px;">
+          <div class="box-title">Contact the owner</div>
+          <form method="post" action="/studios/<%= studio.slug %>/enquire">
+            <div class="form-row">
+              <label for="type">Type</label>
+              <select id="type" name="type">
+                <option value="enquiry">General enquiry</option>
+                <option value="booking">Booking request</option>
+              </select>
+            </div>
+            <div class="form-grid">
+              <div class="form-row"><label for="startAt">From</label>
+                <input id="startAt" type="datetime-local" name="startAt"></div>
+              <div class="form-row"><label for="endAt">To</label>
+                <input id="endAt" type="datetime-local" name="endAt"></div>
+            </div>
+            <div class="form-row"><label for="headcount">People</label>
+              <input id="headcount" type="number" name="headcount" min="1"></div>
+            <div class="form-row"><label for="message">Message</label>
+              <textarea id="message" name="message" rows="3" required placeholder="What you are shooting, what gear you need, dates you have in mind."></textarea></div>
+            <button class="btn" type="submit" style="width:100%;">Send</button>
+          </form>
+        </div>
+      <% } else { %>
+        <div class="box" style="margin-top:16px;"><p class="muted"><a href="/login">Sign in</a> to contact this studio.</p></div>
+      <% } %>
+
+      <% if (myBookings.length) { %>
+        <div class="box" style="margin-top:16px;">
+          <div class="box-title">My enquiries here</div>
+          <% myBookings.forEach(function(b){ %>
+            <div style="padding:6px 0;border-bottom:1px solid #eee;font-size:13px;">
+              <span class="pill neutral"><%= b.status %></span> <%= timeAgo(b.createdAt) %>
+              <div class="muted"><%= b.message.slice(0,80) %></div>
+              <% if (b.ownerResponse && b.ownerResponse.message) { %>
+                <div style="margin-top:4px;padding:6px;background:#f6f6f6;">Owner: <%= b.ownerResponse.message %></div>
+              <% } %>
+            </div>
+          <% }) %>
+        </div>
+      <% } %>
+    </aside>
+  </div>
+</div>
+<%- include('../partials/footer') %>

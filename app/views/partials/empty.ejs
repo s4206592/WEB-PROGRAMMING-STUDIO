@@ -1,0 +1,7 @@
+<div class="empty-state">
+  <div class="empty-title"><%= emptyTitle %></div>
+  <p><%= emptyBody %></p>
+  <% if (typeof emptyCta !== 'undefined' && emptyCta) { %>
+    <a class="btn" href="<%= emptyCta.href %>"><%= emptyCta.label %></a>
+  <% } %>
+</div>

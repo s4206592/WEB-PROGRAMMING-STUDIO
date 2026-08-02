@@ -1,0 +1,138 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<div class="page-wrap">
+  <div class="box">
+    <div style="display:flex;gap:14px;">
+      <div class="vote-col">
+        <% if (currentUser) { %>
+          <form method="post" action="/forum/vote/forum_post/<%= post._id %>">
+            <input type="hidden" name="value" value="up">
+            <button type="submit" title="Upvote"><%= myVotes[String(post._id)] === 1 ? '▲✓' : '▲' %></button>
+          </form>
+        <% } %>
+        <div class="score"><%= post.score %></div>
+        <% if (currentUser) { %>
+          <form method="post" action="/forum/vote/forum_post/<%= post._id %>">
+            <input type="hidden" name="value" value="down">
+            <button type="submit" title="Downvote"><%= myVotes[String(post._id)] === -1 ? '▼✓' : '▼' %></button>
+          </form>
+        <% } %>
+      </div>
+      <div style="flex:1;">
+        <h1 style="font-size:20px;margin:0 0 6px;"><%= post.title %></h1>
+        <div class="wf-label">
+          asked by <a href="/account/u/<%= post.authorId.username %>"><%= post.authorId.username %></a>
+          (<%= post.authorId.reputation.points %> pts) · <%= timeAgo(post.createdAt) %> · <%= post.viewCount %> views
+        </div>
+        <% if (post.isLocked) { %><span class="pill warn">Locked — no new replies</span><% } %>
+        <hr class="rule">
+        <div style="font-size:15px;line-height:1.6;"><%- post.bodyHtml %></div>
+        <% if (post.attachments && post.attachments.length) { %>
+          <div class="review-media">
+            <% post.attachments.forEach(function(a){ %>
+              <% if (a.type === 'video') { %>
+                <a class="btn small secondary" href="<%= a.url %>" target="_blank" rel="noopener">Video</a>
+              <% } else { %>
+                <img src="<%= a.url %>" alt="Attachment">
+              <% } %>
+            <% }) %>
+          </div>
+        <% } %>
+        <% if (post.tags && post.tags.length) { %>
+          <div style="margin-top:10px;">
+            <% post.tags.forEach(function(t){ %><a class="tag" href="/forum?tag=<%= t %>" style="text-decoration:none;"><%= t %></a> <% }) %>
+          </div>
+        <% } %>
+        <% if (currentUser && !isAuthor) { %>
+          <form method="post" action="/forum/report/forum_post/<%= post._id %>" style="margin-top:10px;">
+            <input type="hidden" name="reason" value="off_topic">
+            <button class="linkbtn" type="submit">Report this question</button>
+          </form>
+        <% } %>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-bar"><h2><%= answers.length %> repl<%= answers.length === 1 ? 'y' : 'ies' %></h2></div>
+
+  <% if (!answers.length) { %>
+    <div class="box"><p class="muted">No replies yet. If you know the answer, post it below.</p></div>
+  <% } %>
+
+  <% answers.forEach(function(a){ %>
+    <div class="box" style="margin-bottom:12px;" id="reply-<%= a._id %>">
+      <div style="display:flex;gap:14px;">
+        <div class="vote-col">
+          <% if (currentUser) { %>
+            <form method="post" action="/forum/vote/forum_reply/<%= a._id %>">
+              <input type="hidden" name="value" value="up">
+              <button type="submit"><%= myVotes[String(a._id)] === 1 ? '▲✓' : '▲' %></button>
+            </form>
+          <% } %>
+          <div class="score"><%= a.score %></div>
+          <% if (currentUser) { %>
+            <form method="post" action="/forum/vote/forum_reply/<%= a._id %>">
+              <input type="hidden" name="value" value="down">
+              <button type="submit"><%= myVotes[String(a._id)] === -1 ? '▼✓' : '▼' %></button>
+            </form>
+          <% } %>
+          <% if (a.isAccepted) { %><div class="pill ok" style="margin-top:6px;">✓</div><% } %>
+        </div>
+        <div style="flex:1;">
+          <div class="wf-label">
+            <a href="/account/u/<%= a.authorId ? a.authorId.username : '' %>"><%= a.authorId ? a.authorId.username : 'Anonymous' %></a>
+            <% if (a.authorId && a.authorId.reputation) { %>(<%= a.authorId.reputation.points %> pts)<% } %>
+            · <%= timeAgo(a.createdAt) %>
+            <% if (a.isAccepted) { %><span class="pill ok">Accepted answer</span><% } %>
+          </div>
+          <div style="font-size:14px;line-height:1.6;margin-top:6px;"><%- a.bodyHtml %></div>
+
+          <div style="display:flex;gap:10px;margin-top:8px;align-items:center;flex-wrap:wrap;">
+            <% if (isAuthor && !post.isLocked) { %>
+              <form method="post" action="/forum/<%= post.slug %>/accept/<%= a._id %>">
+                <button class="btn small <%= a.isAccepted ? 'secondary' : '' %>" type="submit">
+                  <%= a.isAccepted ? 'Unaccept' : 'Accept this answer' %>
+                </button>
+              </form>
+            <% } %>
+            <% if (currentUser && !post.isLocked) { %>
+              <details>
+                <summary class="wf-label" style="cursor:pointer;">Comment</summary>
+                <form method="post" action="/forum/<%= post.slug %>/reply" style="margin-top:6px;min-width:260px;">
+                  <input type="hidden" name="parentId" value="<%= a._id %>">
+                  <div class="form-row"><textarea name="body" rows="2" required></textarea></div>
+                  <button class="btn small" type="submit">Post comment</button>
+                </form>
+              </details>
+              <form method="post" action="/forum/report/forum_reply/<%= a._id %>">
+                <input type="hidden" name="reason" value="off_topic">
+                <button class="linkbtn" type="submit">Report</button>
+              </form>
+            <% } %>
+          </div>
+
+          <% (commentsByParent[a._id] || []).forEach(function(c){ %>
+            <div style="margin-left:16px;margin-top:10px;padding-left:10px;border-left:2px solid #ddd;font-size:13px;">
+              <strong><%= c.authorId ? c.authorId.username : 'Anonymous' %></strong>
+              <span class="wf-label"><%= timeAgo(c.createdAt) %></span>
+              <div><%- c.bodyHtml %></div>
+            </div>
+          <% }) %>
+        </div>
+      </div>
+    </div>
+  <% }) %>
+
+  <% if (currentUser && !post.isLocked) { %>
+    <div class="box">
+      <div class="box-title">Your answer</div>
+      <form method="post" action="/forum/<%= post.slug %>/reply">
+        <div class="form-row"><textarea name="body" rows="6" required placeholder="Answer the question. Say what you have actually tried where you can."></textarea></div>
+        <button class="btn" type="submit">Post answer</button>
+      </form>
+    </div>
+  <% } else if (!currentUser) { %>
+    <div class="box"><p class="muted"><a href="/login">Sign in</a> to answer this question.</p></div>
+  <% } %>
+</div>
+<%- include('../partials/footer') %>

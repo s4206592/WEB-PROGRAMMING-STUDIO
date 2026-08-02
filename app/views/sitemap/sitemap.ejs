@@ -1,0 +1,53 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<div class="page-wrap">
+  <div class="section-bar" style="margin-top:0;">
+    <h2>Sitemap <span class="wf-label">(<%= total %> pages)</span></h2>
+    <a class="wf-label" href="/sitemap/search">Search the sitemap →</a>
+  </div>
+  <p class="wf-label">Generated from the route table plus every published listing, article, thread and studio. Pages you cannot reach are hidden.</p>
+
+  <div class="card-grid cols-2">
+    <% Object.keys(byModule).forEach(function(mod){ %>
+      <div class="box">
+        <div class="box-title"><%= MODULE_LABELS[mod] || mod %> <span class="wf-label">(<%= byModule[mod].length %>)</span></div>
+        <ul class="tree">
+          <% byModule[mod].filter(function(e){ return e.depth <= 2; }).forEach(function(parent){ %>
+            <li>
+              <a href="<%= parent.path %>"><%= parent.title %></a>
+              <span class="node-path"><%= parent.path %></span>
+              <% var kids = byModule[mod].filter(function(k){ return k.parentPath === parent.path; }); %>
+              <% if (kids.length) { %>
+                <ul>
+                  <% kids.forEach(function(k){ %>
+                    <li>
+                      <a href="<%= k.path %>"><%= k.title %></a>
+                      <% if (k.isDynamic) { %><span class="wf-label">·<%= k.sourceType %></span><% } %>
+                      <% if (k.requiresAuth) { %><span class="wf-label">· sign-in</span><% } %>
+                    </li>
+                  <% }) %>
+                </ul>
+              <% } %>
+            </li>
+          <% }) %>
+          <% var orphans = byModule[mod].filter(function(e){ return e.depth > 2 && !byModule[mod].some(function(p){ return p.path === e.parentPath; }); }); %>
+          <% orphans.forEach(function(o){ %>
+            <li><a href="<%= o.path %>"><%= o.title %></a><span class="node-path"><%= o.path %></span></li>
+          <% }) %>
+        </ul>
+      </div>
+    <% }) %>
+  </div>
+
+  <div class="box" style="margin-top:16px;">
+    <div class="box-title">Machine-readable</div>
+    <div class="form-actions">
+      <a class="btn small secondary" href="/sitemap.xml">sitemap.xml</a>
+      <a class="btn small secondary" href="/robots.txt">robots.txt</a>
+      <% if (currentUser && (currentUser.roles.includes('staff') || currentUser.roles.includes('admin'))) { %>
+        <a class="btn small secondary" href="/sitemap/seo">SEO integration</a>
+      <% } %>
+    </div>
+  </div>
+</div>
+<%- include('../partials/footer') %>

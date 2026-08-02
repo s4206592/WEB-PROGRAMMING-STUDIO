@@ -1,0 +1,129 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<div class="page-wrap">
+  <div class="three-col">
+    <main>
+      <div class="box">
+        <div class="box-title">Negotiation history</div>
+        <% offer.history.forEach(function(h, i){ %>
+          <div class="review-item">
+            <div class="review-head">
+              <strong><%= h.action.replace(/_/g,' ') %></strong>
+              <span class="wf-label">round <%= i + 1 %> · <%= timeAgo(h.createdAt) %></span>
+            </div>
+            <div class="price"><%= formatVND(h.consideration ? h.consideration.cash : 0) %></div>
+            <% if (h.consideration && h.consideration.items && h.consideration.items.length) { %>
+              <div class="wf-label">plus in trade:</div>
+              <% h.consideration.items.forEach(function(it){ %>
+                <div style="font-size:13px;">· <%= it.title %> (<%= CONDITION_LABELS[it.condition] || it.condition %>) — stated <%= formatVND(it.statedValue) %></div>
+              <% }) %>
+            <% } %>
+            <% if (h.message) { %><p><%= h.message %></p><% } %>
+          </div>
+        <% }) %>
+      </div>
+
+      <% if (messages.length) { %>
+        <div class="box" style="margin-top:16px;">
+          <div class="box-title">Messages</div>
+          <div class="chat-scroll">
+            <% messages.forEach(function(m){ %>
+              <% if (m.isSystem) { %>
+                <div class="msg system"><%= m.body %></div>
+              <% } else { %>
+                <div class="msg <%= currentUser && m.senderId && String(m.senderId._id) === String(currentUser._id) ? 'mine' : '' %>">
+                  <strong><%= m.senderId ? m.senderId.username : 'Unknown' %></strong>
+                  <div><%= m.body %></div>
+                  <span class="msg-time"><%= timeAgo(m.createdAt) %></span>
+                </div>
+              <% } %>
+            <% }) %>
+          </div>
+          <% if (offer.conversationId) { %>
+            <form method="post" action="/messages/<%= offer.conversationId %>/send" style="margin-top:10px;">
+              <div class="form-row"><textarea name="body" rows="2" placeholder="Write a message…" required></textarea></div>
+              <button class="btn small" type="submit">Send</button>
+            </form>
+          <% } %>
+        </div>
+      <% } %>
+    </main>
+
+    <aside>
+      <div class="box">
+        <div class="box-title">Offer</div>
+        <% if (offer.productId) { %>
+          <a href="/products/<%= offer.productId.slug %>"><strong><%= offer.productId.title %></strong></a>
+          <div class="wf-label">Asking <%= formatVND(offer.productId.price) %> · listing is <%= offer.productId.status %></div>
+        <% } else { %>
+          <p class="muted">The listing has been removed.</p>
+        <% } %>
+        <hr class="rule">
+        <dl class="kv">
+          <dt>Buyer</dt><dd><%= offer.buyerId.username %></dd>
+          <dt>Seller</dt><dd><%= offer.sellerId.username %></dd>
+          <dt>Quantity</dt><dd><%= offer.quantity %></dd>
+          <dt>Current terms</dt><dd><%= formatVND(offer.consideration.cash) %></dd>
+          <dt>Settlement</dt><dd><%= offer.settlement === 'trade' ? 'Trade (goods move off-platform)' : 'Cash checkout' %></dd>
+          <dt>Status</dt><dd><span class="pill <%= offer.status === 'accepted' ? 'ok' : (isOpen ? 'warn' : 'bad') %>"><%= offer.status.replace(/_/g,' ') %></span></dd>
+          <% if (isOpen) { %><dt>Waiting on</dt><dd><%= offer.turn %></dd><% } %>
+          <% if (offer.expiresAt) { %><dt>Expires</dt><dd><%= new Date(offer.expiresAt).toLocaleString('en-GB') %></dd><% } %>
+        </dl>
+      </div>
+
+      <% if (offer.status === 'accepted') { %>
+        <div class="box" style="margin-top:16px;">
+          <div class="box-title">Accepted</div>
+          <% if (offer.settlement === 'trade') { %>
+            <p class="muted">This is a trade. There is no single price to escrow, so both sides arrange the swap themselves — use the message thread to exchange details.</p>
+          <% } else if (!isSeller) { %>
+            <p>The item is reserved for you at <strong><%= formatVND(offer.acceptedConsideration.cash) %></strong> until <%= new Date(offer.expiresAt).toLocaleString('en-GB') %>.</p>
+            <form method="post" action="/cart/add/<%= offer.productId._id %>">
+              <input type="hidden" name="quantity" value="<%= offer.quantity %>">
+              <input type="hidden" name="addedFrom" value="offer">
+              <input type="hidden" name="returnTo" value="/cart">
+              <button class="btn" type="submit" style="width:100%;">Add to cart at agreed price</button>
+            </form>
+          <% } else { %>
+            <p class="muted">Reserved for <%= offer.buyerId.username %>. If they do not check out before the reservation lapses, the listing goes back on sale.</p>
+          <% } %>
+        </div>
+      <% } %>
+
+      <% if (myTurn) { %>
+        <div class="box" style="margin-top:16px;">
+          <div class="box-title">Respond</div>
+          <form method="post" action="/offers/<%= offer._id %>/accept">
+            <button class="btn" type="submit" style="width:100%;">Accept <%= formatVND(offer.consideration.cash) %></button>
+          </form>
+          <hr class="rule">
+          <form method="post" action="/offers/<%= offer._id %>/counter">
+            <div class="form-row">
+              <label for="cash">Counter with (₫)</label>
+              <input id="cash" type="text" name="cash" required value="<%= offer.consideration.cash %>">
+            </div>
+            <div class="form-row">
+              <label for="cmsg">Message</label>
+              <textarea id="cmsg" name="message" rows="2" maxlength="500"></textarea>
+            </div>
+            <button class="btn secondary" type="submit" style="width:100%;">Send counter-offer</button>
+          </form>
+        </div>
+      <% } %>
+
+      <% if (isOpen) { %>
+        <div class="box" style="margin-top:16px;">
+          <form method="post" action="/offers/<%= offer._id %>/reject">
+            <div class="form-row">
+              <label for="rmsg"><%= isSeller ? 'Decline this offer' : 'Withdraw your offer' %></label>
+              <textarea id="rmsg" name="message" rows="2" placeholder="Optional reason"></textarea>
+            </div>
+            <button class="btn danger" type="submit" style="width:100%;"><%= isSeller ? 'Decline' : 'Withdraw' %></button>
+            <div class="hint"><%= isSeller ? 'Declining frees the slot — the buyer can send a new offer.' : 'You can offer again after withdrawing.' %></div>
+          </form>
+        </div>
+      <% } %>
+    </aside>
+  </div>
+</div>
+<%- include('../partials/footer') %>

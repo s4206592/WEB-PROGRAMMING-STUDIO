@@ -1,0 +1,68 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<div class="page-wrap">
+  <div class="box">
+    <div class="box-title">Frequently asked questions</div>
+    <form method="get" action="/faq">
+      <div class="form-row inline">
+        <div style="flex:1;"><input type="search" name="q" value="<%= q %>" placeholder="Search the FAQ"></div>
+        <button class="btn" type="submit">Search</button>
+        <a class="btn secondary" href="/faq/submit">Ask staff a question</a>
+      </div>
+    </form>
+  </div>
+
+  <div class="two-col" style="margin-top:16px;">
+    <aside class="box">
+      <div class="box-title">Categories</div>
+      <div class="stack">
+        <a class="btn small <%= !activeCategory ? '' : 'secondary' %>" href="/faq">All topics</a>
+        <% categories.forEach(function(c){ %>
+          <a class="btn small <%= String(activeCategory) === String(c._id) ? '' : 'secondary' %>" href="/faq?category=<%= c._id %>">
+            <%= c.name %> (<%= (byCategory[c._id] || []).length %>)
+          </a>
+        <% }) %>
+      </div>
+    </aside>
+
+    <main>
+      <% if (!total) { %>
+        <%- include('../partials/empty', {
+          emptyTitle: q ? 'Nothing matched' : 'No FAQ entries yet',
+          emptyBody: q
+            ? 'Try a different word, or send the question straight to staff.'
+            : 'The categories are set up but no answers have been written yet. Staff add entries from the admin panel, and good questions from members often become FAQ entries.',
+          emptyCta: { href: '/faq/submit', label: 'Ask staff a question' }
+        }) %>
+      <% } else { %>
+        <% categories.forEach(function(c){ %>
+          <% var entries = byCategory[c._id] || []; %>
+          <% if (entries.length) { %>
+            <div class="section-bar" style="margin-top:0;"><h2><%= c.name %></h2></div>
+            <% if (c.description) { %><p class="wf-label"><%= c.description %></p><% } %>
+            <div class="box" style="margin-bottom:16px;">
+              <% entries.forEach(function(e){ %>
+                <details style="padding:10px 0;border-bottom:1px solid #eee;">
+                  <summary style="cursor:pointer;font-weight:bold;font-size:14px;"><%= e.question %></summary>
+                  <div style="font-size:14px;line-height:1.6;margin-top:8px;"><%- e.answerHtml %></div>
+                  <div style="display:flex;gap:8px;align-items:center;margin-top:8px;">
+                    <span class="wf-label">Was this useful?</span>
+                    <form method="post" action="/faq/<%= e._id %>/helpful">
+                      <input type="hidden" name="value" value="yes">
+                      <button class="btn small secondary" type="submit">Yes (<%= e.helpfulYes %>)</button>
+                    </form>
+                    <form method="post" action="/faq/<%= e._id %>/helpful">
+                      <input type="hidden" name="value" value="no">
+                      <button class="btn small secondary" type="submit">No (<%= e.helpfulNo %>)</button>
+                    </form>
+                  </div>
+                </details>
+              <% }) %>
+            </div>
+          <% } %>
+        <% }) %>
+      <% } %>
+    </main>
+  </div>
+</div>
+<%- include('../partials/footer') %>

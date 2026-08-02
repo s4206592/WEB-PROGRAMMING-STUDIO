@@ -1,0 +1,16 @@
+  <footer class="sitefooter">
+    <span>StudioTrade — secondhand studio equipment marketplace</span>
+    <span class="wf-label" style="display:flex; gap:10px; flex-wrap:wrap;">
+      <a href="/sitemap">Sitemap</a> ·
+      <% if (currentUser) { %>
+        <a href="/account/profile">Profile</a> ·
+        <a href="/orders">My orders</a> ·
+        <form action="/logout" method="post" style="display:inline;"><button type="submit" class="linkbtn">Log out</button></form>
+      <% } else { %>
+        <a href="/login">Login</a> · <a href="/register">Register</a>
+      <% } %>
+      <% if (currentUser && currentUser.roles.includes('admin')) { %> · <a href="/admin">Admin</a><% } %>
+    </span>
+  </footer>
+</body>
+</html>

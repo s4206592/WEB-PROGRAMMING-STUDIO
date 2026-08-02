@@ -1,0 +1,29 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<div class="page-wrap">
+  <div class="section-bar" style="margin-top:0;"><h2>Messages</h2></div>
+  <% if (!conversations.length) { %>
+    <%- include('../partials/empty', { emptyTitle: 'No conversations', emptyBody: 'Chat threads start from a listing, an offer, an order, or a studio enquiry.', emptyCta: { href: '/products', label: 'Browse listings' } }) %>
+  <% } else { %>
+    <div class="box">
+    <% conversations.forEach(function(c){ %>
+      <% var other = c.participants.filter(function(p){ return String(p._id) !== String(currentUser._id); })[0]; %>
+      <% var unread = (c.unread || []).filter(function(u){ return String(u.userId) === String(currentUser._id); })[0]; %>
+      <div class="row-item">
+        <div class="row-info">
+          <a href="/messages/<%= c._id %>"><strong><%= other ? other.username : 'Unknown user' %></strong></a>
+          <% if (unread && unread.count) { %><span class="pill bad"><%= unread.count %> new</span><% } %>
+          <span class="pill neutral"><%= c.context %></span>
+          <% if (c.subject) { %><div class="wf-label"><%= c.subject %></div><% } %>
+          <div class="muted"><%= c.lastMessage && c.lastMessage.text ? c.lastMessage.text : 'No messages yet' %></div>
+        </div>
+        <div class="row-actions">
+          <span class="wf-label"><%= timeAgo(c.updatedAt) %></span>
+          <a class="btn small secondary" href="/messages/<%= c._id %>">Open</a>
+        </div>
+      </div>
+    <% }) %>
+    </div>
+  <% } %>
+</div>
+<%- include('../partials/footer') %>

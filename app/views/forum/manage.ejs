@@ -1,0 +1,57 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<div class="page-wrap">
+  <div class="section-bar" style="margin-top:0;">
+    <h2>My forum activity</h2>
+    <a class="btn small" href="/forum/new">Ask a question</a>
+  </div>
+
+  <div class="box">
+    <div class="box-title">My questions (<%= posts.length %>)</div>
+    <% if (!posts.length) { %>
+      <p class="muted">You have not asked anything yet.</p>
+    <% } else { %>
+      <% posts.forEach(function(p){ %>
+        <div class="row-item">
+          <div class="row-info">
+            <a href="/forum/<%= p.slug %>"><strong><%= p.title %></strong></a>
+            <div class="wf-label"><%= p.score %> votes · <%= p.replyCount %> replies · <%= p.viewCount %> views · <%= timeAgo(p.createdAt) %></div>
+            <span class="pill <%= p.acceptedAnswerId ? 'ok' : 'neutral' %>"><%= p.status %></span>
+          </div>
+          <div class="row-actions">
+            <details>
+              <summary class="btn small secondary" style="list-style:none;">Edit</summary>
+              <form method="post" action="/forum/<%= p._id %>/edit" style="margin-top:8px;min-width:280px;">
+                <div class="form-row"><input type="text" name="title" value="<%= p.title %>"></div>
+                <div class="form-row"><textarea name="body" rows="4" placeholder="Leave blank to keep the current text"></textarea></div>
+                <button class="btn small" type="submit">Save</button>
+              </form>
+            </details>
+            <form method="post" action="/forum/<%= p._id %>/delete">
+              <button class="btn small danger" type="submit">Delete</button>
+            </form>
+          </div>
+        </div>
+      <% }) %>
+    <% } %>
+  </div>
+
+  <div class="box" style="margin-top:16px;">
+    <div class="box-title">My replies (<%= replies.length %>)</div>
+    <% if (!replies.length) { %>
+      <p class="muted">You have not replied to anything yet.</p>
+    <% } else { %>
+      <% replies.forEach(function(r){ %>
+        <div class="review-item">
+          <div class="review-head">
+            <a href="/forum/<%= r.postId ? r.postId.slug : '' %>"><strong><%= r.postId ? r.postId.title : 'Deleted thread' %></strong></a>
+            <span class="wf-label"><%= r.score %> votes · <%= timeAgo(r.createdAt) %></span>
+          </div>
+          <% if (r.isAccepted) { %><span class="pill ok">Accepted answer</span><% } %>
+          <div class="muted"><%- r.bodyHtml %></div>
+        </div>
+      <% }) %>
+    <% } %>
+  </div>
+</div>
+<%- include('../partials/footer') %>

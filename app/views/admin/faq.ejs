@@ -1,0 +1,80 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<div class="page-wrap">
+  <div class="two-col">
+    <aside class="box">
+      <div class="box-title">Add an FAQ entry</div>
+      <form method="post" action="/admin/faq/entries">
+        <div class="form-row"><label for="categoryId">Category</label>
+          <select id="categoryId" name="categoryId" required>
+            <% categories.forEach(function(c){ %><option value="<%= c._id %>"><%= c.name %></option><% }) %>
+          </select></div>
+        <div class="form-row"><label for="question">Question</label>
+          <input id="question" type="text" name="question" required maxlength="300"></div>
+        <div class="form-row"><label for="answer">Answer</label>
+          <textarea id="answer" name="answer" rows="6" required></textarea>
+          <div class="hint">Plain text becomes paragraphs. Any HTML is sanitised before saving.</div></div>
+        <div class="form-row"><label for="displayOrder">Display order</label>
+          <input id="displayOrder" type="number" name="displayOrder" value="0"></div>
+        <div class="form-actions"><button class="btn" type="submit">Publish entry</button></div>
+      </form>
+    </aside>
+
+    <main>
+      <div class="section-bar" style="margin-top:0;"><h2>Published entries (<%= entries.length %>)</h2></div>
+      <% if (!entries.length) { %>
+        <div class="box"><p class="muted">No FAQ entries yet. The categories exist but nobody has written any answers.</p></div>
+      <% } else { %>
+        <div class="box">
+        <% categories.forEach(function(c){ %>
+          <% var group = entries.filter(function(e){ return String(e.categoryId) === String(c._id); }); %>
+          <% if (group.length) { %>
+            <div class="wf-label" style="margin-top:10px;"><%= c.name %></div>
+            <% group.forEach(function(e){ %>
+              <div style="padding:6px 0;border-bottom:1px solid #eee;display:flex;gap:8px;align-items:center;">
+                <div style="flex:1;font-size:13px;">
+                  <strong><%= e.question %></strong>
+                  <div class="wf-label"><%= e.helpfulYes %> found this useful, <%= e.helpfulNo %> did not</div>
+                </div>
+                <form method="post" action="/admin/faq/entries/<%= e._id %>/delete">
+                  <button class="btn small danger" type="submit">Delete</button>
+                </form>
+              </div>
+            <% }) %>
+          <% } %>
+        <% }) %>
+        </div>
+      <% } %>
+
+      <div class="section-bar"><h2>Questions sent to staff (<%= submissions.length %>)</h2></div>
+      <% if (!submissions.length) { %>
+        <div class="box"><p class="muted">Nobody has written in.</p></div>
+      <% } else { %>
+        <% submissions.forEach(function(s){ %>
+          <div class="box" style="margin-bottom:12px;">
+            <div class="section-bar" style="margin:0 0 6px;">
+              <h2 style="font-size:14px;"><%= s.subject || 'Question' %></h2>
+              <span class="pill <%= s.status === 'answered' ? 'ok' : 'warn' %>"><%= s.status.replace(/_/g,' ') %></span>
+            </div>
+            <div class="wf-label">
+              from <%= s.userId ? s.userId.username : (s.guestEmail || 'guest') %> · <%= timeAgo(s.createdAt) %>
+            </div>
+            <p><%= s.question %></p>
+            <% if (s.answer && s.answer.body) { %>
+              <div style="padding:8px;background:#f6f6f6;border-left:3px solid #999;">
+                <strong>Answered</strong> <span class="wf-label"><%= timeAgo(s.answer.answeredAt) %></span>
+                <p style="margin:4px 0 0;"><%= s.answer.body %></p>
+              </div>
+            <% } else { %>
+              <form method="post" action="/faq/submissions/<%= s._id %>/answer">
+                <div class="form-row"><textarea name="body" rows="3" required placeholder="Your answer"></textarea></div>
+                <button class="btn small" type="submit">Send answer</button>
+              </form>
+            <% } %>
+          </div>
+        <% }) %>
+      <% } %>
+    </main>
+  </div>
+</div>
+<%- include('../partials/footer') %>

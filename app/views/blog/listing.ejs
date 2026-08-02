@@ -1,0 +1,68 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<div class="page-wrap">
+  <div class="box">
+    <div class="box-title">StudioTrade Blog</div>
+    <p class="muted">Buying guides, selling tips, equipment reviews and safety advice — written by staff and by the community.</p>
+    <div class="form-actions">
+      <a class="btn small secondary" href="/blog/search">Search articles</a>
+      <% if (currentUser) { %><a class="btn small" href="/blog/submit">Write an article</a><% } %>
+    </div>
+  </div>
+
+  <% if (featured.length) { %>
+    <div class="section-bar"><h2>Featured</h2></div>
+    <div class="card-grid cols-3">
+      <% featured.forEach(function(f){ %>
+        <div class="box">
+          <div class="box-title"><a href="/blog/<%= f.slug %>"><%= f.title %></a></div>
+          <p class="muted"><%= f.excerpt %></p>
+        </div>
+      <% }) %>
+    </div>
+  <% } %>
+
+  <div class="two-col" style="margin-top:20px;">
+    <aside class="box">
+      <div class="box-title">Categories</div>
+      <div class="stack">
+        <a class="btn small <%= !activeCategory ? '' : 'secondary' %>" href="/blog">All articles</a>
+        <% categories.forEach(function(c){ %>
+          <a class="btn small <%= String(activeCategory) === String(c._id) ? '' : 'secondary' %>" href="/blog?category=<%= c._id %>"><%= c.name %></a>
+        <% }) %>
+      </div>
+    </aside>
+
+    <main>
+      <div class="section-bar" style="margin-top:0;"><h2>Articles <span class="wf-label">(<%= total %>)</span></h2></div>
+      <% if (!posts.length) { %>
+        <%- include('../partials/empty', {
+          emptyTitle: 'No articles published yet',
+          emptyBody: 'The blog fills up as people write. Anything a member submits goes to staff for review before it appears here.',
+          emptyCta: currentUser ? { href: '/blog/submit', label: 'Write the first article' } : { href: '/register', label: 'Create an account' }
+        }) %>
+      <% } else { %>
+        <% posts.forEach(function(p){ %>
+          <div class="thread-item">
+            <% if (p.coverImageUrl) { %>
+              <div class="placeholder-img" style="height:140px;margin-bottom:8px;background-image:url('<%= p.coverImageUrl %>');background-size:cover;background-position:center;"></div>
+            <% } %>
+            <div class="thread-title"><a href="/blog/<%= p.slug %>"><%= p.title %></a></div>
+            <div class="thread-meta">
+              <%= p.categoryId ? p.categoryId.name : 'Uncategorised' %> ·
+              by <%= p.authorId ? p.authorId.username : 'unknown' %>
+              <% if (p.authorType === 'staff') { %><span class="pill neutral">Staff</span><% } %>
+              · <%= timeAgo(p.publishedAt) %> · <%= p.metadata.readTimeMinutes %> min read
+            </div>
+            <p class="muted"><%= p.excerpt %></p>
+            <div class="wf-label">
+              <%= p.metadata.views %> views · <%= p.metadata.likes %> likes · <%= p.metadata.commentCount %> comments
+            </div>
+          </div>
+        <% }) %>
+        <%- include('../partials/pagination') %>
+      <% } %>
+    </main>
+  </div>
+</div>
+<%- include('../partials/footer') %>

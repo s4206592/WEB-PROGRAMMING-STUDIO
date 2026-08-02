@@ -1,0 +1,53 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<div class="page-wrap">
+  <div class="section-bar" style="margin-top:0;"><h2>SEO integration</h2></div>
+
+  <div class="stat-grid">
+    <div class="stat"><div class="stat-value"><%= indexable %></div><div class="stat-label">Indexable pages</div></div>
+    <div class="stat"><div class="stat-value"><%= noIndex %></div><div class="stat-label">Marked noindex</div></div>
+    <div class="stat"><div class="stat-value"><%= dynamic %></div><div class="stat-label">Generated from content</div></div>
+    <div class="stat"><div class="stat-value"><%= inactive %></div><div class="stat-label">Deactivated</div></div>
+  </div>
+
+  <div class="box" style="margin-top:16px;">
+    <div class="box-title">How this works</div>
+    <p class="muted" style="font-size:13px;">
+      Static routes are upserted into <code>sitemap_entries</code> when the server boots.
+      Dynamic entries are written as content is published, and rebuilt whenever the sitemap
+      is viewed. Private areas — checkout, admin, orders, messages — are stored with
+      <code>noIndex</code> so they never reach <code>sitemap.xml</code>, and they are
+      disallowed in <code>robots.txt</code> as well.
+    </p>
+    <div class="form-actions">
+      <a class="btn small secondary" href="<%= baseUrl %>/sitemap.xml">View sitemap.xml</a>
+      <a class="btn small secondary" href="<%= baseUrl %>/robots.txt">View robots.txt</a>
+      <form method="post" action="/sitemap/regenerate">
+        <button class="btn small" type="submit">Rebuild now</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="box" style="margin-top:16px;">
+    <div class="box-title">Most recently updated indexable pages</div>
+    <% if (!latest.length) { %>
+      <p class="muted">Nothing indexable yet.</p>
+    <% } else { %>
+      <table class="wf-table">
+        <thead><tr><th>Page</th><th>Path</th><th>Change freq</th><th class="num">Priority</th><th>Last modified</th></tr></thead>
+        <tbody>
+        <% latest.forEach(function(e){ %>
+          <tr>
+            <td><a href="<%= e.path %>"><%= e.title %></a></td>
+            <td class="muted"><%= e.path %></td>
+            <td class="muted"><%= e.seo.changeFreq %></td>
+            <td class="num"><%= (e.seo.priority || 0).toFixed(1) %></td>
+            <td class="nowrap muted"><%= e.seo.lastmod ? new Date(e.seo.lastmod).toLocaleDateString('en-GB') : '—' %></td>
+          </tr>
+        <% }) %>
+        </tbody>
+      </table>
+    <% } %>
+  </div>
+</div>
+<%- include('../partials/footer') %>

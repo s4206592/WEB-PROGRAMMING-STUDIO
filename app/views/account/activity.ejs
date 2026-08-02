@@ -1,0 +1,27 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<div class="wide">
+  <div class="tabs">
+    <a href="/account/settings">Settings</a>
+    <a href="/account/profile">Profile</a>
+    <a class="active" href="/account/activity">Activity history</a>
+  </div>
+  <% if (!entries.length) { %>
+    <%- include('../partials/empty', { emptyTitle: 'No activity recorded', emptyBody: 'Sign-ins, listings, orders, reviews and posts are logged here as you use the site.', emptyCta: { href: '/products', label: 'Browse listings' } }) %>
+  <% } else { %>
+    <table class="wf-table">
+      <thead><tr><th>When</th><th>Action</th><th>Target</th></tr></thead>
+      <tbody>
+      <% entries.forEach(function(e){ %>
+        <tr>
+          <td class="nowrap"><%= new Date(e.createdAt).toLocaleString('en-GB') %></td>
+          <td><%= e.action.replace(/_/g,' ') %></td>
+          <td class="muted"><%= e.targetType || '—' %></td>
+        </tr>
+      <% }) %>
+      </tbody>
+    </table>
+    <%- include('../partials/pagination') %>
+  <% } %>
+</div>
+<%- include('../partials/footer') %>

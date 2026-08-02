@@ -1,0 +1,98 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<div class="page-wrap">
+  <% if (isPreview) { %>
+    <div class="wf-note">Preview — this article is <strong><%= post.status.replace(/_/g,' ') %></strong> and is not publicly visible.
+      <% if (post.review && post.review.feedback) { %><br>Reviewer feedback: <%= post.review.feedback %><% } %>
+    </div>
+  <% } %>
+
+  <div class="three-col">
+    <main>
+      <div class="box">
+        <% if (post.coverImageUrl) { %>
+          <div class="placeholder-img" style="height:260px;margin-bottom:14px;background-image:url('<%= post.coverImageUrl %>');background-size:cover;background-position:center;"></div>
+        <% } %>
+        <h1 style="font-size:24px;margin:0 0 8px;"><%= post.title %></h1>
+        <div class="wf-label">
+          <%= post.categoryId ? post.categoryId.name : 'Uncategorised' %> ·
+          by <%= post.authorId.username %>
+          <% if (post.authorType === 'staff') { %><span class="pill neutral">Staff</span><% } %>
+          · <%= post.publishedAt ? timeAgo(post.publishedAt) : 'unpublished' %>
+          · <%= post.metadata.readTimeMinutes %> min read
+        </div>
+        <hr class="rule">
+        <div style="font-size:15px;line-height:1.6;"><%- post.bodyHtml %></div>
+
+        <% if (post.tags && post.tags.length) { %>
+          <hr class="rule">
+          <% post.tags.forEach(function(t){ %><span class="tag"><%= t %></span> <% }) %>
+        <% } %>
+
+        <hr class="rule">
+        <div class="form-actions">
+          <form method="post" action="/blog/<%= post.slug %>/like">
+            <button class="btn small secondary" type="submit">♥ Like (<%= post.metadata.likes %>)</button>
+          </form>
+          <a class="btn small secondary" href="/blog/<%= post.slug %>/discussion">Discussion (<%= post.metadata.commentCount %>)</a>
+        </div>
+      </div>
+
+      <% if (post.linkedProducts && post.linkedProducts.length) { %>
+        <div class="section-bar"><h2>Gear mentioned in this article</h2></div>
+        <div class="card-grid cols-3">
+          <% post.linkedProducts.forEach(function(p){ %>
+            <div class="product-card">
+              <div class="card-title"><%= p.title %></div>
+              <div class="price"><%= formatVND(p.price) %></div>
+              <a class="btn small" href="/products/<%= p.slug %>">View</a>
+              <% if (currentUser) { %>
+                <form method="post" action="/wishlist/add/<%= p._id %>" style="margin-top:4px;">
+                  <input type="hidden" name="returnTo" value="/blog/<%= post.slug %>">
+                  <button class="btn small secondary" type="submit" style="width:100%;">♡ Save</button>
+                </form>
+              <% } %>
+            </div>
+          <% }) %>
+        </div>
+      <% } %>
+
+      <div class="box" style="margin-top:16px;">
+        <div class="box-title">Recent comments</div>
+        <% if (!comments.length) { %>
+          <p class="muted">No comments yet.</p>
+        <% } else { %>
+          <% comments.forEach(function(c){ %>
+            <div class="review-item">
+              <div class="review-head">
+                <strong><%= c.authorId ? c.authorId.username : 'Anonymous' %></strong>
+                <span class="wf-label"><%= timeAgo(c.createdAt) %></span>
+              </div>
+              <p><%= c.body %></p>
+            </div>
+          <% }) %>
+        <% } %>
+        <a class="btn small secondary" href="/blog/<%= post.slug %>/discussion">Open the discussion</a>
+      </div>
+    </main>
+
+    <aside>
+      <div class="box">
+        <div class="box-title">About the author</div>
+        <strong><a href="/account/u/<%= post.authorId.username %>"><%= post.authorId.username %></a></strong>
+        <% if (post.authorId.bio) { %><p class="muted"><%= post.authorId.bio %></p><% } %>
+      </div>
+      <% if (related.length) { %>
+        <div class="box" style="margin-top:16px;">
+          <div class="box-title">More in this category</div>
+          <% related.forEach(function(r){ %>
+            <div style="padding:6px 0;border-bottom:1px solid #eee;font-size:13px;">
+              <a href="/blog/<%= r.slug %>"><%= r.title %></a>
+            </div>
+          <% }) %>
+        </div>
+      <% } %>
+    </aside>
+  </div>
+</div>
+<%- include('../partials/footer') %>

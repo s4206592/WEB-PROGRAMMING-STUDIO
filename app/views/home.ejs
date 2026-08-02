@@ -1,0 +1,70 @@
+<%- include('partials/head') %>
+<%- include('partials/header') %>
+<div class="page-wrap">
+
+  <div class="box">
+    <div class="box-title">Buy and sell secondhand studio equipment</div>
+    <p class="muted">Lamps, softboxes, cameras and everything around them — listed by people in Vietnam, with negotiable pricing, a 15-day return window, and reviews tied to real purchases.</p>
+    <div class="form-actions">
+      <a class="btn" href="/products">Browse <%= listingCount %> listing<%= listingCount === 1 ? '' : 's' %></a>
+      <% if (currentUser) { %>
+        <a class="btn secondary" href="/sell/new">List an item</a>
+      <% } else { %>
+        <a class="btn secondary" href="/register">Create an account</a>
+      <% } %>
+    </div>
+  </div>
+
+  <div class="section-bar"><h2>Categories</h2><a class="wf-label" href="/products">See all →</a></div>
+  <div class="card-grid cols-3">
+    <% categories.forEach(function(c){ %>
+      <div class="box"><div class="box-title"><%= c.name %></div>
+        <a class="btn small secondary" href="/products?category=<%= c._id %>">Browse</a></div>
+    <% }) %>
+  </div>
+
+  <div class="section-bar"><h2>Newest listings</h2><a class="wf-label" href="/products?sort=newest">More →</a></div>
+  <% if (!latest.length) { %>
+    <%- include('partials/empty', { emptyTitle: 'No listings yet', emptyBody: 'Nothing has been posted for sale. Be the first — create an account and list an item.', emptyCta: currentUser ? { href: '/sell/new', label: 'List an item' } : { href: '/register', label: 'Create an account' } }) %>
+  <% } else { %>
+    <div class="card-grid">
+      <% latest.forEach(function(p){ %><%- include('partials/productcard', { p: p }) %><% }) %>
+    </div>
+  <% } %>
+
+  <div class="three-col" style="margin-top:24px;">
+    <div>
+      <div class="section-bar" style="margin-top:0;"><h2>From the blog</h2><a class="wf-label" href="/blog">All articles →</a></div>
+      <% if (!featuredPosts.length) { %>
+        <div class="box"><p class="muted">No articles published yet. Guides, selling tips and equipment reviews will appear here.</p>
+        <% if (currentUser) { %><a class="btn small secondary" href="/blog/submit">Write one</a><% } %></div>
+      <% } else { %>
+        <% featuredPosts.forEach(function(b){ %>
+          <div class="thread-item">
+            <div class="thread-title"><a href="/blog/<%= b.slug %>"><%= b.title %></a></div>
+            <div class="thread-meta">by <%= b.authorId ? b.authorId.username : 'unknown' %> · <%= timeAgo(b.publishedAt) %></div>
+            <p class="muted"><%= b.excerpt %></p>
+          </div>
+        <% }) %>
+      <% } %>
+    </div>
+    <aside>
+      <div class="section-bar" style="margin-top:0;"><h2>Forum</h2><a class="wf-label" href="/forum">Open →</a></div>
+      <div class="box">
+        <% if (!hotThreads.length) { %>
+          <p class="muted">No questions asked yet.</p>
+          <a class="btn small secondary" href="/forum/new">Ask the first one</a>
+        <% } else { %>
+          <% hotThreads.forEach(function(t){ %>
+            <div style="padding:6px 0;border-bottom:1px solid #eee;font-size:13px;">
+              <a href="/forum/<%= t.slug %>"><%= t.title %></a>
+              <div class="wf-label"><%= t.replyCount %> replies · <%= timeAgo(t.lastActivityAt) %></div>
+            </div>
+          <% }) %>
+        <% } %>
+      </div>
+    </aside>
+  </div>
+
+</div>
+<%- include('partials/footer') %>

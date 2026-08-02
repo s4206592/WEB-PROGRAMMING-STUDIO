@@ -1,0 +1,46 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<div class="page-wrap">
+  <div class="tabs">
+    <a class="<%= status === 'pending_review' ? 'active' : '' %>" href="/blog/review-dashboard?status=pending_review">Pending (<%= pendingCount %>)</a>
+    <a class="<%= status === 'published' ? 'active' : '' %>" href="/blog/review-dashboard?status=published">Published</a>
+    <a class="<%= status === 'rejected' ? 'active' : '' %>" href="/blog/review-dashboard?status=rejected">Rejected</a>
+  </div>
+
+  <% if (!posts.length) { %>
+    <%- include('../partials/empty', { emptyTitle: 'Queue is empty', emptyBody: 'Nothing is waiting on a decision in this state.', emptyCta: { href: '/blog', label: 'Back to the blog' } }) %>
+  <% } else { %>
+    <% posts.forEach(function(p){ %>
+      <div class="box" style="margin-bottom:16px;">
+        <div class="section-bar" style="margin:0 0 8px;">
+          <h2 style="font-size:15px;"><a href="/blog/<%= p.slug %>"><%= p.title %></a></h2>
+          <span class="pill neutral"><%= p.status.replace(/_/g,' ') %></span>
+        </div>
+        <div class="wf-label">
+          by <%= p.authorId ? p.authorId.username : 'unknown' %> ·
+          <%= p.categoryId ? p.categoryId.name : 'uncategorised' %> ·
+          submitted <%= timeAgo(p.createdAt) %> ·
+          <%= p.metadata.readTimeMinutes %> min read
+        </div>
+        <p class="muted"><%= p.excerpt %></p>
+
+        <% if (status === 'pending_review') { %>
+          <form method="post" action="/blog/review-dashboard/<%= p._id %>/decide">
+            <div class="form-row">
+              <label for="fb<%= p._id %>">Feedback for the author</label>
+              <textarea id="fb<%= p._id %>" name="feedback" rows="2" placeholder="What needs changing, or why this is good to go"></textarea>
+            </div>
+            <div class="form-actions">
+              <button class="btn" type="submit" name="decision" value="approve">Approve and publish</button>
+              <button class="btn secondary" type="submit" name="decision" value="request_changes">Send back for changes</button>
+              <button class="btn danger" type="submit" name="decision" value="reject">Reject</button>
+            </div>
+          </form>
+        <% } else if (p.review && p.review.feedback) { %>
+          <div class="muted">Feedback given: <%= p.review.feedback %></div>
+        <% } %>
+      </div>
+    <% }) %>
+  <% } %>
+</div>
+<%- include('../partials/footer') %>

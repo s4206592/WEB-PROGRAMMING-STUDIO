@@ -1,0 +1,103 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<div class="wide">
+  <div class="tabs">
+    <a class="active" href="/account/settings">Settings</a>
+    <a href="/account/profile">Profile</a>
+    <a href="/account/activity">Activity history</a>
+  </div>
+
+  <div class="box">
+    <div class="box-title">Contact details</div>
+    <form method="post" action="/account/settings/profile">
+      <div class="form-grid">
+        <div class="form-row"><label for="fullName">Full name</label>
+          <input id="fullName" type="text" name="fullName" value="<%= currentUser.fullName || '' %>"></div>
+        <div class="form-row"><label for="email">Email</label>
+          <input id="email" type="email" name="email" value="<%= currentUser.email %>">
+          <div class="hint"><%= currentUser.verification.emailVerified ? 'Verified' : 'Not verified' %></div></div>
+        <div class="form-row"><label for="phone">Phone</label>
+          <input id="phone" type="tel" name="phone" value="<%= currentUser.phone %>">
+          <div class="hint"><%= currentUser.verification.phoneVerified ? 'Verified' : 'Not verified' %></div></div>
+        <div class="form-row"><label for="avatarUrl">Avatar image URL</label>
+          <input id="avatarUrl" type="url" name="avatarUrl" value="<%= currentUser.avatarUrl || '' %>"></div>
+      </div>
+      <div class="form-row"><label for="bio">Bio</label>
+        <textarea id="bio" name="bio" maxlength="500"><%= currentUser.bio || '' %></textarea></div>
+      <div class="form-actions"><button class="btn" type="submit">Save changes</button></div>
+    </form>
+  </div>
+
+  <div class="box" style="margin-top:16px;">
+    <div class="box-title">Change password</div>
+    <form method="post" action="/account/settings/password">
+      <div class="form-row"><label for="currentPassword">Current password</label>
+        <input id="currentPassword" type="password" name="currentPassword" required autocomplete="current-password"></div>
+      <div class="form-grid">
+        <div class="form-row"><label for="newPassword">New password</label>
+          <input id="newPassword" type="password" name="newPassword" required minlength="8" autocomplete="new-password"></div>
+        <div class="form-row"><label for="confirmPassword">Confirm new password</label>
+          <input id="confirmPassword" type="password" name="confirmPassword" required minlength="8" autocomplete="new-password"></div>
+      </div>
+      <div class="form-actions"><button class="btn" type="submit">Change password</button></div>
+    </form>
+  </div>
+
+  <div class="box" style="margin-top:16px;">
+    <div class="box-title">Notification preferences</div>
+    <form method="post" action="/account/settings/notifications">
+      <div class="form-grid">
+        <% var prefs = [['inApp','In-app notifications'],['email','Email notifications'],['priceDrops','Wishlist price drops'],['savedSearch','Saved search matches'],['orderUpdates','Order and delivery updates'],['forumReplies','Forum replies and votes'],['blogStatus','Blog submission decisions'],['marketing','Marketing and offers']]; %>
+        <% prefs.forEach(function(p){ %>
+          <label style="font-size:13px;text-transform:none;letter-spacing:0;color:#222;">
+            <input type="checkbox" name="<%= p[0] %>" <%= currentUser.notificationPrefs[p[0]] ? 'checked' : '' %>> <%= p[1] %>
+          </label>
+        <% }) %>
+      </div>
+      <div class="form-actions"><button class="btn" type="submit">Save preferences</button></div>
+    </form>
+  </div>
+
+  <div class="box" style="margin-top:16px;">
+    <div class="box-title">Delivery addresses</div>
+    <% if (!currentUser.addresses.length) { %>
+      <p class="muted">No addresses saved. Add one here or during checkout.</p>
+    <% } else { %>
+      <% currentUser.addresses.forEach(function(a){ %>
+        <div class="row-item">
+          <div class="row-info">
+            <strong><%= a.label %></strong> <% if (a.isDefault) { %><span class="pill ok">Default</span><% } %>
+            <div class="muted"><%= a.recipient %> · <%= a.phone %></div>
+            <div class="muted"><%= [a.line1, a.ward, a.district, a.province].filter(Boolean).join(', ') %></div>
+          </div>
+          <div class="row-actions">
+            <form method="post" action="/account/addresses/<%= a._id %>/delete">
+              <button class="btn small danger" type="submit">Remove</button>
+            </form>
+          </div>
+        </div>
+      <% }) %>
+    <% } %>
+    <hr class="rule">
+    <form method="post" action="/account/addresses">
+      <div class="form-grid">
+        <div class="form-row"><label for="label">Label</label><input id="label" type="text" name="label" placeholder="Home" value="Home"></div>
+        <div class="form-row"><label for="recipient">Recipient</label><input id="recipient" type="text" name="recipient" required></div>
+        <div class="form-row"><label for="aphone">Phone</label><input id="aphone" type="tel" name="phone" required></div>
+        <div class="form-row"><label for="line1">Street address</label><input id="line1" type="text" name="line1" required></div>
+        <div class="form-row"><label for="ward">Ward</label><input id="ward" type="text" name="ward"></div>
+        <div class="form-row"><label for="district">District</label><input id="district" type="text" name="district"></div>
+        <div class="form-row"><label for="province">Province</label>
+          <select id="province" name="province" required>
+            <option value="">Choose…</option>
+            <% VN_PROVINCES.forEach(function(p){ %><option value="<%= p %>"><%= p %></option><% }) %>
+          </select></div>
+      </div>
+      <label style="font-size:13px;text-transform:none;letter-spacing:0;color:#222;">
+        <input type="checkbox" name="isDefault"> Use as my default address
+      </label>
+      <div class="form-actions"><button class="btn" type="submit">Add address</button></div>
+    </form>
+  </div>
+</div>
+<%- include('../partials/footer') %>

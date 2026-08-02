@@ -1,0 +1,9 @@
+<div class="product-card">
+  <div class="placeholder-img" <% if (primaryImage(p)) { %>style="background-image:url('<%= primaryImage(p) %>');background-size:cover;background-position:center;"<% } %>><%= primaryImage(p) ? '' : 'No image' %></div>
+  <span class="tag"><%= p.isSecondhand ? 'Secondhand' : 'New' %></span>
+  <% if (p.listingType === 'wanted') { %><span class="tag">Wanted</span><% } %>
+  <div class="card-title"><%= p.title %></div>
+  <div class="price"><%= formatVND(p.price) %></div>
+  <div class="stars"><%= stars(p.ratingSummary.average) %> (<%= p.ratingSummary.count %>)</div>
+  <a class="btn small" href="/products/<%= p.slug %>">View</a>
+</div>

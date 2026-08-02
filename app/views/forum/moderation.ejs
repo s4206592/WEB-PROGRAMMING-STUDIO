@@ -1,0 +1,65 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<div class="page-wrap">
+  <div class="section-bar" style="margin-top:0;">
+    <h2>Moderation Dashboard</h2>
+    <a class="wf-label" href="/forum">Back to the forum →</a>
+  </div>
+
+  <div class="box">
+    <div class="box-title">Pending reports (<%= reports.length %>)</div>
+    <% if (!reports.length) { %>
+      <p class="muted">Nothing has been reported. This queue fills when members flag a post, reply, listing or review.</p>
+    <% } else { %>
+      <% reports.forEach(function(r){ %>
+        <div class="review-item">
+          <div class="review-head">
+            <strong><%= r.targetType.replace(/_/g,' ') %></strong>
+            <span class="wf-label">reported by <%= r.reporterId ? r.reporterId.username : 'unknown' %> · <%= timeAgo(r.createdAt) %></span>
+          </div>
+          <span class="pill warn"><%= r.reason %></span>
+          <% if (r.details) { %><p><%= r.details %></p><% } %>
+          <form method="post" action="/forum/moderation/<%= r._id %>/resolve">
+            <div class="form-row inline">
+              <div style="flex:1;">
+                <select name="action">
+                  <option value="none">Dismiss — nothing wrong</option>
+                  <option value="content_hidden">Hide the content</option>
+                  <option value="content_removed">Remove the content</option>
+                  <option value="user_warned">Warn the author</option>
+                </select>
+              </div>
+              <div style="flex:2;"><input type="text" name="note" placeholder="Note for the record"></div>
+              <button class="btn small" type="submit">Resolve</button>
+            </div>
+          </form>
+        </div>
+      <% }) %>
+    <% } %>
+  </div>
+
+  <div class="box" style="margin-top:16px;">
+    <div class="box-title">Flagged questions (<%= flaggedPosts.length %>)</div>
+    <% if (!flaggedPosts.length) { %><p class="muted">None.</p><% } %>
+    <% flaggedPosts.forEach(function(p){ %>
+      <div style="padding:6px 0;border-bottom:1px solid #eee;font-size:13px;">
+        <a href="/forum/<%= p.slug %>"><%= p.title %></a>
+        <span class="pill bad"><%= p.moderation.reportCount %> report(s)</span>
+        <span class="wf-label">by <%= p.authorId ? p.authorId.username : '—' %></span>
+      </div>
+    <% }) %>
+  </div>
+
+  <div class="box" style="margin-top:16px;">
+    <div class="box-title">Flagged replies (<%= flaggedReplies.length %>)</div>
+    <% if (!flaggedReplies.length) { %><p class="muted">None.</p><% } %>
+    <% flaggedReplies.forEach(function(r){ %>
+      <div style="padding:6px 0;border-bottom:1px solid #eee;font-size:13px;">
+        <a href="/forum/<%= r.postId ? r.postId.slug : '' %>"><%= r.postId ? r.postId.title : 'Deleted thread' %></a>
+        <span class="pill bad"><%= r.reportCount %> report(s)</span>
+        <span class="wf-label">by <%= r.authorId ? r.authorId.username : '—' %></span>
+      </div>
+    <% }) %>
+  </div>
+</div>
+<%- include('../partials/footer') %>

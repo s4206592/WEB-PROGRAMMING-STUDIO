@@ -1,0 +1,276 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<div class="page-wrap">
+
+  <% if (product.status !== 'active') { %>
+    <div class="wf-note">This listing is <strong><%= product.status.replace(/_/g,' ') %></strong>.
+      <% if (product.status === 'reserved') { %> An accepted offer is holding it for another buyer.<% } %>
+    </div>
+  <% } %>
+
+  <div class="three-col">
+    <main>
+      <div class="box">
+        <div class="gallery-main placeholder-img" <% if (primaryImage(product)) { %>style="background-image:url('<%= primaryImage(product) %>');background-size:contain;background-repeat:no-repeat;background-position:center;"<% } %>><%= primaryImage(product) ? '' : 'No image' %></div>
+        <% if (product.media && product.media.length > 1) { %>
+          <div class="gallery-thumbs">
+            <% product.media.forEach(function(m){ %>
+              <div class="placeholder-img" style="background-image:url('<%= m.url %>');background-size:cover;background-position:center;"></div>
+            <% }) %>
+          </div>
+        <% } %>
+      </div>
+
+      <div class="box" style="margin-top:16px;">
+        <div class="box-title">Description</div>
+        <p style="white-space:pre-wrap;font-size:14px;"><%= product.description || 'The seller did not add a description.' %></p>
+        <hr class="rule">
+        <dl class="kv">
+          <dt>Condition</dt><dd><%= CONDITION_LABELS[product.condition] || product.condition %></dd>
+          <% if (product.brand) { %><dt>Brand</dt><dd><%= product.brand %></dd><% } %>
+          <% if (product.model) { %><dt>Model</dt><dd><%= product.model %></dd><% } %>
+          <% if (product.yearMade) { %><dt>Year</dt><dd><%= product.yearMade %></dd><% } %>
+          <dt>Quantity available</dt><dd><%= availableQty(product) %></dd>
+          <% if (product.location && product.location.province) { %>
+            <dt>Location</dt><dd><%= [product.location.district, product.location.province].filter(Boolean).join(', ') %></dd>
+          <% } %>
+          <dt>Shipping</dt><dd><%= (product.shipping.methods || []).join(', ') %> · <%= product.shipping.feeFlat ? formatVND(product.shipping.feeFlat) : 'free' %> · ships in <%= product.shipping.handlingDays %> day(s)</dd>
+        </dl>
+        <% if (product.bulkPricing && product.bulkPricing.length) { %>
+          <hr class="rule">
+          <p class="wf-label">Bulk pricing</p>
+          <table class="wf-table">
+            <thead><tr><th>Buy at least</th><th class="num">Unit price</th></tr></thead>
+            <tbody>
+            <% product.bulkPricing.forEach(function(t){ %>
+              <tr><td><%= t.minQty %></td><td class="num"><%= formatVND(t.unitPrice) %></td></tr>
+            <% }) %>
+            </tbody>
+          </table>
+        <% } %>
+      </div>
+
+      <div class="box" style="margin-top:16px;" id="reviews">
+        <div class="section-bar" style="margin:0 0 12px;">
+          <h2>Reviews <span class="wf-label">(<%= product.ratingSummary.count %>)</span></h2>
+          <form method="get" style="display:flex;gap:6px;">
+            <select name="reviewSort" onchange="this.form.submit()">
+              <option value="newest" <%= reviewSort === 'newest' ? 'selected' : '' %>>Newest</option>
+              <option value="highest" <%= reviewSort === 'highest' ? 'selected' : '' %>>Highest rating</option>
+              <option value="lowest" <%= reviewSort === 'lowest' ? 'selected' : '' %>>Lowest rating</option>
+              <option value="helpful" <%= reviewSort === 'helpful' ? 'selected' : '' %>>Most helpful</option>
+            </select>
+          </form>
+        </div>
+
+        <% if (!product.ratingSummary.count) { %>
+          <p class="muted">No reviews yet. Reviews can only be written by someone who bought this item and confirmed they received it.</p>
+        <% } else { %>
+          <div style="display:flex;gap:20px;flex-wrap:wrap;align-items:center;">
+            <div>
+              <div style="font-size:32px;font-weight:bold;"><%= product.ratingSummary.average.toFixed(1) %></div>
+              <div class="stars"><%= stars(product.ratingSummary.average) %></div>
+              <div class="wf-label"><%= product.ratingSummary.count %> verified purchase<%= product.ratingSummary.count === 1 ? '' : 's' %></div>
+            </div>
+            <div style="flex:1;min-width:200px;">
+              <% [5,4,3,2,1].forEach(function(n){ %>
+                <% var c = product.ratingSummary.distribution[n] || 0;
+                   var pct = product.ratingSummary.count ? Math.round(c / product.ratingSummary.count * 100) : 0; %>
+                <div style="display:flex;gap:8px;align-items:center;font-size:12px;">
+                  <span><%= n %>★</span>
+                  <span style="flex:1;height:8px;border:1px solid #ccc;background:#fff;">
+                    <span style="display:block;height:100%;width:<%= pct %>%;background:#222;"></span>
+                  </span>
+                  <span class="muted"><%= c %></span>
+                </div>
+              <% }) %>
+            </div>
+          </div>
+          <hr class="rule">
+
+          <% reviews.forEach(function(r){ %>
+            <div class="review-item">
+              <div class="review-head">
+                <div>
+                  <strong><%= r.reviewerId ? r.reviewerId.username : 'Anonymous' %></strong>
+                  <% if (r.isVerifiedPurchase) { %><span class="pill ok">Verified purchase</span><% } %>
+                </div>
+                <span class="stars"><%= stars(r.rating) %> <span class="wf-label"><%= timeAgo(r.createdAt) %></span></span>
+              </div>
+              <% if (r.title) { %><div style="font-weight:bold;margin-top:4px;"><%= r.title %></div><% } %>
+              <p><%= r.comment %></p>
+              <% if (r.media && r.media.length) { %>
+                <div class="review-media">
+                  <% r.media.forEach(function(m){ %>
+                    <% if (m.type === 'video') { %>
+                      <a class="btn small secondary" href="<%= m.url %>" target="_blank" rel="noopener">Video</a>
+                    <% } else { %>
+                      <img src="<%= m.url %>" alt="Review photo">
+                    <% } %>
+                  <% }) %>
+                </div>
+              <% } %>
+              <% if (r.sellerReply && r.sellerReply.body) { %>
+                <div style="margin-top:8px;padding:8px;background:#f6f6f6;border-left:3px solid #999;font-size:13px;">
+                  <strong>Seller replied</strong> <span class="wf-label"><%= timeAgo(r.sellerReply.repliedAt) %></span>
+                  <p style="margin:4px 0 0;"><%= r.sellerReply.body %></p>
+                </div>
+              <% } %>
+              <% if (currentUser) { %>
+                <div style="display:flex;gap:8px;margin-top:8px;align-items:center;">
+                  <form method="post" action="/reviews/<%= r._id %>/vote">
+                    <input type="hidden" name="value" value="up">
+                    <button class="btn small secondary" type="submit">Helpful (<%= r.helpfulCount %>)<%= myVotes[String(r._id)] === 1 ? ' ✓' : '' %></button>
+                  </form>
+                  <form method="post" action="/reviews/<%= r._id %>/vote">
+                    <input type="hidden" name="value" value="down">
+                    <button class="btn small secondary" type="submit">Not helpful (<%= r.notHelpfulCount %>)<%= myVotes[String(r._id)] === -1 ? ' ✓' : '' %></button>
+                  </form>
+                  <form method="post" action="/reviews/<%= r._id %>/report">
+                    <input type="hidden" name="reason" value="offensive">
+                    <button class="linkbtn" type="submit">Report</button>
+                  </form>
+                </div>
+              <% } %>
+              <% if (isOwner && !(r.sellerReply && r.sellerReply.body)) { %>
+                <form method="post" action="/reviews/<%= r._id %>/reply" style="margin-top:8px;">
+                  <div class="form-row"><textarea name="body" rows="2" placeholder="Reply as the seller…" required></textarea></div>
+                  <button class="btn small" type="submit">Post reply</button>
+                </form>
+              <% } %>
+            </div>
+          <% }) %>
+        <% } %>
+      </div>
+    </main>
+
+    <aside>
+      <div class="box">
+        <h1 style="font-size:18px;margin:0 0 8px;"><%= product.title %></h1>
+        <span class="tag"><%= product.isSecondhand ? 'Secondhand' : 'New' %></span>
+        <span class="tag"><%= CONDITION_LABELS[product.condition] %></span>
+        <% if (product.listingType === 'wanted') { %><span class="tag">Wanted</span><% } %>
+
+        <div class="price" style="font-size:24px;margin:10px 0;"><%= formatVND(product.price) %></div>
+        <% if (product.originalPrice && product.originalPrice > product.price) { %>
+          <div class="muted"><s><%= formatVND(product.originalPrice) %></s></div>
+        <% } %>
+        <div class="stars"><%= stars(product.ratingSummary.average) %> (<%= product.ratingSummary.count %>)</div>
+        <div class="wf-label" style="margin-top:6px;"><%= product.stats.views %> views · <%= product.stats.wishlisted %> saved</div>
+
+        <% if (product.isNegotiable && offerCount > 0) { %>
+          <div class="wf-note" style="margin-top:10px;color:#333;border-color:#999;background:#f9f9f9;">
+            <%= offerCount %> open offer<%= offerCount === 1 ? '' : 's' %><% if (offerHighest) { %>, highest <%= formatVND(offerHighest) %><% } %>
+          </div>
+        <% } %>
+
+        <hr class="rule">
+
+        <% if (isOwner) { %>
+          <p class="muted">This is your listing.</p>
+          <div class="stack">
+            <a class="btn secondary" href="/sell/<%= product._id %>/edit">Edit listing</a>
+            <a class="btn secondary" href="/offers?tab=received">Offers received</a>
+          </div>
+        <% } else if (!currentUser) { %>
+          <p class="muted">Sign in to buy, make an offer, or message the seller.</p>
+          <a class="btn" href="/login">Sign in</a>
+        <% } else if (availableQty(product) < 1 || product.status === 'sold') { %>
+          <p class="muted">This item is sold.</p>
+          <a class="btn secondary" href="/products/<%= product.slug %>/similar">See similar listings</a>
+        <% } else { %>
+          <form method="post" action="/cart/add/<%= product._id %>">
+            <input type="hidden" name="returnTo" value="/cart">
+            <div class="form-row inline">
+              <div style="width:90px;">
+                <label for="qty">Qty</label>
+                <input id="qty" type="number" name="quantity" value="1" min="1" max="<%= availableQty(product) %>">
+              </div>
+              <button class="btn" type="submit" style="flex:1;">Add to cart</button>
+            </div>
+          </form>
+
+          <form method="post" action="/wishlist/add/<%= product._id %>" style="margin-top:8px;">
+            <input type="hidden" name="returnTo" value="/products/<%= product.slug %>">
+            <button class="btn secondary" type="submit" style="width:100%;" <%= inWishlist ? 'disabled' : '' %>>
+              <%= inWishlist ? '♥ On your wishlist' : '♡ Save to wishlist' %>
+            </button>
+          </form>
+
+          <form method="post" action="/messages/start/product/<%= product._id %>" style="margin-top:8px;">
+            <button class="btn secondary" type="submit" style="width:100%;">Chat with seller</button>
+          </form>
+
+          <% if (product.isNegotiable) { %>
+            <hr class="rule">
+            <div class="box-title">Make an offer</div>
+            <% if (myOffer) { %>
+              <p class="muted">You have an open offer on this listing (<%= myOffer.status %>).</p>
+              <a class="btn small" href="/offers/<%= myOffer._id %>">Open the negotiation</a>
+            <% } else { %>
+              <form method="post" action="/offers/product/<%= product._id %>">
+                <div class="form-row">
+                  <label for="cash">Your offer (₫)</label>
+                  <input id="cash" type="text" name="cash" placeholder="<%= product.price %>" required>
+                </div>
+                <div class="form-row">
+                  <label for="oqty">Quantity</label>
+                  <input id="oqty" type="number" name="quantity" value="1" min="1" max="<%= availableQty(product) %>">
+                </div>
+                <div class="form-row">
+                  <label for="omsg">Message to the seller</label>
+                  <textarea id="omsg" name="message" rows="2" maxlength="500" placeholder="Optional — why this price?"></textarea>
+                </div>
+                <button class="btn" type="submit" style="width:100%;">Send offer</button>
+                <div class="hint">The seller can accept, counter or decline. Accepting reserves the item for you for 48 hours.</div>
+              </form>
+            <% } %>
+          <% } else { %>
+            <p class="muted" style="margin-top:10px;">The seller has set a fixed price on this listing.</p>
+          <% } %>
+        <% } %>
+      </div>
+
+      <div class="box" style="margin-top:16px;">
+        <div class="box-title">Seller</div>
+        <strong><a href="/account/u/<%= seller.username %>"><%= seller.username %></a></strong>
+        <% if (seller.sellerProfile && seller.sellerProfile.ratingCount) { %>
+          <div class="stars"><%= stars(seller.sellerProfile.rating) %> (<%= seller.sellerProfile.ratingCount %>)</div>
+        <% } else { %>
+          <div class="muted">No seller reviews yet</div>
+        <% } %>
+        <div class="wf-label">Member since <%= new Date(seller.createdAt).toLocaleDateString('en-GB') %></div>
+        <% if (seller.sellerProfile && seller.sellerProfile.totalSales) { %>
+          <div class="wf-label"><%= seller.sellerProfile.totalSales %> completed sale(s)</div>
+        <% } %>
+      </div>
+
+      <div class="box" style="margin-top:16px;">
+        <div class="box-title">Related</div>
+        <div class="stack">
+          <a class="btn small secondary" href="/products/<%= product.slug %>/similar">Similar listings</a>
+          <% if (product.categoryId) { %>
+            <a class="btn small secondary" href="/products?category=<%= product.categoryId._id || product.categoryId %>">More in <%= product.categoryId.name || 'this category' %></a>
+          <% } %>
+        </div>
+        <% if (currentUser && !isOwner) { %>
+          <hr class="rule">
+          <form method="post" action="/products/<%= product._id %>/report">
+            <div class="form-row">
+              <label for="reportReason">Report this listing</label>
+              <select id="reportReason" name="reason">
+                <option value="scam">Looks like a scam</option>
+                <option value="counterfeit">Counterfeit item</option>
+                <option value="spam">Spam</option>
+                <option value="illegal">Illegal item</option>
+                <option value="other">Something else</option>
+              </select>
+            </div>
+            <button class="btn small secondary" type="submit">Submit report</button>
+          </form>
+        <% } %>
+      </div>
+    </aside>
+  </div>
+</div>
+<%- include('../partials/footer') %>

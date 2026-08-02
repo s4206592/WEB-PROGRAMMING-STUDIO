@@ -1,0 +1,102 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<div class="page-wrap">
+  <div class="section-bar" style="margin-top:0;"><h2>Analytics Dashboard</h2><span class="wf-label">Live figures</span></div>
+
+  <div class="stat-grid">
+    <div class="stat"><div class="stat-value"><%= totalUsers %></div><div class="stat-label">Users</div></div>
+    <div class="stat"><div class="stat-value"><%= newUsers %></div><div class="stat-label">New (30 days)</div></div>
+    <div class="stat"><div class="stat-value"><%= activeListings %></div><div class="stat-label">Active listings</div></div>
+    <div class="stat"><div class="stat-value"><%= soldListings %></div><div class="stat-label">Sold listings</div></div>
+    <div class="stat"><div class="stat-value"><%= orderCount %></div><div class="stat-label">Orders</div></div>
+    <div class="stat"><div class="stat-value" style="font-size:18px;"><%= formatVND(gmv) %></div><div class="stat-label">GMV (completed)</div></div>
+    <div class="stat"><div class="stat-value"><%= reviewCount %></div><div class="stat-label">Reviews</div></div>
+    <div class="stat"><div class="stat-value"><%= avgRating || '—' %></div><div class="stat-label">Average rating</div></div>
+    <div class="stat"><div class="stat-value"><%= forumCount %></div><div class="stat-label">Forum threads</div></div>
+    <div class="stat"><div class="stat-value"><%= blogCount %></div><div class="stat-label">Blog articles</div></div>
+  </div>
+
+  <div class="three-col" style="margin-top:20px;">
+    <main>
+      <div class="box">
+        <div class="box-title">Orders by status</div>
+        <% var statuses = Object.keys(ordersByStatus); %>
+        <% if (!statuses.length) { %>
+          <p class="muted">No orders yet.</p>
+        <% } else { %>
+          <table class="wf-table">
+            <thead><tr><th>Status</th><th class="num">Count</th><th>Share</th></tr></thead>
+            <tbody>
+            <% statuses.forEach(function(s){ %>
+              <% var pct = orderCount ? Math.round(ordersByStatus[s] / orderCount * 100) : 0; %>
+              <tr>
+                <td><%= s.replace(/_/g,' ') %></td>
+                <td class="num"><%= ordersByStatus[s] %></td>
+                <td><span style="display:inline-block;height:8px;width:<%= pct %>%;min-width:2px;background:#222;"></span> <span class="muted"><%= pct %>%</span></td>
+              </tr>
+            <% }) %>
+            </tbody>
+          </table>
+        <% } %>
+      </div>
+
+      <div class="box" style="margin-top:16px;">
+        <div class="box-title">Best-selling listings</div>
+        <% if (!topSellers.length) { %>
+          <p class="muted">Nothing has sold yet.</p>
+        <% } else { %>
+          <table class="wf-table">
+            <thead><tr><th>Listing</th><th class="num">Orders</th><th class="num">Revenue</th></tr></thead>
+            <tbody>
+            <% topSellers.forEach(function(t){ %>
+              <tr><td><%= t.title %></td><td class="num"><%= t.orders %></td><td class="num"><%= formatVND(t.gmv) %></td></tr>
+            <% }) %>
+            </tbody>
+          </table>
+        <% } %>
+      </div>
+
+      <div class="box" style="margin-top:16px;">
+        <div class="box-title">Sign-ups, last 30 days</div>
+        <% if (!dailySignups.length) { %>
+          <p class="muted">No sign-ups in the last 30 days.</p>
+        <% } else { %>
+          <% var maxN = Math.max.apply(null, dailySignups.map(function(d){ return d.n; })); %>
+          <div style="display:flex;gap:3px;align-items:flex-end;height:120px;">
+            <% dailySignups.forEach(function(d){ %>
+              <div title="<%= d._id %>: <%= d.n %>" style="flex:1;background:#222;height:<%= Math.round(d.n / maxN * 100) %>%;min-height:2px;"></div>
+            <% }) %>
+          </div>
+          <div class="wf-label" style="margin-top:6px;">
+            <%= dailySignups[0]._id %> → <%= dailySignups[dailySignups.length - 1]._id %> · peak <%= maxN %>/day
+          </div>
+        <% } %>
+      </div>
+    </main>
+
+    <aside>
+      <div class="box">
+        <div class="box-title">Offers</div>
+        <% var oStatuses = Object.keys(offersByStatus); %>
+        <% if (!oStatuses.length) { %>
+          <p class="muted">No offers made yet.</p>
+        <% } else { %>
+          <dl class="kv">
+            <% oStatuses.forEach(function(s){ %>
+              <dt><%= s.replace(/_/g,' ') %></dt><dd><%= offersByStatus[s] %></dd>
+            <% }) %>
+          </dl>
+        <% } %>
+      </div>
+      <div class="box" style="margin-top:16px;">
+        <div class="box-title">Notes</div>
+        <p class="muted" style="font-size:12px;">
+          These figures are computed live from the collections on each page load.
+          A production build would pre-aggregate them into <code>analytics_daily</code>
+          overnight so the dashboard never scans raw data.
+        </p>
+      </div>
+    </aside>
+  </div>
+</div>
+<%- include('../partials/footer') %>

@@ -1,0 +1,506 @@
+/* ================================================
+   WIREFRAME STYLESHEET — StudioTrade Marketplace
+   Intentionally low-fidelity: grayscale, boxes, labels.
+   Purpose: layout/structure only, not visual design.
+   ================================================ */
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: "Helvetica Neue", Arial, sans-serif;
+  margin: 0;
+  background: #e9e9e9;
+  color: #222;
+}
+
+.wf-label {
+  font-size: 10px;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: #888;
+}
+
+/* ---- Top bar ---- */
+header.topbar {
+  background: #fff;
+  border-bottom: 2px solid #222;
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+header.topbar .logo {
+  font-weight: bold;
+  font-size: 20px;
+  border: 2px solid #222;
+  padding: 4px 10px;
+}
+header.topbar nav {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+header.topbar nav a {
+  border: 1px solid #999;
+  padding: 6px 10px;
+  font-size: 13px;
+  text-decoration: none;
+  color: #333;
+  background: #f4f4f4;
+}
+header.topbar nav a.current {
+  background: #222;
+  color: #fff;
+  border-color: #222;
+}
+header.topbar .search-box {
+  border: 1px solid #999;
+  background: #fff;
+  padding: 6px 10px;
+  font-size: 13px;
+  color: #888;
+  min-width: 180px;
+}
+header.topbar .user-icons {
+  display: flex;
+  gap: 8px;
+}
+header.topbar .icon-box {
+  width: 34px;
+  height: 34px;
+  border: 1px solid #999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  background: #f4f4f4;
+  position: relative;
+}
+header.topbar .badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: #222;
+  color: #fff;
+  font-size: 9px;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ---- Breadcrumb ---- */
+.breadcrumb {
+  padding: 8px 24px;
+  font-size: 12px;
+  color: #777;
+  background: #ddd;
+  border-bottom: 1px solid #ccc;
+}
+
+/* ---- Layout ---- */
+.page-wrap {
+  max-width: 1200px;
+  margin: 20px auto;
+  padding: 0 20px;
+}
+.two-col {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 20px;
+}
+.three-col {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 20px;
+}
+
+/* ---- Generic boxes ---- */
+.box {
+  border: 1px solid #999;
+  background: #fff;
+  padding: 14px;
+}
+.box-title {
+  font-weight: bold;
+  font-size: 14px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 6px;
+}
+.placeholder-img {
+  background: repeating-linear-gradient(45deg, #ddd, #ddd 8px, #eee 8px, #eee 16px);
+  border: 1px solid #999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #888;
+  font-size: 11px;
+}
+.btn {
+  display: inline-block;
+  border: 1px solid #222;
+  background: #222;
+  color: #fff;
+  padding: 8px 14px;
+  font-size: 13px;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+}
+.btn.secondary {
+  background: #fff;
+  color: #222;
+}
+.btn.small { padding: 4px 10px; font-size: 11px; }
+
+/* ---- Grid of cards (Product Listing) ---- */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+@media (max-width: 900px) {
+  .card-grid { grid-template-columns: repeat(2, 1fr); }
+  .two-col, .three-col { grid-template-columns: 1fr; }
+}
+.product-card {
+  border: 1px solid #999;
+  background: #fff;
+  padding: 10px;
+  font-size: 12px;
+}
+.product-card .placeholder-img { height: 120px; margin-bottom: 8px; width: 100%; }
+.product-card .tag {
+  display: inline-block;
+  font-size: 10px;
+  border: 1px solid #666;
+  padding: 1px 6px;
+  margin-bottom: 4px;
+}
+.product-card .price { font-weight: bold; margin: 4px 0; }
+.stars { color: #444; font-size: 12px; letter-spacing: 1px; }
+
+/* ---- Filters sidebar ---- */
+.filter-group { margin-bottom: 16px; }
+.filter-group .box-title { font-size: 12px; }
+.filter-group label {
+  display: block;
+  font-size: 12px;
+  margin: 4px 0;
+  color: #444;
+}
+
+/* ---- Table (cart / notifications) ---- */
+table.wf-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+table.wf-table th, table.wf-table td {
+  border: 1px solid #ccc;
+  padding: 8px 10px;
+  text-align: left;
+}
+table.wf-table th {
+  background: #eee;
+}
+
+/* ---- Rows / list items ---- */
+.row-item {
+  display: flex;
+  gap: 12px;
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin-bottom: 10px;
+  background: #fff;
+  align-items: center;
+}
+.row-item .placeholder-img { width: 70px; height: 70px; flex-shrink: 0; }
+.row-item .row-info { flex: 1; }
+.row-item .row-actions { display: flex; flex-direction: column; gap: 6px; }
+
+/* ---- Notification list ---- */
+.notif-item {
+  display: flex;
+  gap: 10px;
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+  font-size: 13px;
+  align-items: flex-start;
+}
+.notif-item .dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #222; margin-top: 5px; flex-shrink: 0;
+}
+.notif-item.read .dot { background: #ccc; }
+.notif-item .time { color: #999; font-size: 11px; }
+
+/* ---- Section title bars ---- */
+.section-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 24px 0 12px;
+}
+.section-bar h2 {
+  font-size: 16px;
+  margin: 0;
+  border-left: 4px solid #222;
+  padding-left: 8px;
+}
+
+/* ---- Footer ---- */
+footer.sitefooter {
+  border-top: 2px solid #222;
+  margin-top: 40px;
+  padding: 20px 24px;
+  font-size: 12px;
+  color: #666;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  background: #fff;
+}
+
+/* ---- Star rating widget ---- */
+.rate-select span {
+  font-size: 22px;
+  margin-right: 4px;
+  color: #bbb;
+}
+.rate-select span.filled { color: #222; }
+
+/* ---- Tabs ---- */
+.tabs {
+  display: flex;
+  border-bottom: 2px solid #222;
+  margin-bottom: 16px;
+}
+.tabs a {
+  padding: 8px 16px;
+  font-size: 13px;
+  text-decoration: none;
+  color: #555;
+  border: 1px solid transparent;
+}
+.tabs a.active {
+  border: 1px solid #222;
+  border-bottom: 2px solid #fff;
+  margin-bottom: -2px;
+  background: #fff;
+  color: #222;
+  font-weight: bold;
+}
+
+/* wireframe annotation callouts */
+.wf-note {
+  font-size: 11px;
+  color: #a33;
+  border: 1px dashed #a33;
+  padding: 6px 8px;
+  margin-bottom: 10px;
+  background: #fff5f5;
+}
+
+/* ================================================
+   APPLICATION ADDITIONS
+   Everything above is the original wireframe sheet.
+   Below: only what a live app needs that a static
+   wireframe did not — forms, flash messages, empty
+   states, and a few layout fixes. Visual design is
+   deliberately left alone.
+   ================================================ */
+
+a { color: #222; }
+header.topbar .logo { text-decoration: none; color: #222; }
+header.topbar .topsearch { margin: 0; }
+header.topbar .search-box { color: #222; }
+
+/* ---- Flash messages ---- */
+.flash {
+  padding: 10px 24px;
+  font-size: 13px;
+  border-bottom: 1px solid #ccc;
+}
+.flash.success { background: #eef7ee; border-left: 4px solid #2c7a2c; color: #204d20; }
+.flash.error   { background: #fdeeee; border-left: 4px solid #a33; color: #7a1f1f; }
+
+/* ---- Forms ---- */
+.form-row { margin-bottom: 14px; }
+.form-row label,
+.field-label {
+  display: block;
+  font-size: 11px;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: #666;
+  margin-bottom: 4px;
+}
+.form-row input[type=text],
+.form-row input[type=email],
+.form-row input[type=password],
+.form-row input[type=tel],
+.form-row input[type=url],
+.form-row input[type=number],
+.form-row input[type=search],
+.form-row input[type=date],
+.form-row input[type=datetime-local],
+.form-row select,
+.form-row textarea {
+  width: 100%;
+  border: 1px solid #999;
+  background: #fff;
+  padding: 8px 10px;
+  font-size: 14px;
+  font-family: inherit;
+  color: #222;
+}
+.form-row textarea { min-height: 120px; resize: vertical; }
+.form-row .hint { font-size: 11px; color: #888; margin-top: 4px; }
+.form-row.inline { display: flex; gap: 10px; align-items: flex-end; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; }
+@media (max-width: 700px) { .form-grid { grid-template-columns: 1fr; } }
+.form-actions { display: flex; gap: 10px; align-items: center; margin-top: 16px; flex-wrap: wrap; }
+
+button.btn { font-family: inherit; }
+.btn:disabled, .btn.disabled { opacity: .45; cursor: not-allowed; }
+.btn.danger { background: #a33; border-color: #a33; }
+.linkbtn {
+  background: none; border: none; padding: 0;
+  font: inherit; color: #666; cursor: pointer; text-decoration: underline;
+}
+
+/* ---- Auth / narrow pages ---- */
+.narrow { max-width: 520px; margin: 30px auto; padding: 0 20px; }
+.wide   { max-width: 880px; margin: 30px auto; padding: 0 20px; }
+
+/* ---- Empty states ---- */
+.empty-state {
+  border: 1px dashed #999;
+  background: #fff;
+  padding: 40px 24px;
+  text-align: center;
+  color: #666;
+}
+.empty-state .empty-title { font-weight: bold; font-size: 15px; color: #222; margin-bottom: 6px; }
+.empty-state p { font-size: 13px; margin: 0 0 16px; }
+
+/* ---- Cards ---- */
+.product-card .card-title { font-weight: bold; margin: 4px 0; line-height: 1.3; }
+.product-card .placeholder-img { font-size: 11px; }
+.card-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+.card-grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
+
+/* ---- Status pills ---- */
+.pill {
+  display: inline-block;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  border: 1px solid #666;
+  padding: 2px 7px;
+  background: #f4f4f4;
+}
+.pill.ok      { border-color: #2c7a2c; color: #2c7a2c; }
+.pill.warn    { border-color: #b58100; color: #8a6200; }
+.pill.bad     { border-color: #a33; color: #a33; }
+.pill.neutral { border-color: #999; color: #666; }
+
+/* ---- Milestone tracker (Product Delivery Progress) ---- */
+.milestones { list-style: none; padding: 0; margin: 0; }
+.milestones li {
+  border-left: 2px solid #ccc;
+  padding: 0 0 18px 18px;
+  position: relative;
+  font-size: 13px;
+}
+.milestones li:last-child { padding-bottom: 0; }
+.milestones li::before {
+  content: '';
+  position: absolute; left: -6px; top: 3px;
+  width: 10px; height: 10px; border-radius: 50%;
+  background: #fff; border: 2px solid #ccc;
+}
+.milestones li.done { border-left-color: #222; }
+.milestones li.done::before { background: #222; border-color: #222; }
+.milestones .m-label { font-weight: bold; }
+.milestones .m-time { color: #888; font-size: 11px; }
+
+/* ---- Pagination ---- */
+.pagination {
+  display: flex; gap: 12px; align-items: center; justify-content: center;
+  margin: 24px 0;
+}
+
+/* ---- Tables ---- */
+table.wf-table td.num, table.wf-table th.num { text-align: right; }
+table.wf-table tbody tr:hover { background: #fafafa; }
+
+/* ---- Star input ---- */
+.rate-select { display: flex; gap: 2px; }
+.rate-select input[type=radio] { display: none; }
+.rate-select label {
+  font-size: 26px; color: #bbb; cursor: pointer; line-height: 1;
+  text-transform: none; letter-spacing: 0; margin: 0;
+}
+.rate-select input[type=radio]:checked ~ label { color: #bbb; }
+.rate-select label.on { color: #222; }
+
+/* ---- Review / thread items ---- */
+.review-item { border-bottom: 1px solid #ddd; padding: 14px 0; font-size: 13px; }
+.review-item:last-child { border-bottom: none; }
+.review-head { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.review-media { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+.review-media img { width: 80px; height: 80px; object-fit: cover; border: 1px solid #999; }
+
+.thread-item { border: 1px solid #ccc; background: #fff; padding: 12px; margin-bottom: 10px; }
+.thread-item .thread-title { font-weight: bold; font-size: 14px; margin-bottom: 4px; }
+.thread-item .thread-meta { font-size: 11px; color: #777; }
+.thread-item .thread-title a { text-decoration: none; }
+
+.vote-col { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 44px; }
+.vote-col button { border: 1px solid #999; background: #f4f4f4; cursor: pointer; font-size: 12px; padding: 2px 6px; }
+.vote-col .score { font-weight: bold; font-size: 14px; }
+
+/* ---- Chat ---- */
+.chat-scroll { max-height: 420px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding: 4px; }
+.msg { max-width: 75%; border: 1px solid #ccc; padding: 8px 10px; font-size: 13px; background: #fff; }
+.msg.mine { align-self: flex-end; background: #f0f0f0; }
+.msg.system { align-self: center; max-width: 100%; border-style: dashed; color: #666; font-size: 12px; background: #fafafa; }
+.msg .msg-time { display: block; font-size: 10px; color: #999; margin-top: 4px; }
+
+/* ---- Stat tiles (admin analytics) ---- */
+.stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+@media (max-width: 900px) { .stat-grid { grid-template-columns: repeat(2, 1fr); } }
+.stat {
+  border: 1px solid #999; background: #fff; padding: 14px;
+}
+.stat .stat-value { font-size: 24px; font-weight: bold; }
+.stat .stat-label { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: #777; }
+
+/* ---- Sitemap tree ---- */
+.tree, .tree ul { list-style: none; padding-left: 18px; }
+.tree { padding-left: 0; font-size: 13px; }
+.tree li { padding: 3px 0; }
+.tree .node-path { color: #888; font-size: 11px; margin-left: 6px; }
+
+/* ---- Media gallery ---- */
+.gallery-main { width: 100%; height: 340px; }
+.gallery-thumbs { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+.gallery-thumbs .placeholder-img { width: 64px; height: 64px; }
+
+/* ---- Misc ---- */
+.muted { color: #777; font-size: 12px; }
+.stack > * + * { margin-top: 14px; }
+.right { text-align: right; }
+.nowrap { white-space: nowrap; }
+hr.rule { border: none; border-top: 1px solid #ddd; margin: 18px 0; }
+.kv { display: grid; grid-template-columns: 160px 1fr; gap: 6px 12px; font-size: 13px; }
+.kv dt { color: #777; }
+.kv dd { margin: 0; }

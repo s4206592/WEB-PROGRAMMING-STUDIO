@@ -1,0 +1,92 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<div class="page-wrap">
+  <div class="two-col">
+    <aside class="box">
+      <div class="box-title">Forum</div>
+      <div class="stack">
+        <% if (currentUser) { %>
+          <a class="btn" href="/forum/new">Ask a question</a>
+          <a class="btn small secondary" href="/forum/manage">My posts</a>
+        <% } else { %>
+          <a class="btn" href="/login">Sign in to ask</a>
+        <% } %>
+        <a class="btn small secondary" href="/faq">FAQ</a>
+        <% if (currentUser && (currentUser.roles.includes('moderator') || currentUser.roles.includes('staff') || currentUser.roles.includes('admin'))) { %>
+          <a class="btn small secondary" href="/forum/moderation">Moderation</a>
+        <% } %>
+      </div>
+      <hr class="rule">
+      <div class="box-title">Trending tags</div>
+      <% if (!trendingTags.length) { %>
+        <p class="muted">No tags used yet.</p>
+      <% } else { %>
+        <% trendingTags.forEach(function(t){ %>
+          <a class="tag" href="/forum?tag=<%= t.slug %>" style="text-decoration:none;"><%= t.slug %> (<%= t.usageCount %>)</a>
+        <% }) %>
+      <% } %>
+      <% if (activeTag) { %>
+        <hr class="rule">
+        <a class="btn small secondary" href="/forum">Clear tag filter</a>
+      <% } %>
+    </aside>
+
+    <main>
+      <div class="box" style="margin-bottom:14px;">
+        <form method="get" action="/forum">
+          <div class="form-row inline">
+            <div style="flex:1;"><input type="search" name="q" value="<%= q %>" placeholder="Search questions and answers"></div>
+            <button class="btn" type="submit">Search</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="tabs">
+        <a class="<%= tab === 'recent' ? 'active' : '' %>" href="/forum?tab=recent">Recent</a>
+        <a class="<%= tab === 'trending' ? 'active' : '' %>" href="/forum?tab=trending">Trending</a>
+        <a class="<%= tab === 'unanswered' ? 'active' : '' %>" href="/forum?tab=unanswered">Unanswered</a>
+      </div>
+
+      <% if (!posts.length) { %>
+        <%- include('../partials/empty', {
+          emptyTitle: total === 0 ? 'No questions yet' : 'Nothing matched',
+          emptyBody: total === 0
+            ? 'The forum is where people ask about gear compatibility, fair prices, and whether a listing looks legitimate. Nobody has asked anything yet.'
+            : 'Try a different search term or tab.',
+          emptyCta: currentUser ? { href: '/forum/new', label: 'Ask the first question' } : { href: '/register', label: 'Create an account' }
+        }) %>
+      <% } else { %>
+        <% posts.forEach(function(p){ %>
+          <div class="thread-item" style="display:flex;gap:12px;">
+            <div class="vote-col">
+              <div class="score"><%= p.score %></div>
+              <div class="wf-label">votes</div>
+              <div class="score" style="margin-top:6px;"><%= p.replyCount %></div>
+              <div class="wf-label">replies</div>
+            </div>
+            <div style="flex:1;">
+              <div class="thread-title">
+                <a href="/forum/<%= p.slug %>"><%= p.title %></a>
+                <% if (p.isPinned) { %><span class="pill neutral">Pinned</span><% } %>
+                <% if (p.acceptedAnswerId) { %><span class="pill ok">Answered</span><% } %>
+                <% if (p.isLocked) { %><span class="pill warn">Locked</span><% } %>
+              </div>
+              <div class="thread-meta">
+                by <%= p.authorId ? p.authorId.username : 'unknown' %>
+                <% if (p.authorId && p.authorId.reputation) { %>(<%= p.authorId.reputation.points %> pts)<% } %>
+                · <%= timeAgo(p.lastActivityAt) %> · <%= p.viewCount %> views
+              </div>
+              <% if (p.tags && p.tags.length) { %>
+                <div style="margin-top:6px;">
+                  <% p.tags.forEach(function(t){ %><a class="tag" href="/forum?tag=<%= t %>" style="text-decoration:none;"><%= t %></a> <% }) %>
+                </div>
+              <% } %>
+            </div>
+          </div>
+        <% }) %>
+        <%- include('../partials/pagination') %>
+      <% } %>
+    </main>
+  </div>
+</div>
+<%- include('../partials/footer') %>

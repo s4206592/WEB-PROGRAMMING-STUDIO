@@ -1,0 +1,28 @@
+{
+  "name": "studiotrade",
+  "version": "1.0.0",
+  "description": "StudioTrade — an online marketplace for secondhand studio equipment (COSC3060 Web Programming Studio, Team SG-G5)",
+  "main": "server.js",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "seed": "node src/seed.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "connect-flash": "^0.1.1",
+    "connect-mongo": "^5.1.0",
+    "dotenv": "^16.4.5",
+    "ejs": "^3.1.10",
+    "express": "^4.19.2",
+    "express-session": "^1.18.0",
+    "method-override": "^3.0.0",
+    "mongoose": "^8.5.1",
+    "morgan": "^1.10.0",
+    "sanitize-html": "^2.13.0"
+  },
+  "license": "MIT"
+}

@@ -1,0 +1,42 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<div class="page-wrap">
+  <div class="box">
+    <div class="box-title"><%= profileUser.username %></div>
+    <p class="muted"><%= profileUser.fullName || '' %></p>
+    <% if (profileUser.bio) { %><p style="font-size:13px;"><%= profileUser.bio %></p><% } %>
+    <dl class="kv">
+      <dt>Member since</dt><dd><%= new Date(profileUser.createdAt).toLocaleDateString('en-GB') %></dd>
+      <dt>Reputation</dt><dd><%= profileUser.reputation.points %> pts</dd>
+      <% if (profileUser.sellerProfile && profileUser.sellerProfile.joinedAsSellerAt) { %>
+        <dt>Seller rating</dt><dd><%= stars(profileUser.sellerProfile.rating) %> (<%= profileUser.sellerProfile.ratingCount %> reviews)</dd>
+        <dt>Completed sales</dt><dd><%= profileUser.sellerProfile.totalSales %></dd>
+      <% } %>
+    </dl>
+  </div>
+
+  <div class="section-bar"><h2>Active listings</h2></div>
+  <% if (!listings.length) { %>
+    <div class="box"><p class="muted">This user has nothing for sale right now.</p></div>
+  <% } else { %>
+    <div class="card-grid">
+      <% listings.forEach(function(p){ %><%- include('../partials/productcard', { p: p }) %><% }) %>
+    </div>
+  <% } %>
+
+  <div class="section-bar"><h2>Reviews as a seller</h2></div>
+  <div class="box">
+    <% if (!reviews.length) { %><p class="muted">No reviews yet.</p><% } %>
+    <% reviews.forEach(function(r){ %>
+      <div class="review-item">
+        <div class="review-head">
+          <strong><%= r.reviewerId ? r.reviewerId.username : 'Anonymous' %></strong>
+          <span class="stars"><%= stars(r.rating) %> <span class="wf-label"><%= timeAgo(r.createdAt) %></span></span>
+        </div>
+        <div class="wf-label"><%= r.productId ? r.productId.title : 'Removed listing' %></div>
+        <p><%= r.comment %></p>
+      </div>
+    <% }) %>
+  </div>
+</div>
+<%- include('../partials/footer') %>

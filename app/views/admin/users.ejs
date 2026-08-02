@@ -1,0 +1,54 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<div class="page-wrap">
+  <div class="section-bar" style="margin-top:0;"><h2>User Management <span class="wf-label">(<%= total %>)</span></h2></div>
+
+  <div class="box" style="margin-bottom:14px;">
+    <form method="get" action="/admin/users">
+      <div class="form-row inline">
+        <div style="flex:2;"><input type="search" name="q" value="<%= q %>" placeholder="Username, email, phone or name"></div>
+        <div style="flex:1;">
+          <select name="status">
+            <option value="">Any status</option>
+            <% ['active','suspended','banned','deleted'].forEach(function(s){ %>
+              <option value="<%= s %>" <%= activeStatus === s ? 'selected' : '' %>><%= s %></option>
+            <% }) %>
+          </select>
+        </div>
+        <div style="flex:1;">
+          <select name="role">
+            <option value="">Any role</option>
+            <% ['buyer','seller','studio_owner','moderator','staff','admin'].forEach(function(r){ %>
+              <option value="<%= r %>" <%= activeRole === r ? 'selected' : '' %>><%= r %></option>
+            <% }) %>
+          </select>
+        </div>
+        <button class="btn" type="submit">Filter</button>
+        <a class="btn secondary" href="/admin/users">Clear</a>
+      </div>
+    </form>
+  </div>
+
+  <% if (!users.length) { %>
+    <%- include('../partials/empty', { emptyTitle: 'No users matched', emptyBody: 'Clear the filters, or wait for people to sign up.', emptyCta: { href: '/admin', label: 'Back to admin' } }) %>
+  <% } else { %>
+    <table class="wf-table">
+      <thead><tr><th>User</th><th>Email</th><th>Roles</th><th>Status</th><th>Joined</th><th>Last seen</th><th></th></tr></thead>
+      <tbody>
+      <% users.forEach(function(u){ %>
+        <tr>
+          <td><strong><%= u.username %></strong><div class="wf-label"><%= u.fullName || '' %></div></td>
+          <td class="muted"><%= u.email %></td>
+          <td><% u.roles.forEach(function(r){ %><span class="pill neutral"><%= r %></span> <% }) %></td>
+          <td><span class="pill <%= u.status === 'active' ? 'ok' : 'bad' %>"><%= u.status %></span></td>
+          <td class="nowrap muted"><%= new Date(u.createdAt).toLocaleDateString('en-GB') %></td>
+          <td class="nowrap muted"><%= u.lastLoginAt ? timeAgo(u.lastLoginAt) : 'never' %></td>
+          <td><a class="btn small secondary" href="/admin/users/<%= u._id %>">Manage</a></td>
+        </tr>
+      <% }) %>
+      </tbody>
+    </table>
+    <%- include('../partials/pagination') %>
+  <% } %>
+</div>
+<%- include('../partials/footer') %>

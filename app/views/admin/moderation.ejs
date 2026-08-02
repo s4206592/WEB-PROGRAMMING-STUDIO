@@ -1,0 +1,68 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<div class="page-wrap">
+  <div class="tabs">
+    <% ['pending','under_review','actioned','dismissed'].forEach(function(s){ %>
+      <a class="<%= status === s ? 'active' : '' %>" href="/admin/moderation?status=<%= s %>"><%= s.replace(/_/g,' ') %></a>
+    <% }) %>
+  </div>
+
+  <% if (!reports.length) { %>
+    <%- include('../partials/empty', { emptyTitle: 'Nothing in this queue', emptyBody: 'Reports arrive when a member flags a listing, review, forum post, comment or studio.', emptyCta: { href: '/admin', label: 'Back to admin' } }) %>
+  <% } else { %>
+    <% reports.forEach(function(r){ %>
+      <div class="box" style="margin-bottom:14px;">
+        <div class="section-bar" style="margin:0 0 8px;">
+          <h2 style="font-size:14px;"><%= r.targetType.replace(/_/g,' ') %></h2>
+          <span class="pill warn"><%= r.reason %></span>
+        </div>
+        <div class="wf-label">reported by <%= r.reporterId ? r.reporterId.username : 'unknown' %> · <%= timeAgo(r.createdAt) %></div>
+        <% if (r.details) { %><p><%= r.details %></p><% } %>
+
+        <div style="padding:8px;background:#f8f8f8;border:1px solid #eee;font-size:13px;margin:8px 0;">
+          <% if (!r.target) { %>
+            <span class="muted">The reported content no longer exists.</span>
+          <% } else if (r.targetType === 'product') { %>
+            <a href="/products/<%= r.target.slug %>"><%= r.target.title %></a> — <span class="pill neutral"><%= r.target.status %></span>
+          <% } else if (r.targetType === 'forum_post') { %>
+            <a href="/forum/<%= r.target.slug %>"><%= r.target.title %></a> — <span class="pill neutral"><%= r.target.status %></span>
+          <% } else if (r.targetType === 'blog_post') { %>
+            <a href="/blog/<%= r.target.slug %>"><%= r.target.title %></a> — <span class="pill neutral"><%= r.target.status %></span>
+          <% } else if (r.targetType === 'review') { %>
+            <span class="stars"><%= stars(r.target.rating) %></span> <%= (r.target.comment || '').slice(0,200) %>
+          <% } else if (r.targetType === 'user') { %>
+            <a href="/admin/users/<%= r.targetId %>"><%= r.target.username %></a> — <span class="pill neutral"><%= r.target.status %></span>
+          <% } else if (r.targetType === 'studio') { %>
+            <a href="/studios/<%= r.target.slug %>"><%= r.target.name %></a>
+          <% } else { %>
+            <%- (r.target.bodyHtml || r.target.body || '').slice(0, 300) %>
+          <% } %>
+        </div>
+
+        <% if (status === 'pending' || status === 'under_review') { %>
+          <form method="post" action="/admin/moderation/<%= r._id %>/act">
+            <div class="form-row inline">
+              <div style="flex:1;">
+                <select name="action">
+                  <option value="none">Dismiss — no action</option>
+                  <option value="content_hidden">Hide the content</option>
+                  <option value="content_removed">Remove the content</option>
+                  <option value="user_warned">Warn the author</option>
+                  <% if (r.targetType === 'user') { %>
+                    <option value="user_suspended">Suspend the user</option>
+                    <option value="user_banned">Ban the user</option>
+                  <% } %>
+                </select>
+              </div>
+              <div style="flex:2;"><input type="text" name="note" placeholder="Note for the audit trail"></div>
+              <button class="btn small" type="submit">Apply</button>
+            </div>
+          </form>
+        <% } else if (r.resolution && r.resolution.action) { %>
+          <div class="muted">Resolved: <%= r.resolution.action.replace(/_/g,' ') %><%= r.resolution.note ? ' — ' + r.resolution.note : '' %></div>
+        <% } %>
+      </div>
+    <% }) %>
+  <% } %>
+</div>
+<%- include('../partials/footer') %>

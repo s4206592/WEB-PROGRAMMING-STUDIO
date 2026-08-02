@@ -1,0 +1,83 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<div class="page-wrap">
+  <div class="tabs">
+    <a href="/wishlist">Saved items</a>
+    <a class="active" href="/wishlist/saved-searches">Saved searches</a>
+  </div>
+
+  <div class="two-col">
+    <aside class="box">
+      <div class="box-title">Save a new search</div>
+      <form method="post" action="/wishlist/saved-searches">
+        <div class="form-row"><label for="name">Name</label>
+          <input id="name" type="text" name="name" required placeholder="Godox softbox under 2tr"></div>
+        <div class="form-row"><label for="keywords">Keywords</label>
+          <input id="keywords" type="text" name="keywords" placeholder="godox softbox"></div>
+        <div class="form-row"><label for="categoryId">Category</label>
+          <select id="categoryId" name="categoryId">
+            <option value="">Any</option>
+            <% categories.filter(function(c){ return c.parentId; }).forEach(function(c){ %>
+              <option value="<%= c._id %>"><%= c.name %></option>
+            <% }) %>
+          </select></div>
+        <div class="form-grid">
+          <div class="form-row"><label for="minPrice">Min ₫</label><input id="minPrice" type="text" name="minPrice"></div>
+          <div class="form-row"><label for="maxPrice">Max ₫</label><input id="maxPrice" type="text" name="maxPrice"></div>
+        </div>
+        <div class="form-row"><label for="province">Province</label>
+          <select id="province" name="province">
+            <option value="">Anywhere</option>
+            <% VN_PROVINCES.forEach(function(p){ %><option value="<%= p %>"><%= p %></option><% }) %>
+          </select></div>
+        <div class="form-row"><label for="alertFrequency">Alert me</label>
+          <select id="alertFrequency" name="alertFrequency">
+            <option value="instant">As soon as something matches</option>
+            <option value="daily" selected>Daily digest</option>
+            <option value="weekly">Weekly digest</option>
+            <option value="off">Do not alert</option>
+          </select></div>
+        <label style="font-size:13px;text-transform:none;letter-spacing:0;color:#222;">
+          <input type="checkbox" name="isNegotiable"> Only listings that accept offers
+        </label>
+        <div class="form-actions"><button class="btn" type="submit">Save search</button></div>
+      </form>
+    </aside>
+
+    <main>
+      <div class="section-bar" style="margin-top:0;"><h2>My saved searches</h2></div>
+      <% if (!searches.length) { %>
+        <%- include('../partials/empty', { emptyTitle: 'No saved searches', emptyBody: 'Save a search and get told when a matching listing is posted, instead of checking back yourself.', emptyCta: { href: '/products', label: 'Search listings' } }) %>
+      <% } else { %>
+        <% searches.forEach(function(s){ %>
+          <div class="box" style="margin-bottom:12px;">
+            <div class="section-bar" style="margin:0 0 8px;">
+              <h2 style="font-size:14px;"><%= s.name %></h2>
+              <span class="pill <%= s.isActive ? 'ok' : 'neutral' %>"><%= s.isActive ? 'Active' : 'Paused' %></span>
+            </div>
+            <div class="muted" style="font-size:13px;">
+              <%= s.query.keywords ? '"' + s.query.keywords + '"' : 'Any keywords' %>
+              <% if (s.query.categoryId) { %> · <%= s.query.categoryId.name %><% } %>
+              <% if (s.query.minPrice || s.query.maxPrice) { %>
+                · <%= s.query.minPrice ? formatVND(s.query.minPrice) : '0₫' %>–<%= s.query.maxPrice ? formatVND(s.query.maxPrice) : 'any' %>
+              <% } %>
+              <% if (s.query.province) { %> · <%= s.query.province %><% } %>
+              · alerts <%= s.alertFrequency %>
+            </div>
+            <p style="margin:8px 0;"><strong><%= s.liveMatches %></strong> listing<%= s.liveMatches === 1 ? '' : 's' %> match right now.</p>
+            <div class="form-actions">
+              <a class="btn small" href="/products?q=<%= encodeURIComponent(s.query.keywords || '') %><%= s.query.categoryId ? '&category=' + (s.query.categoryId._id || s.query.categoryId) : '' %><%= s.query.minPrice ? '&minPrice=' + s.query.minPrice : '' %><%= s.query.maxPrice ? '&maxPrice=' + s.query.maxPrice : '' %><%= s.query.province ? '&province=' + encodeURIComponent(s.query.province) : '' %>">Run this search</a>
+              <form method="post" action="/wishlist/saved-searches/<%= s._id %>/toggle" style="display:inline;">
+                <button class="btn small secondary" type="submit"><%= s.isActive ? 'Pause alerts' : 'Resume alerts' %></button>
+              </form>
+              <form method="post" action="/wishlist/saved-searches/<%= s._id %>/delete" style="display:inline;">
+                <button class="btn small danger" type="submit">Delete</button>
+              </form>
+            </div>
+          </div>
+        <% }) %>
+      <% } %>
+    </main>
+  </div>
+</div>
+<%- include('../partials/footer') %>

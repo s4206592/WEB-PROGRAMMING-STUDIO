@@ -1,0 +1,43 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<div class="narrow">
+  <div class="box">
+    <div class="box-title">Create your account</div>
+    <% if (errors.length) { %><div class="wf-note"><% errors.forEach(function(e){ %><div><%= e %></div><% }) %></div><% } %>
+    <form method="post" action="/register">
+      <div class="form-row">
+        <label for="username">Username</label>
+        <input id="username" type="text" name="username" value="<%= form.username || '' %>" required autocomplete="username">
+        <div class="hint">3–30 characters. Letters, numbers, dot, dash, underscore.</div>
+      </div>
+      <div class="form-row">
+        <label for="email">Email</label>
+        <input id="email" type="email" name="email" value="<%= form.email || '' %>" required autocomplete="email">
+      </div>
+      <div class="form-row">
+        <label for="phone">Phone</label>
+        <input id="phone" type="tel" name="phone" value="<%= form.phone || '' %>" required placeholder="+84901234567">
+        <div class="hint">Used to verify you are a real seller. Never shown publicly.</div>
+      </div>
+      <div class="form-row">
+        <label for="fullName">Full name (optional)</label>
+        <input id="fullName" type="text" name="fullName" value="<%= form.fullName || '' %>">
+      </div>
+      <div class="form-grid">
+        <div class="form-row">
+          <label for="password">Password</label>
+          <input id="password" type="password" name="password" required minlength="8" autocomplete="new-password">
+        </div>
+        <div class="form-row">
+          <label for="confirmPassword">Confirm password</label>
+          <input id="confirmPassword" type="password" name="confirmPassword" required minlength="8" autocomplete="new-password">
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn" type="submit">Create account</button>
+        <a class="muted" href="/login">Already have an account?</a>
+      </div>
+    </form>
+  </div>
+</div>
+<%- include('../partials/footer') %>

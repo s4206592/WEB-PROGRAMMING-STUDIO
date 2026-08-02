@@ -1,0 +1,77 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<div class="wide">
+  <div class="tabs">
+    <a href="/checkout/delivery">1. Delivery</a>
+    <a href="/checkout/payment">2. Payment</a>
+    <a class="active" href="/checkout/review">3. Review order</a>
+  </div>
+
+  <% if (blocking) { %>
+    <div class="wf-note">A line in your cart changed while you were checking out. Go back to the cart and resolve it before placing the order.</div>
+  <% } %>
+
+  <div class="box">
+    <div class="box-title">Items</div>
+    <table class="wf-table">
+      <thead><tr><th>Item</th><th class="num">Unit</th><th class="num">Qty</th><th class="num">Line total</th></tr></thead>
+      <tbody>
+      <% lines.forEach(function(l){ %>
+        <tr>
+          <td><%= l.titleSnapshot %>
+            <% if (l.priceSource === 'negotiated') { %><span class="pill ok">Negotiated</span><% } %>
+            <% if (l.priceSource === 'bulk_tier') { %><span class="pill ok">Bulk tier</span><% } %>
+          </td>
+          <td class="num"><%= formatVND(l.unitPrice) %></td>
+          <td class="num"><%= l.quantity %></td>
+          <td class="num"><%= formatVND(l.quantity * l.unitPrice) %></td>
+        </tr>
+      <% }) %>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="three-col" style="margin-top:16px;">
+    <div class="box">
+      <div class="box-title">Delivery</div>
+      <dl class="kv">
+        <dt>Recipient</dt><dd><%= draft.deliveryInfo.recipient %></dd>
+        <dt>Phone</dt><dd><%= draft.deliveryInfo.phone %></dd>
+        <dt>Address</dt><dd><%= [draft.deliveryInfo.line1, draft.deliveryInfo.ward, draft.deliveryInfo.district, draft.deliveryInfo.province].filter(Boolean).join(', ') %></dd>
+        <dt>Method</dt><dd><%= draft.deliveryInfo.method %></dd>
+        <% if (draft.deliveryInfo.notes) { %><dt>Notes</dt><dd><%= draft.deliveryInfo.notes %></dd><% } %>
+      </dl>
+      <a class="btn small secondary" href="/checkout/delivery">Change</a>
+      <hr class="rule">
+      <div class="box-title">Payment</div>
+      <dl class="kv">
+        <dt>Method</dt><dd><%= draft.paymentInfo.method.replace(/_/g,' ') %></dd>
+        <% if (draft.paymentInfo.maskedRef) { %><dt>Card</dt><dd><%= draft.paymentInfo.maskedRef %></dd><% } %>
+      </dl>
+      <a class="btn small secondary" href="/checkout/payment">Change</a>
+    </div>
+
+    <aside>
+      <div class="box">
+        <div class="box-title">Total</div>
+        <dl class="kv">
+          <dt>Subtotal</dt><dd><%= formatVND(subtotal) %></dd>
+          <dt>Shipping</dt><dd><%= formatVND(shippingFee) %></dd>
+          <dt>Grand total</dt><dd><strong style="font-size:18px;"><%= formatVND(grandTotal) %></strong></dd>
+        </dl>
+        <hr class="rule">
+        <form method="post" action="/checkout/place">
+          <button class="btn" type="submit" style="width:100%;" <%= blocking ? 'disabled' : '' %>>Place order</button>
+        </form>
+        <div class="hint">
+          <% if (draft.paymentInfo.method === 'cod') { %>
+            Delivery starts immediately for cash on delivery.
+          <% } else { %>
+            After ordering, transfer the money and mark the order as paid. The seller confirms it arrived, and only then does delivery start.
+          <% } %>
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>
+<%- include('../partials/footer') %>

@@ -1,0 +1,135 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<div class="page-wrap">
+  <div class="three-col">
+    <main>
+      <div class="box">
+        <div class="box-title">
+          <% if (product) { %><a href="/products/<%= product.slug %>"><%= product.title %></a>
+          <% } else { %>Listing removed<% } %>
+        </div>
+        <% if (!product) { %>
+          <p class="muted">The seller has taken this listing down. Your note and price history are kept here for reference.</p>
+        <% } else { %>
+          <div class="price" style="font-size:22px;"><%= formatVND(product.price) %></div>
+          <% if (item.priceAtSave != null && item.priceAtSave !== product.price) { %>
+            <p class="muted">Saved at <%= formatVND(item.priceAtSave) %> — <%= product.price < item.priceAtSave ? 'now cheaper' : 'now dearer' %>.</p>
+          <% } %>
+          <span class="pill <%= product.status === 'active' ? 'ok' : 'warn' %>"><%= product.status %></span>
+          <span class="tag"><%= CONDITION_LABELS[product.condition] %></span>
+          <hr class="rule">
+          <dl class="kv">
+            <dt>Seller</dt>
+            <dd>
+              <% if (product.sellerId) { %>
+                <a href="/account/u/<%= product.sellerId.username %>"><%= product.sellerId.username %></a>
+                <% if (product.sellerId.sellerProfile && product.sellerId.sellerProfile.ratingCount) { %>
+                  — <%= stars(product.sellerId.sellerProfile.rating) %> (<%= product.sellerId.sellerProfile.ratingCount %>)
+                <% } else { %> — no reviews yet<% } %>
+              <% } %>
+            </dd>
+            <dt>Available</dt><dd><%= availableQty(product) %></dd>
+            <dt>Negotiable</dt><dd><%= product.isNegotiable ? 'Yes — you can make an offer' : 'No, fixed price' %></dd>
+          </dl>
+        <% } %>
+      </div>
+
+      <div class="box" style="margin-top:16px;">
+        <div class="box-title">Price history</div>
+        <% if (!history.length) { %>
+          <p class="muted">No price changes recorded since this listing was posted.</p>
+        <% } else { %>
+          <table class="wf-table">
+            <thead><tr><th>When</th><th class="num">Price</th><th>Changed by</th></tr></thead>
+            <tbody>
+            <% history.forEach(function(h){ %>
+              <tr>
+                <td class="nowrap"><%= new Date(h.createdAt).toLocaleDateString('en-GB') %></td>
+                <td class="num"><%= formatVND(h.price) %></td>
+                <td class="muted"><%= h.changedBy %></td>
+              </tr>
+            <% }) %>
+            </tbody>
+          </table>
+        <% } %>
+      </div>
+
+      <div class="box" style="margin-top:16px;">
+        <div class="box-title">Your notes and alerts</div>
+        <form method="post" action="/wishlist/item/<%= item._id %>/notes">
+          <div class="form-row">
+            <label for="inspectionNotes">Inspection notes</label>
+            <textarea id="inspectionNotes" name="inspectionNotes" rows="3" maxlength="1000" placeholder="Check for fungus on the front element. Ask whether the original box is included."><%= item.inspectionNotes || '' %></textarea>
+            <div class="hint">Private to you. Useful when you finally meet the seller.</div>
+          </div>
+          <div class="form-grid">
+            <div class="form-row">
+              <label for="priority">Priority</label>
+              <select id="priority" name="priority">
+                <% ['low','medium','high'].forEach(function(p){ %>
+                  <option value="<%= p %>" <%= item.priority === p ? 'selected' : '' %>><%= p %></option>
+                <% }) %>
+              </select>
+            </div>
+            <div class="form-row">
+              <label for="priceThreshold">Alert me under (₫)</label>
+              <input id="priceThreshold" type="text" name="priceThreshold" value="<%= item.alerts.priceThreshold || '' %>">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="field-label">Alerts</div>
+            <label style="font-size:13px;text-transform:none;letter-spacing:0;color:#222;"><input type="checkbox" name="onPriceDrop" <%= item.alerts.onPriceDrop ? 'checked' : '' %>> Price drops</label>
+            <label style="font-size:13px;text-transform:none;letter-spacing:0;color:#222;"><input type="checkbox" name="onBackInStock" <%= item.alerts.onBackInStock ? 'checked' : '' %>> Back in stock</label>
+            <label style="font-size:13px;text-transform:none;letter-spacing:0;color:#222;"><input type="checkbox" name="onSimilarListing" <%= item.alerts.onSimilarListing ? 'checked' : '' %>> Similar listings appear</label>
+          </div>
+          <div class="form-row">
+            <label for="tags">Tags</label>
+            <input id="tags" type="text" name="tags" value="<%= (item.tags || []).join(', ') %>" placeholder="lighting, budget build">
+          </div>
+          <div class="form-actions"><button class="btn" type="submit">Save</button></div>
+        </form>
+      </div>
+    </main>
+
+    <aside>
+      <div class="box">
+        <div class="box-title">Actions</div>
+        <% if (product && ['active','reserved'].includes(product.status)) { %>
+          <% if (acceptedOffer) { %>
+            <div class="wf-note" style="color:#333;border-color:#2c7a2c;background:#f2faf2;">
+              You have an accepted offer at <%= formatVND(acceptedOffer.acceptedConsideration.cash) %>. That price applies at checkout.
+            </div>
+          <% } %>
+          <form method="post" action="/wishlist/item/<%= item._id %>/to-cart">
+            <div class="form-row">
+              <label for="quantity">Quantity</label>
+              <input id="quantity" type="number" name="quantity" value="1" min="1" max="<%= availableQty(product) %>">
+            </div>
+            <label style="font-size:13px;text-transform:none;letter-spacing:0;color:#222;">
+              <input type="checkbox" name="removeAfter"> Remove from wishlist after adding
+            </label>
+            <button class="btn" type="submit" style="width:100%;margin-top:8px;">Add to cart</button>
+            <div class="hint">The current listing price is used, not the price you saved at.</div>
+          </form>
+
+          <% if (product.isNegotiable && !acceptedOffer) { %>
+            <hr class="rule">
+            <a class="btn secondary" href="/products/<%= product.slug %>" style="width:100%;">Make an offer instead</a>
+          <% } %>
+          <hr class="rule">
+          <a class="btn secondary" href="/products/<%= product.slug %>/similar" style="width:100%;">See similar listings</a>
+        <% } else { %>
+          <p class="muted">This item cannot be bought right now.</p>
+          <% if (product) { %>
+            <a class="btn secondary" href="/products/<%= product.slug %>/similar" style="width:100%;">Find something similar</a>
+          <% } %>
+        <% } %>
+        <hr class="rule">
+        <form method="post" action="/wishlist/item/<%= item._id %>/remove">
+          <button class="btn danger" type="submit" style="width:100%;">Remove from wishlist</button>
+        </form>
+      </div>
+    </aside>
+  </div>
+</div>
+<%- include('../partials/footer') %>

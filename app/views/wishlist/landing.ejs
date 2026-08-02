@@ -1,0 +1,83 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<div class="page-wrap">
+  <div class="tabs">
+    <a class="active" href="/wishlist">Saved items</a>
+    <a href="/wishlist/saved-searches">Saved searches</a>
+  </div>
+
+  <% if (!rows.length) { %>
+    <%- include('../partials/empty', { emptyTitle: 'Nothing saved yet', emptyBody: 'Save a listing and we will watch its price for you, keep your inspection notes, and let you move it into the cart when you are ready.', emptyCta: { href: '/products', label: 'Browse listings' } }) %>
+  <% } else { %>
+    <div class="section-bar" style="margin-top:0;">
+      <h2>Wishlist <span class="wf-label">(<%= rows.length %>)</span></h2>
+      <form method="get" style="display:flex;gap:6px;">
+        <select name="filter" onchange="this.form.submit()">
+          <option value="" <%= !filter ? 'selected' : '' %>>All items</option>
+          <option value="available" <%= filter === 'available' ? 'selected' : '' %>>Still available</option>
+          <option value="drops" <%= filter === 'drops' ? 'selected' : '' %>>Price dropped</option>
+        </select>
+        <select name="priority" onchange="this.form.submit()">
+          <option value="" <%= !priority ? 'selected' : '' %>>Any priority</option>
+          <option value="high" <%= priority === 'high' ? 'selected' : '' %>>High</option>
+          <option value="medium" <%= priority === 'medium' ? 'selected' : '' %>>Medium</option>
+          <option value="low" <%= priority === 'low' ? 'selected' : '' %>>Low</option>
+        </select>
+        <select name="sort" onchange="this.form.submit()">
+          <option value="newest" <%= sort === 'newest' ? 'selected' : '' %>>Recently saved</option>
+          <option value="price_asc" <%= sort === 'price_asc' ? 'selected' : '' %>>Price: low to high</option>
+          <option value="price_desc" <%= sort === 'price_desc' ? 'selected' : '' %>>Price: high to low</option>
+          <option value="drops" <%= sort === 'drops' ? 'selected' : '' %>>Biggest drop</option>
+        </select>
+      </form>
+    </div>
+
+    <form method="post" action="/wishlist/bulk-to-cart">
+      <div class="box">
+        <% rows.forEach(function(r){ %>
+          <div class="row-item">
+            <% if (!r.gone) { %>
+              <input type="checkbox" name="itemId" value="<%= r.item._id %>">
+            <% } %>
+            <div class="placeholder-img" <% if (r.product && primaryImage(r.product)) { %>style="background-image:url('<%= primaryImage(r.product) %>');background-size:cover;background-position:center;"<% } %>></div>
+            <div class="row-info">
+              <% if (r.product) { %>
+                <a href="/products/<%= r.product.slug %>"><strong><%= r.product.title %></strong></a>
+                <div class="price"><%= formatVND(r.product.price) %></div>
+                <% if (r.priceDelta !== null && r.priceDelta !== 0) { %>
+                  <span class="pill <%= r.priceDelta < 0 ? 'ok' : 'warn' %>">
+                    <%= r.priceDelta < 0 ? '▼ ' + formatVND(Math.abs(r.priceDelta)) + ' cheaper' : '▲ ' + formatVND(r.priceDelta) + ' dearer' %>
+                    than when you saved it
+                  </span>
+                <% } %>
+              <% } else { %>
+                <strong class="muted">Listing removed</strong>
+              <% } %>
+              <% if (r.gone && r.product) { %><span class="pill bad"><%= r.product.status %></span><% } %>
+              <% if (r.item.purchasedAt) { %><span class="pill neutral">Already purchased</span><% } %>
+              <span class="pill neutral"><%= r.item.priority %> priority</span>
+              <% if (r.item.inspectionNotes) { %>
+                <div class="muted" style="margin-top:4px;">Note: <%= r.item.inspectionNotes %></div>
+              <% } %>
+              <div class="wf-label">Saved <%= timeAgo(r.item.addedAt) %><%= r.item.priceAtSave != null ? ' at ' + formatVND(r.item.priceAtSave) : '' %></div>
+            </div>
+            <div class="row-actions">
+              <a class="btn small secondary" href="/wishlist/item/<%= r.item._id %>">Details</a>
+              <% if (!r.gone && r.product) { %>
+                <a class="btn small secondary" href="/products/<%= r.product.slug %>/similar">Similar</a>
+              <% } %>
+              <form method="post" action="/wishlist/item/<%= r.item._id %>/remove">
+                <button class="btn small danger" type="submit">Remove</button>
+              </form>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+      <div class="form-actions">
+        <button class="btn" type="submit">Add selected to cart</button>
+        <span class="hint">Items stay on your wishlist when you add them — the cart gets the live price, not the price you saved at.</span>
+      </div>
+    </form>
+  <% } %>
+</div>
+<%- include('../partials/footer') %>

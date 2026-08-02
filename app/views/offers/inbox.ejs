@@ -1,0 +1,52 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<div class="page-wrap">
+  <div class="tabs">
+    <a class="<%= tab === 'received' ? 'active' : '' %>" href="/offers?tab=received">Offers received</a>
+    <a class="<%= tab === 'sent' ? 'active' : '' %>" href="/offers?tab=sent">Offers I sent</a>
+  </div>
+
+  <% if (!offers.length) { %>
+    <%- include('../partials/empty', {
+      emptyTitle: tab === 'received' ? 'No offers received' : 'You have not made any offers',
+      emptyBody: tab === 'received'
+        ? 'When someone offers on one of your listings it appears here, best offer first.'
+        : 'Find a listing that accepts offers and name your price.',
+      emptyCta: { href: tab === 'received' ? '/sell/listings' : '/products', label: tab === 'received' ? 'My listings' : 'Browse listings' }
+    }) %>
+  <% } else { %>
+    <table class="wf-table">
+      <thead><tr>
+        <th>Listing</th><th><%= tab === 'received' ? 'Buyer' : 'Seller' %></th>
+        <th class="num">Offer</th><th>Type</th><th>Status</th><th>Turn</th><th>Updated</th><th></th>
+      </tr></thead>
+      <tbody>
+      <% offers.forEach(function(o){ %>
+        <tr>
+          <td>
+            <% if (o.productId) { %><a href="/products/<%= o.productId.slug %>"><%= o.productId.title %></a>
+            <% } else { %><span class="muted">Removed listing</span><% } %>
+            <% if (o.productId) { %><div class="wf-label">Asking <%= formatVND(o.productId.price) %></div><% } %>
+          </td>
+          <td><%= tab === 'received' ? (o.buyerId ? o.buyerId.username : '—') : (o.sellerId ? o.sellerId.username : '—') %></td>
+          <td class="num"><%= formatVND(o.consideration.cash) %>
+            <% if (o.consideration.items && o.consideration.items.length) { %>
+              <div class="wf-label">+ <%= o.consideration.items.length %> item(s)</div>
+            <% } %>
+          </td>
+          <td><span class="pill neutral"><%= o.settlement === 'trade' ? 'Trade' : 'Cash' %></span></td>
+          <td>
+            <span class="pill <%= o.status === 'accepted' ? 'ok' : (['rejected','withdrawn','auto_declined','expired'].includes(o.status) ? 'bad' : 'warn') %>">
+              <%= o.status.replace(/_/g,' ') %>
+            </span>
+          </td>
+          <td class="muted"><%= ['pending','countered'].includes(o.status) ? o.turn : '—' %></td>
+          <td class="nowrap muted"><%= timeAgo(o.updatedAt) %></td>
+          <td><a class="btn small secondary" href="/offers/<%= o._id %>">Open</a></td>
+        </tr>
+      <% }) %>
+      </tbody>
+    </table>
+  <% } %>
+</div>
+<%- include('../partials/footer') %>
