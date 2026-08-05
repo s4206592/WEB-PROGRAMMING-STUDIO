@@ -39,8 +39,8 @@
           </div>
         <% } %>
         <% if (post.tags && post.tags.length) { %>
-          <div style="margin-top:10px;">
-            <% post.tags.forEach(function(t){ %><a class="tag" href="/forum?tag=<%= t %>" style="text-decoration:none;"><%= t %></a> <% }) %>
+          <div class="tag-group" style="margin-top:10px;">
+            <% post.tags.forEach(function(t){ %><a class="tag" href="/forum?tag=<%= t %>" style="text-decoration:none;"><%= t %></a><% }) %>
           </div>
         <% } %>
         <% if (currentUser && !isAuthor) { %>

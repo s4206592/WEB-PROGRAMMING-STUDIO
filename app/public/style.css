@@ -342,6 +342,8 @@ a { color: #222; }
   transition: background-color .1s, border-color .1s;
 }
 .tag:hover { background: #e4e4e4; border-color: #666; }
+.tag-group { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.tag-group .tag { margin: 0; }
 
 details > summary { cursor: pointer; }
 details > summary:hover { color: #555; }
