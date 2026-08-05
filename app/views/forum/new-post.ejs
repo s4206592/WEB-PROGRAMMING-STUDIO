@@ -19,9 +19,9 @@
         <input id="tags" type="text" name="tags" value="<%= form.tags || '' %>" placeholder="lighting, godox, compatibility">
         <div class="hint">Up to five, comma separated.</div>
         <% if (tags.length) { %>
-          <div style="margin-top:6px;">
+          <div class="tag-group" style="margin-top:6px;">
             <span class="wf-label">Already in use:</span>
-            <% tags.slice(0,15).forEach(function(t){ %><span class="tag"><%= t.slug %></span> <% }) %>
+            <% tags.slice(0,15).forEach(function(t){ %><span class="tag"><%= t.slug %></span><% }) %>
           </div>
         <% } %>
       </div>
