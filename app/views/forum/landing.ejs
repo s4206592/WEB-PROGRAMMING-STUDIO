@@ -21,9 +21,11 @@
       <% if (!trendingTags.length) { %>
         <p class="muted">No tags used yet.</p>
       <% } else { %>
-        <% trendingTags.forEach(function(t){ %>
-          <a class="tag" href="/forum?tag=<%= t.slug %>" style="text-decoration:none;"><%= t.slug %> (<%= t.usageCount %>)</a>
-        <% }) %>
+        <div class="tag-group">
+          <% trendingTags.forEach(function(t){ %>
+            <a class="tag" href="/forum?tag=<%= t.slug %>" style="text-decoration:none;"><%= t.slug %> (<%= t.usageCount %>)</a>
+          <% }) %>
+        </div>
       <% } %>
       <% if (activeTag) { %>
         <hr class="rule">
@@ -77,8 +79,8 @@
                 · <%= timeAgo(p.lastActivityAt) %> · <%= p.viewCount %> views
               </div>
               <% if (p.tags && p.tags.length) { %>
-                <div style="margin-top:6px;">
-                  <% p.tags.forEach(function(t){ %><a class="tag" href="/forum?tag=<%= t %>" style="text-decoration:none;"><%= t %></a> <% }) %>
+                <div class="tag-group" style="margin-top:6px;">
+                  <% p.tags.forEach(function(t){ %><a class="tag" href="/forum?tag=<%= t %>" style="text-decoration:none;"><%= t %></a><% }) %>
                 </div>
               <% } %>
             </div>

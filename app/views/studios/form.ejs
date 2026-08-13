@@ -26,10 +26,23 @@
         <input id="coverImageUrl" type="url" name="coverImageUrl" value="<%= v('coverImageUrl') %>"></div>
       <div class="form-row">
         <div class="field-label">Gallery image URLs</div>
+        <div class="hint" style="margin-bottom:6px;">Up to 10 images.</div>
         <% var gal = (studio && studio.gallery || []).map(function(g){ return g.url; }); while (gal.length < 3) gal.push(''); %>
-        <% gal.slice(0,10).forEach(function(u){ %>
-          <div class="form-row"><input type="url" name="galleryUrl" value="<%= u %>" placeholder="https://…"></div>
-        <% }) %>
+        <div id="gallery-rows">
+          <% gal.slice(0,10).forEach(function(u){ %>
+            <div class="form-row inline gallery-row">
+              <div style="flex:1;"><input type="url" name="galleryUrl" value="<%= u %>" placeholder="https://…"></div>
+              <button type="button" class="btn small secondary remove-row">Remove</button>
+            </div>
+          <% }) %>
+        </div>
+        <template id="gallery-row-template">
+          <div class="form-row inline gallery-row">
+            <div style="flex:1;"><input type="url" name="galleryUrl" placeholder="https://…"></div>
+            <button type="button" class="btn small secondary remove-row">Remove</button>
+          </div>
+        </template>
+        <button type="button" class="btn small secondary" id="add-gallery">+ Add image</button>
       </div>
 
       <hr class="rule">
@@ -72,12 +85,23 @@
 
       <div class="form-row">
         <div class="field-label">Equipment on site</div>
-        <% equipment.slice(0,8).forEach(function(e){ %>
-          <div class="form-row inline">
-            <div style="flex:2;"><input type="text" name="equipName" value="<%= e.name || '' %>" placeholder="Aputure 300D, 3m white cyclorama…"></div>
-            <div style="flex:1;"><input type="number" name="equipQty" value="<%= e.quantity || 1 %>" min="1"></div>
+        <div id="equipment-rows">
+          <% equipment.forEach(function(e){ %>
+            <div class="form-row inline equipment-row">
+              <div style="flex:2;"><input type="text" name="equipName" value="<%= e.name || '' %>" placeholder="Aputure 300D, 3m white cyclorama…"></div>
+              <div style="flex:1;"><input type="number" name="equipQty" value="<%= e.quantity || 1 %>" min="1"></div>
+              <button type="button" class="btn small secondary remove-row">Remove</button>
+            </div>
+          <% }) %>
+        </div>
+        <template id="equipment-row-template">
+          <div class="form-row inline equipment-row">
+            <div style="flex:2;"><input type="text" name="equipName" placeholder="Aputure 300D, 3m white cyclorama…"></div>
+            <div style="flex:1;"><input type="number" name="equipQty" value="1" min="1"></div>
+            <button type="button" class="btn small secondary remove-row">Remove</button>
           </div>
-        <% }) %>
+        </template>
+        <button type="button" class="btn small secondary" id="add-equipment">+ Add equipment</button>
       </div>
 
       <div class="form-row">
@@ -108,4 +132,5 @@
     </form>
   </div>
 </div>
+<script src="/studio-form.js" defer></script>
 <%- include('../partials/footer') %>
