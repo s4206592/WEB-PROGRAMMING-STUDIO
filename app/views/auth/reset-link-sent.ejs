@@ -1,0 +1,12 @@
+<%- include('../partials/header', { pageTitle: 'Reset link' }) %>
+<div class="container" style="padding:56px 0; display:flex; justify-content:center;">
+  <div class="form-card">
+    <h2>Reset link ready</h2>
+    <div class="alert alert-success">
+      Email sending isn't wired up yet, so here's the link directly — this box will be replaced by an actual email later.
+    </div>
+    <a href="<%= resetUrl %>" class="btn btn-primary btn-block"><%= resetUrl %></a>
+    <p class="muted" style="margin-top:14px; font-size:12px;">This link expires in 30 minutes and can only be used once.</p>
+  </div>
+</div>
+<%- include('../partials/footer') %>

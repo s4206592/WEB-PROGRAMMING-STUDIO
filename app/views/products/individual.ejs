@@ -1,0 +1,48 @@
+<%- include('../partials/header', { pageTitle: product.title }) %>
+<div class="container" style="padding:40px 0;">
+  <div class="grid" style="grid-template-columns: 1fr 1fr; gap:36px;">
+    <div>
+      <div class="card-media" style="border-radius:3px; aspect-ratio:1;">
+        <% if (product.images[0]) { %><img src="<%= product.images[0] %>" alt="<%= product.title %>"/><% } else { %>NO IMAGE<% } %>
+      </div>
+    </div>
+    <div>
+      <span class="condition-badge <%= product.condition === 'new' ? 'new' : '' %>"><%= product.condition %></span>
+      <h1 style="margin-top:10px;"><%= product.title %></h1>
+      <p class="mono" style="font-size:22px; color:var(--neon);">₫<%= product.pricing.listPrice.toLocaleString() %><% if (product.pricing.negotiable) { %> <span class="muted mono" style="font-size:12px;">(negotiable)</span><% } %></p>
+      <p class="muted">Sold by <strong><%= product.sellerSnapshot.username %></strong></p>
+      <p><%= product.description %></p>
+
+      <div class="row" style="margin:24px 0;">
+        <% if (currentUser) { %>
+          <button class="btn btn-primary" data-add-to-cart="<%= product._id %>">Add to cart</button>
+          <button class="btn btn-secondary" data-add-to-wishlist="<%= product._id %>">Save to wishlist</button>
+        <% } else { %>
+          <a href="/login?next=/products/<%= product._id %>" class="btn btn-primary">Log in to buy</a>
+        <% } %>
+      </div>
+
+      <p class="muted mono" style="font-size:12px;">Rating: <%= product.ratingSummary.avg || '—' %> (<%= product.ratingSummary.count %> review<%= product.ratingSummary.count === 1 ? '' : 's' %>)</p>
+    </div>
+  </div>
+
+  <div style="margin-top:56px;">
+    <h2 class="section-title">Reviews</h2>
+    <% if (reviews.length === 0) { %>
+      <div class="empty-state">No reviews yet.</div>
+    <% } else { %>
+      <div class="stack">
+        <% reviews.forEach(function(r) { %>
+          <div class="card"><div class="card-body">
+            <div class="stars"><% for(let i=0;i<5;i++){ %><%= i < r.rating ? '★' : '☆' %><% } %></div>
+            <strong><%= r.title || '' %></strong>
+            <p><%= r.comment %></p>
+            <p class="muted" style="font-size:12px;">— <%= r.reviewerSnapshot.username %></p>
+          </div></div>
+        <% }) %>
+      </div>
+    <% } %>
+  </div>
+</div>
+<script src="/js/product.js"></script>
+<%- include('../partials/footer') %>

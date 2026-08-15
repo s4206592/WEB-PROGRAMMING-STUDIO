@@ -1,109 +1,71 @@
 require('dotenv').config();
-
-const path = require('path');
 const express = require('express');
+const path = require('path');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
-const flash = require('connect-flash');
-const morgan = require('morgan');
-const methodOverride = require('method-override');
-
-const { connectDB } = require('./src/config/db');
-const { loadUser } = require('./src/middleware/auth');
-const { locals } = require('./src/middleware/locals');
-const { ensureAdmin, ensureReferenceData } = require('./src/seed');
+const connectDB = require('./config/db');
+const { attachUser } = require('./middleware/auth.middleware');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
-const isProd = process.env.NODE_ENV === 'production';
-
-// Render terminates TLS at its proxy — this makes secure cookies work.
-app.set('trust proxy', 1);
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
-
-app.use(morgan(isProd ? 'tiny' : 'dev'));
-app.use(express.urlencoded({ extended: true, limit: '1mb' }));
-app.use(express.json({ limit: '1mb' }));
-app.use(methodOverride('_method'));
-app.use(express.static(path.join(__dirname, 'public'), { maxAge: isProd ? '7d' : 0 }));
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(session({
-  name: 'studiotrade.sid',
-  secret: process.env.SESSION_SECRET || 'dev-only-insecure-secret',
+  secret: process.env.SESSION_SECRET || 'dev-secret-change-me',
   resave: false,
   saveUninitialized: false,
-  store: MongoStore.create({
-    mongoUrl: process.env.MONGODB_URI,
-    collectionName: 'sessions',
-    ttl: 14 * 24 * 60 * 60
-  }),
-  cookie: {
-    httpOnly: true,
-    sameSite: 'lax',
-    secure: isProd,
-    maxAge: 14 * 24 * 60 * 60 * 1000
-  }
+  store: process.env.MONGODB_URI ? MongoStore.create({ mongoUrl: process.env.MONGODB_URI }) : undefined,
+  cookie: { maxAge: 1000 * 60 * 60 * 24 * 7 }
 }));
+app.use(attachUser);
 
-app.use(flash());
-app.use(locals);
-app.use(loadUser);
+// --- Module registry ---------------------------------------------------
+// Each module is one require + one app.use. To remove a module entirely
+// (routes, and by extension its pages), delete its line here and delete
+// its route file — every other module keeps working because none of them
+// import each other directly, only shared models via soft references.
+// The try/catch means a broken module fails loudly in the log but does not
+// take the rest of the site down with it.
+const moduleRegistry = [
+  ['core pages (home, sitemap)', './routes/page.routes'],
+  ['auth / account', './routes/auth.routes'],
+  ['product listing', './routes/product.routes'],
+  ['shopping cart', './routes/cart.routes'],
+  ['wishlist', './routes/wishlist.routes'],
+  ['checkout & orders', './routes/order.routes'],
+  ['product review & rating', './routes/review.routes'],
+  ['discussion forum & faq', './routes/forum.routes'],
+  ['blog', './routes/blog.routes'],
+  ['administration', './routes/admin.routes'],
+  ['notifications', './routes/notification.routes']
+];
 
-// Health check — Render pings this to confirm the service is up.
-app.get('/healthz', (req, res) => res.json({ ok: true, at: new Date().toISOString() }));
+for (const [name, file] of moduleRegistry) {
+  try {
+    app.use(require(file));
+    console.log(`[module loaded] ${name}`);
+  } catch (err) {
+    console.error(`[module failed to load] ${name}:`, err.message);
+  }
+}
 
-// ── Routes ────────────────────────────────────────────────────────
-app.use('/', require('./src/routes/index'));
-app.use('/', require('./src/routes/auth'));
-app.use('/account', require('./src/routes/account'));
-app.use('/products', require('./src/routes/products'));
-app.use('/sell', require('./src/routes/seller'));
-app.use('/offers', require('./src/routes/offers'));
-app.use('/messages', require('./src/routes/messages'));
-app.use('/cart', require('./src/routes/cart'));
-app.use('/checkout', require('./src/routes/checkout'));
-app.use('/orders', require('./src/routes/orders'));
-app.use('/reviews', require('./src/routes/reviews'));
-app.use('/wishlist', require('./src/routes/wishlist'));
-app.use('/blog', require('./src/routes/blog'));
-app.use('/forum', require('./src/routes/forum'));
-app.use('/faq', require('./src/routes/faq'));
-app.use('/studios', require('./src/routes/studios'));
-app.use('/notifications', require('./src/routes/notifications'));
-app.use('/admin', require('./src/routes/admin'));
-app.use('/', require('./src/routes/sitemap'));
-
-// ── 404 ───────────────────────────────────────────────────────────
 app.use((req, res) => {
-  res.status(404).render('error', {
-    title: 'Page not found',
-    status: 404,
-    message: `No page at ${req.path}.`
-  });
+  res.status(404).render('404', { message: "That page doesn't exist or its module isn't available right now." });
 });
 
-// ── Error handler ─────────────────────────────────────────────────
 app.use((err, req, res, next) => {
   console.error(err);
-  res.status(err.status || 500).render('error', {
-    title: 'Something went wrong',
-    status: err.status || 500,
-    message: isProd ? 'An unexpected error occurred. Try again.' : err.message
-  });
+  res.status(500).render('404', { message: 'Something went wrong on our end.' });
 });
 
-(async () => {
-  try {
-    await connectDB();
-    // Reference data (categories, FAQ/blog taxonomy) + the admin account.
-    // No demo listings, posts or orders — every user-generated table starts empty.
-    await ensureReferenceData();
-    await ensureAdmin();
-    app.listen(PORT, () => console.log(`✓ StudioTrade listening on http://localhost:${PORT}`));
-  } catch (err) {
-    console.error('✗ Startup failed:', err);
-    process.exit(1);
-  }
-})();
+const PORT = process.env.PORT || 3000;
+connectDB().then(() => {
+  app.listen(PORT, () => console.log(`StudioTrade running on port ${PORT}`));
+}).catch(err => {
+  console.error('Failed to connect to MongoDB', err);
+  process.exit(1);
+});

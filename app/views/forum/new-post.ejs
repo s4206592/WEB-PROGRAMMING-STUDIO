@@ -1,41 +1,13 @@
-<%- include('../partials/head') %>
-<%- include('../partials/header') %>
-<div class="wide">
-  <div class="box">
-    <div class="box-title">Ask a question</div>
-    <% if (errors.length) { %><div class="wf-note"><% errors.forEach(function(e){ %><div><%= e %></div><% }) %></div><% } %>
-    <form method="post" action="/forum/new">
-      <div class="form-row">
-        <label for="title">Title</label>
-        <input id="title" type="text" name="title" maxlength="200" required value="<%= form.title || '' %>" placeholder="Will a Bowens-mount softbox fit a Godox SL60W?">
-        <div class="hint">Be specific — a clear title gets answered faster.</div>
-      </div>
-      <div class="form-row">
-        <label for="body">Details</label>
-        <textarea id="body" name="body" rows="10" required placeholder="What you have tried, what gear you own, what you are unsure about."><%= form.body || '' %></textarea>
-      </div>
-      <div class="form-row">
-        <label for="tags">Tags</label>
-        <input id="tags" type="text" name="tags" value="<%= form.tags || '' %>" placeholder="lighting, godox, compatibility">
-        <div class="hint">Up to five, comma separated.</div>
-        <% if (tags.length) { %>
-          <div class="tag-group" style="margin-top:6px;">
-            <span class="wf-label">Already in use:</span>
-            <% tags.slice(0,15).forEach(function(t){ %><span class="tag"><%= t.slug %></span><% }) %>
-          </div>
-        <% } %>
-      </div>
-      <div class="form-row">
-        <div class="field-label">Attachments (image or video URLs)</div>
-        <% [1,2].forEach(function(){ %>
-          <div class="form-row"><input type="url" name="attachmentUrl" placeholder="https://…"></div>
-        <% }) %>
-      </div>
-      <div class="form-actions">
-        <button class="btn" type="submit">Post question</button>
-        <a class="btn secondary" href="/forum">Cancel</a>
-      </div>
-    </form>
-  </div>
+<%- include('../partials/header', { pageTitle: 'New post' }) %>
+<div class="container" style="padding:40px 0; max-width:560px;">
+  <h1 class="section-title">Ask a question</h1>
+  <% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+  <form id="new-post-form" method="POST" action="/forum/new">
+    <div class="field"><label>Title</label><input name="title" value="<%= old.title || '' %>" /><div class="field-error">Title must be at least 4 characters.</div></div>
+    <div class="field"><label>Details</label><textarea name="body" rows="5"><%= old.body || '' %></textarea><div class="field-error">Add a bit more detail (10+ characters).</div></div>
+    <div class="field"><label>Tags (comma-separated, optional)</label><input name="tags" /></div>
+    <button class="btn btn-primary btn-block" type="submit">Post</button>
+  </form>
 </div>
+<script src="/js/forum.js"></script>
 <%- include('../partials/footer') %>

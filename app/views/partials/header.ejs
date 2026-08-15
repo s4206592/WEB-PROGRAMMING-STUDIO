@@ -1,35 +1,31 @@
-  <header class="topbar">
-    <a class="logo" href="/">STUDIOTRADE</a>
-    <nav>
-      <a href="/products" class="<%= path.startsWith('/products') ? 'current' : '' %>">Products</a>
-      <a href="/forum" class="<%= path.startsWith('/forum') ? 'current' : '' %>">Forum</a>
-      <a href="/blog" class="<%= path.startsWith('/blog') ? 'current' : '' %>">Blog</a>
-      <a href="/studios" class="<%= path.startsWith('/studios') ? 'current' : '' %>">Studios</a>
-      <a href="/faq" class="<%= path.startsWith('/faq') ? 'current' : '' %>">FAQ</a>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title><%= typeof pageTitle !== 'undefined' ? pageTitle + ' — StudioTrade' : 'StudioTrade' %></title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="/" class="brand">STUDIO<span>TRADE</span></a>
+    <div class="nav-links">
+      <a href="/products">Marketplace</a>
+      <a href="/forum">Forum</a>
+      <a href="/faq">FAQ</a>
+      <a href="/blog">Blog</a>
       <% if (currentUser) { %>
-        <a href="/sell/new" class="<%= path.startsWith('/sell') ? 'current' : '' %>">Sell an item</a>
-      <% } %>
-    </nav>
-    <form class="topsearch" action="/products" method="get">
-      <input class="search-box" type="search" name="q" placeholder="Search listings" value="<%= query.q || '' %>">
-    </form>
-    <div class="user-icons">
-      <a class="icon-box" href="/wishlist" title="Wishlist">♡<% if (wishlistCount) { %><span class="badge"><%= wishlistCount %></span><% } %></a>
-      <a class="icon-box" href="/cart" title="Cart">🛒<% if (cartCount) { %><span class="badge"><%= cartCount %></span><% } %></a>
-      <a class="icon-box" href="/notifications" title="Notifications">🔔<% if (notifCount) { %><span class="badge"><%= notifCount %></span><% } %></a>
-      <% if (currentUser) { %>
-        <a class="icon-box" href="/account/profile" title="<%= currentUser.username %>">👤</a>
+        <a href="/wishlist">Wishlist</a>
+        <a href="/cart">Cart <span class="badge-count" data-cart-count style="display:none"></span></a>
+        <a href="/profile"><%= currentUser.username %></a>
+        <% if (currentUser.role === 'admin') { %><a href="/admin">Admin</a><% } %>
+        <form action="/logout" method="POST" style="display:inline"><button class="btn btn-secondary" type="submit" style="padding:8px 14px;">Log out</button></form>
       <% } else { %>
-        <a class="btn small" href="/login">Sign in</a>
+        <a href="/login">Log in</a>
+        <a href="/register" class="btn btn-primary" style="padding:8px 14px;">Sign up</a>
       <% } %>
     </div>
-  </header>
-  <% if (typeof breadcrumb !== 'undefined' && breadcrumb) { %>
-    <div class="breadcrumb"><%= breadcrumb %></div>
-  <% } %>
-  <% if (flashSuccess && flashSuccess.length) { %>
-    <div class="flash success"><% flashSuccess.forEach(function(m){ %><div><%= m %></div><% }) %></div>
-  <% } %>
-  <% if (flashError && flashError.length) { %>
-    <div class="flash error"><% flashError.forEach(function(m){ %><div><%= m %></div><% }) %></div>
-  <% } %>
+  </div>
+</nav>
+<main>
