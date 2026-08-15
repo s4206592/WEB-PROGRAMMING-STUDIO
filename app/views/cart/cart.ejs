@@ -1,0 +1,26 @@
+<%- include('../partials/header', { pageTitle: 'Cart' }) %>
+<div class="container" style="padding:40px 0; max-width:760px;">
+  <h1 class="section-title">Your cart</h1>
+  <% if (cart.items.length === 0) { %>
+    <div class="empty-state">Your cart is empty. <a href="/products">Browse listings</a>.</div>
+  <% } else { %>
+    <div class="stack">
+      <% var total = 0; %>
+      <% cart.items.forEach(function(i) { total += i.productSnapshot.price * i.quantity; %>
+        <div class="card" data-cart-row><div class="card-body between">
+          <div>
+            <strong><%= i.productSnapshot.title %></strong>
+            <p class="muted mono" style="font-size:13px;">₫<%= i.productSnapshot.price.toLocaleString() %> × <input data-qty-input="<%= i.productId %>" type="number" min="1" value="<%= i.quantity %>" style="width:50px; background:var(--surface-2); border:1px solid var(--line); color:var(--text); padding:4px;" /></p>
+          </div>
+          <button class="btn btn-danger" data-remove-item="<%= i.productId %>">Remove</button>
+        </div></div>
+      <% }) %>
+    </div>
+    <div class="between" style="margin-top:24px; border-top:1px solid var(--line); padding-top:16px;">
+      <span class="mono">Subtotal: ₫<%= total.toLocaleString() %></span>
+      <a href="/checkout" class="btn btn-primary">Checkout</a>
+    </div>
+  <% } %>
+</div>
+<script src="/js/cart.js"></script>
+<%- include('../partials/footer') %>

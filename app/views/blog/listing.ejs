@@ -1,0 +1,32 @@
+<%- include('../partials/header', { pageTitle: 'Blog' }) %>
+<div class="container" style="padding:40px 0;">
+  <div class="between" style="margin-bottom:24px;">
+    <h1 class="section-title" style="margin-bottom:0;">Blog</h1>
+    <% if (currentUser) { %><a href="/blog/submit" class="btn btn-primary">Write an article</a><% } %>
+  </div>
+  <form method="GET" action="/blog" class="row" style="margin-bottom:24px;">
+    <input name="q" placeholder="Search articles…" value="<%= query.q || '' %>" style="background:var(--surface-2); border:1px solid var(--line); color:var(--text); padding:10px 12px; border-radius:3px; min-width:200px;" />
+    <select name="category" style="background:var(--surface-2); border:1px solid var(--line); color:var(--text); padding:10px 12px; border-radius:3px;">
+      <option value="">All categories</option>
+      <% categories.forEach(function(c) { %><option value="<%= c %>" <%= query.category === c ? 'selected' : '' %>><%= c %></option><% }) %>
+    </select>
+    <select name="sort" style="background:var(--surface-2); border:1px solid var(--line); color:var(--text); padding:10px 12px; border-radius:3px;">
+      <option value="newest" <%= sortKey === 'newest' ? 'selected' : '' %>>Newest</option>
+      <option value="popular" <%= sortKey === 'popular' ? 'selected' : '' %>>Most viewed</option>
+    </select>
+    <button class="btn btn-secondary" type="submit">Search</button>
+  </form>
+  <% if (posts.length === 0) { %>
+    <div class="empty-state">No published articles yet.</div>
+  <% } else { %>
+    <div class="grid">
+      <% posts.forEach(function(p) { %>
+        <a class="card" href="/blog/<%= p._id %>" style="text-decoration:none; color:inherit;"><div class="card-body">
+          <span class="condition-badge"><%= p.category %></span>
+          <div class="card-title" style="margin-top:8px;"><%= p.title %></div>
+        </div></a>
+      <% }) %>
+    </div>
+  <% } %>
+</div>
+<%- include('../partials/footer') %>

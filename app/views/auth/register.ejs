@@ -1,0 +1,43 @@
+<%- include('../partials/header', { pageTitle: 'Sign up' }) %>
+<div class="container" style="padding:56px 0; display:flex; justify-content:center;">
+  <div class="form-card">
+    <h2>Create account</h2>
+    <% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+    <form id="register-form" method="POST" action="/register" novalidate>
+      <div class="field">
+        <label for="username">Username</label>
+        <input id="username" name="username" value="<%= old.username || '' %>" required minlength="3" />
+        <div class="field-error"></div>
+      </div>
+      <div class="field">
+        <label for="email">Email</label>
+        <input id="email" type="email" name="email" value="<%= old.email || '' %>" required />
+        <div class="field-error"></div>
+      </div>
+      <div class="field">
+        <label for="phone">Phone (optional)</label>
+        <input id="phone" name="phone" value="<%= old.phone || '' %>" />
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <div class="row">
+          <input id="password" type="password" name="password" required minlength="8" style="flex:1;" />
+          <button type="button" class="btn btn-secondary" data-toggle-password="password" style="padding:11px 14px;">Show</button>
+        </div>
+        <div class="field-error"></div>
+      </div>
+      <div class="field">
+        <label for="confirmPassword">Confirm password</label>
+        <div class="row">
+          <input id="confirmPassword" type="password" name="confirmPassword" required minlength="8" style="flex:1;" />
+          <button type="button" class="btn btn-secondary" data-toggle-password="confirmPassword" style="padding:11px 14px;">Show</button>
+        </div>
+        <div class="field-error"></div>
+      </div>
+      <button class="btn btn-primary btn-block" type="submit">Sign up</button>
+    </form>
+    <p class="muted" style="margin-top:14px;">Already have an account? <a href="/login">Log in</a></p>
+  </div>
+</div>
+<script src="/js/auth.js"></script>
+<%- include('../partials/footer') %>

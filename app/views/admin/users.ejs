@@ -1,0 +1,26 @@
+<%- include('../partials/header', { pageTitle: 'Manage users' }) %>
+<div class="container" style="padding:40px 0;">
+  <h1 class="section-title">Users</h1>
+  <table>
+    <thead><tr><th>Username</th><th>Email</th><th>Role</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+    <% users.forEach(function(u) { %>
+      <tr>
+        <td><%= u.username %></td>
+        <td><%= u.email %></td>
+        <td class="mono"><%= u.role %></td>
+        <td><span class="pill <%= u.status === 'active' ? 'pill-active' : 'pill-flagged' %>"><%= u.status %></span></td>
+        <td>
+          <% if (u.status === 'active') { %>
+            <form method="POST" action="/admin/users/<%= u._id %>/suspend"><button class="btn btn-danger">Suspend</button></form>
+          <% } else { %>
+            <form method="POST" action="/admin/users/<%= u._id %>/activate"><button class="btn btn-secondary">Reactivate</button></form>
+          <% } %>
+        </td>
+      </tr>
+    <% }) %>
+    </tbody>
+  </table>
+</div>
+<script src="/js/admin.js"></script>
+<%- include('../partials/footer') %>

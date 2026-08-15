@@ -1,0 +1,17 @@
+<%- include('../partials/header', { pageTitle: 'Notifications' }) %>
+<div class="container" style="padding:48px 0;">
+  <h1 class="section-title">Notifications</h1>
+  <% if (notifications.length === 0) { %>
+    <div class="empty-state">Nothing here yet.</div>
+  <% } else { %>
+    <div class="stack">
+      <% notifications.forEach(function(n) { %>
+        <div class="card"><div class="card-body">
+          <strong><%= n.title %></strong>
+          <p class="muted"><%= n.body %></p>
+        </div></div>
+      <% }) %>
+    </div>
+  <% } %>
+</div>
+<%- include('../partials/footer') %>

@@ -1,0 +1,22 @@
+<%- include('../partials/header', { pageTitle: 'Staff review' }) %>
+<div class="container" style="padding:40px 0;">
+  <h1 class="section-title">Pending articles</h1>
+  <% if (pending.length === 0) { %>
+    <div class="empty-state">Nothing waiting for review.</div>
+  <% } else { %>
+    <div class="stack">
+      <% pending.forEach(function(p) { %>
+        <div class="card"><div class="card-body">
+          <strong><%= p.title %></strong> <span class="pill pill-pending">pending</span>
+          <p class="muted"><%= p.body.slice(0,160) %>…</p>
+          <div class="row">
+            <form method="POST" action="/blog/staff/<%= p._id %>/approve"><button class="btn btn-primary">Approve</button></form>
+            <form method="POST" action="/blog/staff/<%= p._id %>/reject"><button class="btn btn-danger">Reject</button></form>
+          </div>
+        </div></div>
+      <% }) %>
+    </div>
+  <% } %>
+</div>
+<script src="/js/admin.js"></script>
+<%- include('../partials/footer') %>
