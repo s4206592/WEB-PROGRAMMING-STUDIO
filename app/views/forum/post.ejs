@@ -4,6 +4,15 @@
   <p class="muted">by <%= post.authorSnapshot.username %></p>
   <p><%= post.body %></p>
 
+  <% if (canManage) { %>
+    <div class="row" style="margin-bottom:20px;">
+      <a href="/forum/<%= post._id %>/edit" class="btn btn-secondary">Edit</a>
+      <form method="POST" action="/forum/<%= post._id %>/delete" onsubmit="return confirm('Delete this post?');">
+        <button class="btn btn-danger" type="submit">Delete</button>
+      </form>
+    </div>
+  <% } %>
+
   <h3 style="margin-top:36px;">Replies</h3>
   <% if (replies.length === 0) { %><p class="muted">No replies yet.</p><% } %>
   <div class="stack">

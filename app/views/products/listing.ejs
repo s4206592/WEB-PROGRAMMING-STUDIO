@@ -4,7 +4,7 @@
     <h1 class="section-title" style="margin-bottom:0;">All listings</h1>
     <a href="/products/new" class="btn btn-primary">List an item</a>
   </div>
-  <form method="GET" action="/products" class="row" style="margin-bottom:28px;">
+  <form method="GET" action="/products" id="product-filters" class="row" style="margin-bottom:28px;">
     <input name="q" placeholder="Search gear…" value="<%= query.q || '' %>" style="background:var(--surface-2); border:1px solid var(--line); color:var(--text); padding:10px 12px; border-radius:3px; min-width:200px;" />
     <select name="category" style="background:var(--surface-2); border:1px solid var(--line); color:var(--text); padding:10px 12px; border-radius:3px;">
       <option value="">All categories</option>
@@ -26,6 +26,11 @@
     <button class="btn btn-secondary" type="submit">Filter</button>
   </form>
 
+  <div id="recently-viewed" style="display:none; margin-bottom:36px;">
+    <h2 class="section-title" style="font-size:16px;">Recently viewed</h2>
+    <div class="grid" id="recently-viewed-grid"></div>
+  </div>
+
   <% if (products.length === 0) { %>
     <div class="empty-state">
       <p>No listings match yet. <a href="/products/new">List the first piece of gear.</a></p>
@@ -45,4 +50,5 @@
     </div>
   <% } %>
 </div>
+<script src="/js/product.js"></script>
 <%- include('../partials/footer') %>

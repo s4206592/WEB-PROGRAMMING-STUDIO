@@ -89,7 +89,51 @@ router.get('/products/:id', async (req, res) => {
       .sort({ createdAt: -1 }).lean();
   } catch (e) { /* review module unavailable */ }
 
-  res.render('products/individual', { product, reviews });
+  const isOwner = req.session.user && String(product.sellerId) === String(req.session.user.id);
+  const isAdmin = req.session.user && req.session.user.role === 'admin';
+  res.render('products/individual', { product, reviews, canManage: isOwner || isAdmin });
+});
+
+function canManageListing(req, product) {
+  if (!req.session.user) return false;
+  return String(product.sellerId) === String(req.session.user.id) || req.session.user.role === 'admin';
+}
+
+router.get('/products/:id/edit', requireLogin, async (req, res) => {
+  const product = await Product.findById(req.params.id).lean();
+  if (!product) return res.status(404).render('404', { message: 'That listing could not be found.' });
+  if (!canManageListing(req, product)) return res.status(403).render('404', { message: "You don't have access to edit this listing." });
+  res.render('products/edit-listing', { product, error: null });
+});
+
+router.post('/products/:id/edit', requireLogin, async (req, res) => {
+  const product = await Product.findById(req.params.id);
+  if (!product) return res.status(404).render('404', { message: 'That listing could not be found.' });
+  if (!canManageListing(req, product)) return res.status(403).render('404', { message: "You don't have access to edit this listing." });
+
+  const { title, description, category, condition, listPrice, negotiable, quantity, images, tags } = req.body;
+  if (!title || !description || !category || !listPrice) {
+    return res.render('products/edit-listing', { product: { ...product.toObject(), ...req.body }, error: 'Please fill in all required fields.' });
+  }
+  product.title = title;
+  product.description = description;
+  product.category = category;
+  product.condition = condition === 'new' ? 'new' : 'secondhand';
+  product.pricing.listPrice = Number(listPrice);
+  product.pricing.negotiable = negotiable === 'on';
+  product.quantityAvailable = Number(quantity) || 1;
+  product.images = images ? images.split(',').map(s => s.trim()).filter(Boolean) : [];
+  product.tags = tags ? tags.split(',').map(s => s.trim()).filter(Boolean) : [];
+  await product.save();
+  res.redirect(`/products/${product._id}`);
+});
+
+router.post('/products/:id/delete', requireLogin, async (req, res) => {
+  const product = await Product.findById(req.params.id).lean();
+  if (!product) return res.redirect('/products');
+  if (!canManageListing(req, product)) return res.status(403).render('404', { message: "You don't have access to delete this listing." });
+  await Product.deleteOne({ _id: product._id });
+  res.redirect('/products');
 });
 
 module.exports = router;

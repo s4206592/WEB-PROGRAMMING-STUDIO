@@ -1,0 +1,27 @@
+<%- include('../partials/header', { pageTitle: post.title }) %>
+<div class="container" style="padding:40px 0; max-width:680px;">
+  <span class="condition-badge"><%= post.category %></span>
+  <h1><%= post.title %></h1>
+  <p class="muted">by <%= post.authorSnapshot.username %></p>
+  <p><%= post.body %></p>
+
+  <h3 style="margin-top:36px;">Comments</h3>
+  <% if (comments.length === 0) { %><p class="muted">No comments yet.</p><% } %>
+  <div class="stack">
+    <% comments.forEach(function(c) { %>
+      <div class="card"><div class="card-body">
+        <p><%= c.body %></p>
+        <p class="muted" style="font-size:12px;">— <%= c.authorSnapshot.username %></p>
+      </div></div>
+    <% }) %>
+  </div>
+
+  <% if (currentUser) { %>
+    <form id="comment-form" method="POST" action="/blog/<%= post._id %>/comment" style="margin-top:20px;">
+      <div class="field"><textarea name="body" rows="3" placeholder="Add a comment…"></textarea><div class="field-error">Comment can't be empty.</div></div>
+      <button class="btn btn-primary" type="submit">Comment</button>
+    </form>
+  <% } %>
+</div>
+<script src="/js/blog.js"></script>
+<%- include('../partials/footer') %>

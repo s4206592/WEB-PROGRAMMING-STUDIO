@@ -6,6 +6,88 @@
 // Cart or Wishlist module's routes are deleted from server.js, the fetch
 // below simply 404s/fails and is caught — the button still visibly
 // presses because that part of the code never waits on the network.
+// --- Web Storage API: recently-viewed products + remembered filters ----
+// Both are pure client-side convenience state — never worth a database
+// round trip, and never sent to the server — so localStorage is the right
+// tool rather than a new collection.
+const RECENTLY_VIEWED_KEY = 'studiotrade_recently_viewed';
+const LAST_FILTERS_KEY = 'studiotrade_last_filters';
+
+document.addEventListener('DOMContentLoaded', () => {
+  // On an individual product page: record it as recently viewed.
+  const marker = document.getElementById('page-product');
+  if (marker) {
+    try {
+      const entry = {
+        id: marker.dataset.id, title: marker.dataset.title,
+        price: marker.dataset.price, image: marker.dataset.image
+      };
+      let list = JSON.parse(localStorage.getItem(RECENTLY_VIEWED_KEY) || '[]');
+      list = list.filter((p) => p.id !== entry.id);
+      list.unshift(entry);
+      localStorage.setItem(RECENTLY_VIEWED_KEY, JSON.stringify(list.slice(0, 6)));
+    } catch (err) { /* localStorage unavailable (private mode etc.) — skip silently */ }
+  }
+
+  // On the marketplace listing page: render recently-viewed strip, and
+  // remember/restore the last filter + sort choice used.
+  const grid = document.getElementById('recently-viewed-grid');
+  if (grid) {
+    try {
+      const list = JSON.parse(localStorage.getItem(RECENTLY_VIEWED_KEY) || '[]');
+      if (list.length > 0) {
+        document.getElementById('recently-viewed').style.display = '';
+        grid.innerHTML = list.map((p) => `
+          <a class="card" href="/products/${p.id}" style="text-decoration:none; color:inherit;">
+            <div class="card-media">${p.image ? `<img src="${p.image}" alt="">` : 'NO IMAGE'}</div>
+            <div class="gear-tag">₫${Number(p.price).toLocaleString()}</div>
+            <div class="card-body"><div class="card-title">${p.title}</div></div>
+          </a>`).join('');
+      }
+    } catch (err) { /* skip silently */ }
+  }
+
+  const filterForm = document.getElementById('product-filters');
+  if (filterForm) {
+    const hasQuery = window.location.search.length > 0;
+    if (!hasQuery) {
+      try {
+        const saved = JSON.parse(localStorage.getItem(LAST_FILTERS_KEY) || '{}');
+        Object.keys(saved).forEach((name) => {
+          const field = filterForm.querySelector(`[name="${name}"]`);
+          if (field) field.value = saved[name];
+        });
+      } catch (err) { /* skip silently */ }
+    }
+    filterForm.addEventListener('submit', () => {
+      try {
+        const data = {};
+        new FormData(filterForm).forEach((value, key) => { if (value) data[key] = value; });
+        localStorage.setItem(LAST_FILTERS_KEY, JSON.stringify(data));
+      } catch (err) { /* skip silently */ }
+    });
+  }
+});
+
+// --- Multi-item listing form validation ---------------------------------
+const listingForm = document.getElementById('listing-form');
+if (listingForm) {
+  listingForm.addEventListener('submit', (e) => {
+    let valid = true;
+    listingForm.querySelectorAll('.listing-row').forEach((row) => {
+      row.querySelectorAll('[data-field]').forEach((wrap) => {
+        const input = wrap.querySelector('input, textarea');
+        const field = wrap.dataset.field;
+        let ok = input.value.trim().length > 0;
+        if (ok && field === 'listPrice') ok = Number(input.value) >= 0;
+        wrap.classList.toggle('has-error', !ok);
+        if (!ok) valid = false;
+      });
+    });
+    if (!valid) e.preventDefault();
+  });
+}
+
 // --- Multi-item listing form (list several pieces of gear at once) -----
 const addRowBtn = document.getElementById('add-row');
 if (addRowBtn) {

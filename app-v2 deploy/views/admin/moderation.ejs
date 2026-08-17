@@ -1,0 +1,18 @@
+<%- include('../partials/header', { pageTitle: 'Moderation' }) %>
+<div class="container" style="padding:40px 0;">
+  <h1 class="section-title">Moderation queue</h1>
+  <% if (flags.length === 0) { %>
+    <div class="empty-state">No open flags.</div>
+  <% } else { %>
+    <div class="stack">
+      <% flags.forEach(function(f) { %>
+        <div class="card"><div class="card-body between">
+          <div><strong><%= f.targetType %></strong><p class="muted"><%= f.reason %></p></div>
+          <form method="POST" action="/admin/moderation/<%= f._id %>/resolve"><button class="btn btn-secondary">Resolve</button></form>
+        </div></div>
+      <% }) %>
+    </div>
+  <% } %>
+</div>
+<script src="/js/admin.js"></script>
+<%- include('../partials/footer') %>

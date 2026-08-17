@@ -1,0 +1,19 @@
+<%- include('../partials/header', { pageTitle: 'Write an article' }) %>
+<div class="container" style="padding:40px 0; max-width:560px;">
+  <h1 class="section-title">Submit an article</h1>
+  <% if (typeof success !== 'undefined' && success) { %><div class="alert alert-success">Submitted — a staff member will review it before it's published.</div><% } %>
+  <% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+  <form id="blog-submit-form" method="POST" action="/blog/submit">
+    <div class="field"><label>Title</label><input name="title" value="<%= old.title || '' %>" /></div>
+    <div class="field"><label>Category</label>
+      <select name="category">
+        <option>Buying Guides</option><option>Selling Tips</option><option>Equipment Reviews</option>
+        <option>Tutorials</option><option>Marketplace Safety</option><option>Community Stories</option>
+      </select>
+    </div>
+    <div class="field"><label>Article</label><textarea name="body" rows="8"><%= old.body || '' %></textarea></div>
+    <button class="btn btn-primary btn-block" type="submit">Submit for review</button>
+  </form>
+</div>
+<script src="/js/blog.js"></script>
+<%- include('../partials/footer') %>

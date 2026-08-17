@@ -2,7 +2,7 @@
 <div class="container" style="padding:40px 0; max-width:760px;">
   <div class="between" style="margin-bottom:24px;">
     <h1 class="section-title" style="margin-bottom:0;">Forum</h1>
-    <% if (currentUser) { %><a href="/forum/new" class="btn btn-primary">Ask a question</a><% } %>
+    <% if (currentUser) { %><a href="/forum/manage" class="btn btn-secondary">My posts</a> <a href="/forum/new" class="btn btn-primary">Ask a question</a><% } %>
   </div>
   <form method="GET" action="/forum" class="row" style="margin-bottom:24px;">
     <input name="q" placeholder="Search posts…" value="<%= query.q || '' %>" style="background:var(--surface-2); border:1px solid var(--line); color:var(--text); padding:10px 12px; border-radius:3px; min-width:200px;" />

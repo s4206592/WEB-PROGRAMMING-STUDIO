@@ -40,11 +40,55 @@ router.post('/forum/new', requireLogin, async (req, res) => {
   res.redirect(`/forum/${post._id}`);
 });
 
+// Post Management page (named in the original design doc) — lists only the
+// logged-in user's own posts with edit/delete access. Must be registered
+// before /forum/:id or Express would treat "manage" as a post id.
+router.get('/forum/manage', requireLogin, async (req, res) => {
+  const posts = await ForumPost.find({ authorId: req.session.user.id }).sort({ createdAt: -1 }).lean();
+  res.render('forum/manage', { posts });
+});
+
+function canManagePost(req, post) {
+  if (!req.session.user) return false;
+  return String(post.authorId) === String(req.session.user.id) || req.session.user.role === 'admin';
+}
+
+router.get('/forum/:id/edit', requireLogin, async (req, res) => {
+  const post = await ForumPost.findById(req.params.id).lean();
+  if (!post) return res.status(404).render('404', { message: 'Post not found.' });
+  if (!canManagePost(req, post)) return res.status(403).render('404', { message: "You don't have access to edit this post." });
+  res.render('forum/edit-post', { post, error: null });
+});
+
+router.post('/forum/:id/edit', requireLogin, async (req, res) => {
+  const post = await ForumPost.findById(req.params.id);
+  if (!post) return res.status(404).render('404', { message: 'Post not found.' });
+  if (!canManagePost(req, post)) return res.status(403).render('404', { message: "You don't have access to edit this post." });
+  const { title, body, tags } = req.body;
+  if (!title || !body) {
+    return res.render('forum/edit-post', { post: { ...post.toObject(), title, body }, error: 'Title and body are required.' });
+  }
+  post.title = title;
+  post.body = body;
+  post.tags = tags ? tags.split(',').map(s => s.trim()).filter(Boolean) : [];
+  await post.save();
+  res.redirect(`/forum/${post._id}`);
+});
+
+router.post('/forum/:id/delete', requireLogin, async (req, res) => {
+  const post = await ForumPost.findById(req.params.id).lean();
+  if (!post) return res.redirect('/forum');
+  if (!canManagePost(req, post)) return res.status(403).render('404', { message: "You don't have access to delete this post." });
+  await ForumPost.deleteOne({ _id: post._id });
+  res.redirect('/forum/manage');
+});
+
 router.get('/forum/:id', async (req, res) => {
   const post = await ForumPost.findById(req.params.id).lean();
   if (!post) return res.status(404).render('404', { message: 'Post not found.' });
   const replies = await ForumReply.find({ postId: post._id }).sort({ createdAt: 1 }).lean();
-  res.render('forum/post', { post, replies });
+  const canManage = req.session.user && (String(post.authorId) === String(req.session.user.id) || req.session.user.role === 'admin');
+  res.render('forum/post', { post, replies, canManage });
 });
 
 router.post('/forum/:id/reply', requireLogin, async (req, res) => {

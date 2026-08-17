@@ -1,0 +1,20 @@
+<%- include('../partials/header', { pageTitle: 'FAQ' }) %>
+<div class="container" style="padding:40px 0; max-width:760px;">
+  <h1 class="section-title">FAQ</h1>
+  <% var cats = Object.keys(byCategory); %>
+  <% if (cats.length === 0) { %>
+    <div class="empty-state">No FAQ entries yet.</div>
+  <% } %>
+  <% cats.forEach(function(cat) { %>
+    <h3 style="margin-top:28px;"><%= cat %></h3>
+    <div class="stack">
+      <% byCategory[cat].forEach(function(f) { %>
+        <div class="card"><div class="card-body">
+          <strong><%= f.question %></strong>
+          <p class="muted"><%= f.answer %></p>
+        </div></div>
+      <% }) %>
+    </div>
+  <% }) %>
+</div>
+<%- include('../partials/footer') %>

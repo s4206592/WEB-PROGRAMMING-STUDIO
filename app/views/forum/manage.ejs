@@ -1,0 +1,22 @@
+<%- include('../partials/header', { pageTitle: 'Manage my posts' }) %>
+<div class="container" style="padding:40px 0; max-width:680px;">
+  <h1 class="section-title">Post management</h1>
+  <% if (posts.length === 0) { %>
+    <div class="empty-state">You haven't posted yet. <a href="/forum/new">Ask a question</a>.</div>
+  <% } else { %>
+    <div class="stack">
+      <% posts.forEach(function(p) { %>
+        <div class="card"><div class="card-body between">
+          <a href="/forum/<%= p._id %>" style="text-decoration:none; color:inherit;"><strong><%= p.title %></strong></a>
+          <div class="row">
+            <a href="/forum/<%= p._id %>/edit" class="btn btn-secondary">Edit</a>
+            <form method="POST" action="/forum/<%= p._id %>/delete" onsubmit="return confirm('Delete this post?');">
+              <button class="btn btn-danger" type="submit">Delete</button>
+            </form>
+          </div>
+        </div></div>
+      <% }) %>
+    </div>
+  <% } %>
+</div>
+<%- include('../partials/footer') %>

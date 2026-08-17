@@ -23,3 +23,25 @@ window.pressFeedback = function pressFeedback(el) {
   el.classList.add('is-pressed');
   setTimeout(() => el.classList.remove('is-pressed'), 180);
 };
+
+// Mobile nav: hamburger toggles the link list as a dropdown. Desktop CSS
+// ignores the "open" state entirely (links are always visible there), so
+// this only matters below the nav's mobile breakpoint.
+const navToggle = document.getElementById('nav-toggle');
+const navLinks = document.getElementById('nav-links');
+if (navToggle && navLinks) {
+  navToggle.addEventListener('click', () => {
+    const isOpen = navLinks.classList.toggle('open');
+    navToggle.setAttribute('aria-expanded', String(isOpen));
+    navToggle.classList.toggle('open', isOpen);
+  });
+  // Close the menu after tapping a link/button inside it, so navigating
+  // doesn't leave the dropdown open on return (back button, SPA-like feel).
+  navLinks.addEventListener('click', (e) => {
+    if (e.target.closest('a, button')) {
+      navLinks.classList.remove('open');
+      navToggle.setAttribute('aria-expanded', 'false');
+      navToggle.classList.remove('open');
+    }
+  });
+}

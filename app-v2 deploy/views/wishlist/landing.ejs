@@ -1,0 +1,24 @@
+<%- include('../partials/header', { pageTitle: 'Wishlist' }) %>
+<div class="container" style="padding:40px 0; max-width:760px;">
+  <h1 class="section-title">Your wishlist</h1>
+  <% if (wishlist.items.length === 0) { %>
+    <div class="empty-state">Nothing saved yet. <a href="/products">Browse listings</a>.</div>
+  <% } else { %>
+    <div class="stack">
+      <% wishlist.items.forEach(function(i) { %>
+        <div class="card" data-wishlist-row><div class="card-body between">
+          <div>
+            <strong><%= i.productSnapshot.title %></strong>
+            <p class="muted mono" style="font-size:13px;">₫<%= i.productSnapshot.price.toLocaleString() %> · <%= i.productSnapshot.availability %></p>
+          </div>
+          <div class="row">
+            <form method="POST" action="/wishlist/<%= i.productId %>/checkout"><button class="btn btn-secondary" type="submit">Move to cart</button></form>
+            <button class="btn btn-danger" data-remove-wishlist="<%= i.productId %>">Remove</button>
+          </div>
+        </div></div>
+      <% }) %>
+    </div>
+  <% } %>
+</div>
+<script src="/js/wishlist.js"></script>
+<%- include('../partials/footer') %>

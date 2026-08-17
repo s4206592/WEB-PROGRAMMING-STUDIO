@@ -1,6 +1,6 @@
 <%- include('../partials/header', { pageTitle: product.title }) %>
 <div class="container" style="padding:40px 0;">
-  <div class="grid" style="grid-template-columns: 1fr 1fr; gap:36px;">
+  <div class="two-col">
     <div>
       <div class="card-media" style="border-radius:3px; aspect-ratio:1;">
         <% if (product.images[0]) { %><img src="<%= product.images[0] %>" alt="<%= product.title %>"/><% } else { %>NO IMAGE<% } %>
@@ -22,9 +22,18 @@
         <% } %>
       </div>
 
+      <% if (canManage) { %>
+        <div class="row" style="margin-bottom:24px;">
+          <a href="/products/<%= product._id %>/edit" class="btn btn-secondary">Edit listing</a>
+        </div>
+      <% } %>
+
       <p class="muted mono" style="font-size:12px;">Rating: <%= product.ratingSummary.avg || '—' %> (<%= product.ratingSummary.count %> review<%= product.ratingSummary.count === 1 ? '' : 's' %>)</p>
     </div>
   </div>
+  <div id="page-product" style="display:none;"
+       data-id="<%= product._id %>" data-title="<%= product.title %>"
+       data-price="<%= product.pricing.listPrice %>" data-image="<%= product.images[0] || '' %>"></div>
 
   <div style="margin-top:56px;">
     <h2 class="section-title">Reviews</h2>

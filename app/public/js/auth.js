@@ -47,6 +47,16 @@ if (registerForm) {
   });
 }
 
+const forgotForm = document.getElementById('forgot-password-form');
+if (forgotForm) {
+  forgotForm.addEventListener('submit', (e) => {
+    const email = forgotForm.querySelector('#email');
+    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim());
+    document.getElementById('forgot-email-field').classList.toggle('has-error', !emailOk);
+    if (!emailOk) e.preventDefault();
+  });
+}
+
 const resetForm = document.getElementById('reset-password-form');
 if (resetForm) {
   resetForm.addEventListener('submit', (e) => {
