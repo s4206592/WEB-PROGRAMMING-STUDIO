@@ -1,0 +1,34 @@
+<%- include('partials/header', { pageTitle: 'Home' }) %>
+<section class="hero">
+  <div class="container">
+    <p class="eyebrow">Secondhand studio gear, Vietnam</p>
+    <h1>Buy and sell<br/>studio equipment<br/>without the guesswork</h1>
+    <p class="lede">Verified listings, direct negotiation with sellers, and a 15-day return window on every order.</p>
+    <div class="row" style="margin-top:20px;">
+      <a href="/products" class="btn btn-primary">Browse listings</a>
+      <a href="/products/new" class="btn btn-secondary">Sell your gear</a>
+    </div>
+  </div>
+</section>
+<div class="container" style="padding:48px 0;">
+  <h2 class="section-title">Recently listed</h2>
+  <% if (recentProducts.length === 0) { %>
+    <div class="empty-state">
+      <p>No listings yet — be the first to <a href="/products/new">list a piece of gear</a>.</p>
+    </div>
+  <% } else { %>
+    <div class="grid">
+      <% recentProducts.forEach(function(p) { %>
+        <a class="card" href="/products/<%= p._id %>" style="text-decoration:none; color:inherit;">
+          <div class="card-media"><% if (p.images[0]) { %><img src="<%= p.images[0] %>" alt="<%= p.title %>"/><% } else { %>NO IMAGE<% } %></div>
+          <div class="gear-tag">₫<%= p.pricing.listPrice.toLocaleString() %></div>
+          <div class="card-body">
+            <div class="card-title"><%= p.title %></div>
+            <span class="condition-badge <%= p.condition === 'new' ? 'new' : '' %>"><%= p.condition %></span>
+          </div>
+        </a>
+      <% }) %>
+    </div>
+  <% } %>
+</div>
+<%- include('partials/footer') %>

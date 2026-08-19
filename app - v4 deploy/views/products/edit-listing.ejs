@@ -1,0 +1,31 @@
+<%- include('../partials/header', { pageTitle: 'Edit listing' }) %>
+<div class="container" style="padding:48px 0; max-width:560px;">
+  <h1 class="section-title">Edit listing</h1>
+  <% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+  <form id="listing-form" method="POST" action="/products/<%= product._id %>/edit" novalidate>
+    <div class="listing-row">
+      <div class="field" data-field="title"><label>Title</label><input name="title" value="<%= product.title %>" /><div class="field-error">Title is required.</div></div>
+      <div class="field" data-field="description"><label>Description</label><textarea name="description" rows="4"><%= product.description %></textarea><div class="field-error">Description is required.</div></div>
+      <div class="field" data-field="category"><label>Category</label><input name="category" value="<%= product.category %>" /><div class="field-error">Category is required.</div></div>
+      <div class="field"><label>Condition</label>
+        <select name="condition">
+          <option value="secondhand" <%= product.condition !== 'new' ? 'selected' : '' %>>Secondhand</option>
+          <option value="new" <%= product.condition === 'new' ? 'selected' : '' %>>New</option>
+        </select>
+      </div>
+      <div class="field" data-field="listPrice"><label>Price (VND)</label><input name="listPrice" type="number" min="0" value="<%= product.pricing.listPrice %>" /><div class="field-error">Enter a price of 0 or more.</div></div>
+      <div class="field"><label>Quantity</label><input name="quantity" type="number" min="1" value="<%= product.quantityAvailable %>" /></div>
+      <div class="field"><label>Image URLs (comma-separated, optional)</label><input name="images" value="<%= (product.images || []).join(', ') %>" /></div>
+      <div class="field"><label>Tags (comma-separated, optional)</label><input name="tags" value="<%= (product.tags || []).join(', ') %>" /></div>
+      <label style="display:flex; gap:8px; align-items:center; margin-bottom:20px; font-size:13px;">
+        <input type="checkbox" name="negotiable" <%= product.pricing.negotiable ? 'checked' : '' %> style="width:auto;" /> Open to offers
+      </label>
+    </div>
+    <button class="btn btn-primary btn-block" type="submit">Save changes</button>
+  </form>
+  <form method="POST" action="/products/<%= product._id %>/delete" style="margin-top:12px;" onsubmit="return confirm('Delete this listing? This cannot be undone.');">
+    <button class="btn btn-danger btn-block" type="submit">Delete listing</button>
+  </form>
+</div>
+<script src="/js/product.js"></script>
+<%- include('../partials/footer') %>

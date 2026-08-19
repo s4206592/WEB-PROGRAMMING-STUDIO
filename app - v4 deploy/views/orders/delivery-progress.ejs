@@ -1,0 +1,25 @@
+<%- include('../partials/header', { pageTitle: 'Delivery progress' }) %>
+<div class="container" style="padding:48px 0; max-width:640px;">
+  <h1 class="section-title">Order #<%= order.orderNumber %></h1>
+  <div class="row" style="margin-bottom:24px;">
+    <% ['confirmed','shipped','delivered','received'].forEach(function(stage) {
+       var reached = order.deliveryMilestones.some(function(m){ return m.stage === stage; }); %>
+      <span class="pill <%= reached ? 'pill-active' : '' %>" style="<%= reached ? '' : 'opacity:0.4;' %>"><%= stage %></span>
+    <% }) %>
+  </div>
+
+  <% if (order.status !== 'received') { %>
+    <button class="btn btn-secondary" data-advance-order="<%= order._id %>">Simulate next delivery step</button>
+  <% } %>
+
+  <% if (order.status === 'received') { %>
+    <div class="stack" style="margin-top:24px;">
+      <p class="muted">Item received. You can now review each product you bought.</p>
+      <% order.items.forEach(function(i) { %>
+        <a href="/products/<%= i.productId %>/review" class="btn btn-primary">Review "<%= i.productSnapshot.title %>"</a>
+      <% }) %>
+    </div>
+  <% } %>
+</div>
+<script src="/js/checkout.js"></script>
+<%- include('../partials/footer') %>

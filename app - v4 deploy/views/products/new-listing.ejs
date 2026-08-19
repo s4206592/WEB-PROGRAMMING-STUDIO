@@ -1,0 +1,44 @@
+<%- include('../partials/header', { pageTitle: 'List gear' }) %>
+<div class="container" style="padding:48px 0; max-width:680px;">
+  <h1 class="section-title">List your gear</h1>
+  <p class="muted" style="margin-top:-10px;">List one item or several at once — each row gets its own price and condition.</p>
+  <% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+
+  <form id="listing-form" method="POST" action="/products/new" novalidate>
+    <div id="listing-rows">
+      <% items.forEach(function(item, idx) { %>
+        <div class="card listing-row" style="padding:20px; margin-bottom:16px;">
+          <div class="between" style="margin-bottom:12px;">
+            <strong class="mono" style="font-size:12px; color:var(--muted);">ITEM <%= idx + 1 %></strong>
+            <button type="button" class="btn btn-danger" data-remove-row style="padding:6px 10px; font-size:11px; <%= items.length <= 1 ? 'display:none;' : '' %>">Remove</button>
+          </div>
+          <div class="field" data-field="title"><label>Title</label><input name="items[<%= idx %>][title]" value="<%= item.title %>" /><div class="field-error">Title is required.</div></div>
+          <div class="field" data-field="description"><label>Description</label><textarea name="items[<%= idx %>][description]" rows="3"><%= item.description %></textarea><div class="field-error">Description is required.</div></div>
+          <div class="row" style="gap:16px;">
+            <div class="field field-flex" data-field="category"><label>Category</label><input name="items[<%= idx %>][category]" value="<%= item.category %>" placeholder="Lighting, Cameras, Grip…" /><div class="field-error">Category is required.</div></div>
+            <div class="field field-flex"><label>Condition</label>
+              <select name="items[<%= idx %>][condition]">
+                <option value="secondhand" <%= item.condition !== 'new' ? 'selected' : '' %>>Secondhand</option>
+                <option value="new" <%= item.condition === 'new' ? 'selected' : '' %>>New</option>
+              </select>
+            </div>
+          </div>
+          <div class="row" style="gap:16px;">
+            <div class="field field-flex" data-field="listPrice"><label>Price (VND)</label><input name="items[<%= idx %>][listPrice]" type="number" min="0" value="<%= item.listPrice %>" /><div class="field-error">Enter a price of 0 or more.</div></div>
+            <div class="field field-flex"><label>Quantity</label><input name="items[<%= idx %>][quantity]" type="number" min="1" value="<%= item.quantity || 1 %>" /></div>
+          </div>
+          <div class="field"><label>Image URLs (comma-separated, optional)</label><input name="items[<%= idx %>][images]" value="<%= item.images || '' %>" /></div>
+          <div class="field"><label>Tags (comma-separated, optional)</label><input name="items[<%= idx %>][tags]" value="<%= item.tags || '' %>" /></div>
+          <label style="display:flex; gap:8px; align-items:center; font-size:13px;">
+            <input type="checkbox" name="items[<%= idx %>][negotiable]" checked style="width:auto;" /> Open to offers
+          </label>
+        </div>
+      <% }) %>
+    </div>
+
+    <button type="button" id="add-row" class="btn btn-secondary" style="margin-bottom:20px;">+ Add another item</button>
+    <button class="btn btn-primary btn-block" type="submit">Publish listing(s)</button>
+  </form>
+</div>
+<script src="/js/product.js"></script>
+<%- include('../partials/footer') %>

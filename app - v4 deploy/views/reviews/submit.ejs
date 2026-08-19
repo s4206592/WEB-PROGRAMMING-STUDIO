@@ -1,0 +1,28 @@
+<%- include('../partials/header', { pageTitle: 'Write a review' }) %>
+<div class="container" style="padding:48px 0; max-width:480px;">
+  <h1 class="section-title">Review "<%= product.title %>"</h1>
+  <% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+  <% if (!notEligible) { %>
+    <form id="review-form" method="POST" action="/products/<%= product._id %>/review">
+      <input type="hidden" name="orderId" value="<%= orderId %>" />
+      <input type="hidden" id="rating" name="rating" value="" />
+      <div class="field" id="rating-field">
+        <label>Your rating</label>
+        <div class="row" style="font-size:28px;">
+          <% for (let i=1;i<=5;i++) { %><span data-star="<%= i %>" style="cursor:pointer; color:var(--line);">★</span><% } %>
+        </div>
+        <div class="field-error">Please choose a star rating.</div>
+      </div>
+      <div class="field"><label>Title (optional)</label><input name="title" /></div>
+      <div class="field" id="comment-field">
+        <label>Comment</label>
+        <textarea name="comment" rows="4"></textarea>
+        <div class="field-error">Comment must be at least 5 characters.</div>
+      </div>
+      <button class="btn btn-primary btn-block" type="submit">Submit review</button>
+    </form>
+  <% } %>
+</div>
+<style>[data-star].active{ color: var(--neon) !important; }</style>
+<script src="/js/review.js"></script>
+<%- include('../partials/footer') %>

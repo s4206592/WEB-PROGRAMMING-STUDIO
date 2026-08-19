@@ -1,0 +1,35 @@
+<%- include('../partials/header', { pageTitle: 'Checkout' }) %>
+<div class="container" style="padding:40px 0; max-width:560px;">
+  <h1 class="section-title">Checkout</h1>
+  <% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+  <p class="muted">Payment goes directly to the seller. Delivery, payment, and review are all on this one page for the class-project checkout flow.</p>
+  <form id="checkout-form" method="POST" action="/checkout">
+    <h3 style="margin-top:24px;">Delivery</h3>
+    <div class="field"><label>Address</label><input name="address" required /></div>
+    <div class="field"><label>Contact phone</label><input name="contactPhone" required /></div>
+    <div class="field"><label>Shipping method</label>
+      <select name="shippingMethod">
+        <option value="Standard">Standard (3–5 days)</option>
+        <option value="Express">Express (1–2 days)</option>
+      </select>
+    </div>
+    <h3>Payment</h3>
+    <div class="field"><label>Payment method</label>
+      <select name="paymentMethod">
+        <option>Cash on delivery (simulated)</option>
+        <option>Bank transfer (simulated)</option>
+      </select>
+    </div>
+    <h3>Review order</h3>
+    <div class="stack" style="margin-bottom:20px;">
+      <% var total = 0; %>
+      <% cart.items.forEach(function(i) { total += i.productSnapshot.price * i.quantity; %>
+        <div class="between"><span><%= i.productSnapshot.title %> × <%= i.quantity %></span><span class="mono">₫<%= (i.productSnapshot.price * i.quantity).toLocaleString() %></span></div>
+      <% }) %>
+      <div class="between" style="font-weight:700; border-top:1px solid var(--line); padding-top:8px;"><span>Total (+ ₫30,000 shipping)</span><span class="mono">₫<%= (total + 30000).toLocaleString() %></span></div>
+    </div>
+    <button class="btn btn-primary btn-block" type="submit">Place order</button>
+  </form>
+</div>
+<script src="/js/checkout.js"></script>
+<%- include('../partials/footer') %>
