@@ -24,6 +24,9 @@
       <option value="rating" <%= sortKey === 'rating' ? 'selected' : '' %>>Top rated</option>
     </select>
     <button class="btn btn-secondary" type="submit">Filter</button>
+    <% if (currentUser) { %>
+      <button type="button" class="btn btn-secondary" id="save-search-btn">Save this search</button>
+    <% } %>
   </form>
 
   <div id="recently-viewed" style="display:none; margin-bottom:36px;">

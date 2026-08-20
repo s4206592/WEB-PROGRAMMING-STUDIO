@@ -6,6 +6,28 @@
 // Cart or Wishlist module's routes are deleted from server.js, the fetch
 // below simply 404s/fails and is caught — the button still visibly
 // presses because that part of the code never waits on the network.
+// --- Save this search (talks to the Wishlist module's SavedSearch API) --
+document.addEventListener('DOMContentLoaded', () => {
+  const saveSearchBtn = document.getElementById('save-search-btn');
+  if (saveSearchBtn) {
+    saveSearchBtn.addEventListener('click', async () => {
+      window.pressFeedback(saveSearchBtn);
+      const form = document.getElementById('product-filters');
+      const data = {};
+      new FormData(form).forEach((value, key) => { if (value && key !== 'sort') data[key] = value; });
+      try {
+        const res = await fetch('/api/wishlist/search', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data)
+        });
+        if (!res.ok) throw new Error('wishlist module unavailable');
+        window.showToast ? window.showToast('Search saved — view it on your Wishlist page') : console.log('Search saved');
+      } catch (err) {
+        window.showToast ? window.showToast('Could not save this search right now') : console.warn(err);
+      }
+    });
+  }
+});
+
 // --- Web Storage API: recently-viewed products + remembered filters ----
 // Both are pure client-side convenience state — never worth a database
 // round trip, and never sent to the server — so localStorage is the right

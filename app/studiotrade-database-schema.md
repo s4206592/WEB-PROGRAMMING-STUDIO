@@ -167,12 +167,14 @@ The Individual Product (IP) page queries `reviews` separately from `products` an
 ```js
 {
   _id, userId,
-  queryParams: { keywords, category, priceMin, priceMax, condition },
+  queryParams: { q, category, condition, minPrice, maxPrice },
+  label: String,          // human-readable summary shown on the Wishlist page
   alertsEnabled: Boolean,
   lastNotifiedAt, createdAt
 }
 // index: { userId: 1 }
 ```
+Implemented: "Save this search" on the marketplace filter bar (`POST /api/wishlist/search`), listed and re-runnable from `/wishlist` (`GET /api/wishlist/searches` for the JSON form, or read directly by the `/wishlist` page route), removable via `POST /api/wishlist/searches/:id/delete`. `alertsEnabled`/`lastNotifiedAt` are reserved for a future price/listing-alert job — not wired to anything yet.
 Checkout-from-wishlist just copies the `productSnapshot` (+ live price re-check) into a new `cart` item — no schema coupling required beyond that one read.
 
 ---

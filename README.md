@@ -40,9 +40,9 @@ Several modules share one route file because closely related actions (e.g. every
 **Mai Thanh Ngu — Blog, Wishlist (shared), Administration (shared)**
 - `routes/blog.routes.js`, `models/blogPost.model.js`
 - `views/blog/listing.ejs`, `views/blog/post.ejs`, `views/blog/staff-review.ejs`, `views/blog/submit.ejs`
-- `routes/wishlist.routes.js` — `POST /api/wishlist/add`, `POST /api/wishlist/remove`, `POST /wishlist/:productId/checkout`
+- `routes/wishlist.routes.js` — `POST /api/wishlist/add`, `POST /api/wishlist/remove`, `POST /wishlist/:productId/checkout`, `POST /api/wishlist/search`, `GET /api/wishlist/searches`, `POST /api/wishlist/searches/:id/delete`
 - `views/wishlist/landing.ejs` (shared with Truong Gia Bao)
-- `models/wishlist.model.js`
+- `models/wishlist.model.js`, `models/savedSearch.model.js`
 - `routes/admin.routes.js` — `GET /admin`, `GET /admin/moderation`
 - `views/admin/dashboard.ejs`, `views/admin/moderation.ejs`
 - `models/moderationFlag.model.js`
@@ -92,8 +92,41 @@ npm start
 ```
 Visit `http://localhost:3000`.
 
-### Deployment
-The app is configured for Render.com (`render.yaml` included) with a MongoDB Atlas cluster. Push to a GitHub repo, connect it as a Web Service on Render, set the same environment variables listed above, and run `npm run seed` once from Render's Shell tab after the first deploy.
+### Deploying to Render.com
+
+**1. Set up a MongoDB Atlas cluster (if you don't have one yet)**
+Create a free cluster at [mongodb.com/atlas](https://www.mongodb.com/atlas), add a database user, and allow network access from anywhere (`0.0.0.0/0`) so Render can reach it. Copy the connection string — this is your `MONGODB_URI`.
+
+**2. Push the project to a GitHub repo**
+Render deploys from a Git branch, so the code needs to be on GitHub first (`node_modules` is already excluded via `.gitignore`).
+
+**3. Create the Web Service on Render**
+- In the Render dashboard: **New → Web Service**, connect the GitHub repo.
+- **Build command:** `npm install`
+- **Start command:** `npm start`
+- (`render.yaml` is included if you'd rather use Render's Blueprint deploy instead of setting this up manually.)
+
+**4. Set environment variables**
+Under the service's **Environment** tab, add:
+- `MONGODB_URI` — your Atlas connection string
+- `SESSION_SECRET` — any long random string (Render can auto-generate one)
+- `ADMIN_EMAIL`, `ADMIN_USERNAME`, `ADMIN_PASSWORD` — credentials for the seeded admin account
+
+**5. Deploy and seed**
+Render deploys automatically after the first setup. Once it shows **Live**, open the **Shell** tab for the service and run:
+```bash
+npm run seed
+```
+This creates the admin account, starter FAQ entries, and the sample users/listings. Do this once — running it again is safe (it detects the admin account already exists and skips re-creating it).
+
+**6. Share the URL**
+The `/register` page is public, so anyone with the Render URL can create an account.
+
+**Keeping it up to date after the first deploy**
+- Go to **Settings → Build & Deploy** and confirm **Branch** matches what you actually push to (usually `main`), and **Auto-Deploy** is set to **On Commit**. With that on, every push to that branch redeploys automatically.
+- To deploy immediately without waiting on a push (or if auto-deploy is off), use the **Manual Deploy** dropdown on the service page and choose **Deploy latest commit**.
+- If changes don't seem to show up after a deploy that says "Live," check the **Events** tab to confirm a deploy actually ran — and try a hard refresh or a private/incognito tab, since browsers (and in-app browsers like Instagram/Facebook's) can aggressively cache CSS/JS.
+- A build that fails will show the error in the **Events**/**Logs** tab — usually a missing dependency or a typo in the build/start command.
 
 ---
 
@@ -102,12 +135,9 @@ The app is configured for Render.com (`render.yaml` included) with a MongoDB Atl
 1. **Register / log in** — go to `/register` to create an account, or log in at `/login` with a seeded sample user's credentials (printed by `npm run seed`).
 2. **Shopping Cart & Product Listing** — browse `/products`, open a listing, click "Add to cart," go to `/cart` to adjust quantities (subtotal updates live), then `/checkout` to place an order. Track it at `/orders/:id/delivery` — use the "Simulate next delivery step" button to move it through to "received."
 3. **Product Review and Rating** — once an order is "received," a "Review" link appears on the delivery page; submit a star rating and comment, then revisit the product page to see it listed and sortable by newest/highest/lowest rated.
-4. **Wishlist** — from any product page, click "Save to wishlist," then visit `/wishlist` to view, remove, or move an item into the cart.
+4. **Wishlist** — from any product page, click "Save to wishlist," then visit `/wishlist` to view, remove, or move an item into the cart. On `/products`, set any filter (search/category/condition/price) and click "Save this search" — it appears under "Saved searches" on `/wishlist`, where you can re-run it or remove it.
 5. **Discussion Forum and FAQ** — browse `/faq` and `/forum`; log in to post a new thread at `/forum/new`, reply to one, and manage your own posts at `/forum/manage`.
 6. **Blog** — browse `/blog`; log in to submit an article at `/blog/submit`. Log in as the **admin** account to review and approve/reject it at `/blog/staff` before it appears publicly.
 7. **User Account Management** — edit your profile at `/profile`; test the forgot-password flow at `/forgot-password` (since no email service is connected yet, the reset link is shown directly on the page instead of being emailed).
 8. **Administration** — log in as the admin account, view stats at `/admin`, manage users at `/admin/users`, and resolve flagged content at `/admin/moderation`.
 9. **Sitemap** — visit `/sitemap` to see every page across every module listed in one place; this works whether or not you're logged in.
-
-### Known gap between this report and the code
-The Wishlist module's route table in the assignment report lists **"Save search"** (`POST /api/wishlist/search`) and **"View saved searches"** (`GET /api/wishlist/searches`) as features. These are not implemented in the current build — only add/remove/move-to-cart are wired up in `routes/wishlist.routes.js`. A `SavedSearches` collection is documented in `studiotrade-database-schema.md` as part of the intended design, but no route or view exists for it yet.

@@ -1,5 +1,6 @@
 const express = require('express');
 const Wishlist = require('../models/wishlist.model');
+const SavedSearch = require('../models/savedSearch.model');
 const Cart = require('../models/cart.model');
 const Product = require('../models/product.model');
 const { requireLogin } = require('../middleware/auth.middleware');
@@ -11,7 +12,15 @@ const router = express.Router();
 
 router.get('/wishlist', requireLogin, async (req, res) => {
   const wishlist = await Wishlist.findOne({ userId: req.session.user.id }).lean();
-  res.render('wishlist/landing', { wishlist: wishlist || { items: [] } });
+
+  // Saved searches are read defensively: if that collection is ever
+  // dropped, the wishlist page still renders the saved items fine.
+  let savedSearches = [];
+  try {
+    savedSearches = await SavedSearch.find({ userId: req.session.user.id }).sort({ createdAt: -1 }).lean();
+  } catch (e) { /* saved searches unavailable */ }
+
+  res.render('wishlist/landing', { wishlist: wishlist || { items: [] }, savedSearches });
 });
 
 router.post('/api/wishlist/add', requireLogin, async (req, res) => {
@@ -65,6 +74,39 @@ router.post('/wishlist/:productId/checkout', requireLogin, async (req, res) => {
   } catch (e) {
     res.redirect('/wishlist');
   }
+});
+
+// --- Saved searches -------------------------------------------------------
+// Matches the endpoints named in the Assignment 2 report: save the current
+// marketplace filter for later, and list/remove saved searches. Own
+// collection (SavedSearch), no relation to wishlist "items" at all.
+
+router.post('/api/wishlist/search', requireLogin, async (req, res) => {
+  try {
+    const { q, category, condition, minPrice, maxPrice, label } = req.body;
+    if (!q && !category && !condition && !minPrice && !maxPrice) {
+      return res.status(400).json({ ok: false, message: 'Add at least one filter before saving a search.' });
+    }
+    const saved = await SavedSearch.create({
+      userId: req.session.user.id,
+      queryParams: { q, category, condition, minPrice: minPrice ? Number(minPrice) : undefined, maxPrice: maxPrice ? Number(maxPrice) : undefined },
+      label: label || [q, category, condition].filter(Boolean).join(' · ') || 'All listings'
+    });
+    res.json({ ok: true, id: saved._id });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ ok: false, message: 'Could not save this search.' });
+  }
+});
+
+router.get('/api/wishlist/searches', requireLogin, async (req, res) => {
+  const searches = await SavedSearch.find({ userId: req.session.user.id }).sort({ createdAt: -1 }).lean();
+  res.json({ ok: true, searches });
+});
+
+router.post('/api/wishlist/searches/:id/delete', requireLogin, async (req, res) => {
+  await SavedSearch.deleteOne({ _id: req.params.id, userId: req.session.user.id });
+  res.json({ ok: true });
 });
 
 module.exports = router;

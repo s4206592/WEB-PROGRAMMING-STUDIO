@@ -9,5 +9,14 @@ document.addEventListener('click', async (e) => {
       body: JSON.stringify({ productId })
     });
     removeBtn.closest('[data-wishlist-row]')?.remove();
+    return;
+  }
+
+  const removeSearchBtn = e.target.closest('[data-remove-saved-search]');
+  if (removeSearchBtn) {
+    window.pressFeedback(removeSearchBtn);
+    const id = removeSearchBtn.dataset.removeSavedSearch;
+    await fetch(`/api/wishlist/searches/${id}/delete`, { method: 'POST' });
+    removeSearchBtn.closest('[data-saved-search-row]')?.remove();
   }
 });

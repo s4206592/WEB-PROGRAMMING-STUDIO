@@ -19,6 +19,32 @@
       <% }) %>
     </div>
   <% } %>
+
+  <h2 class="section-title" style="margin-top:48px;">Saved searches</h2>
+  <% if (savedSearches.length === 0) { %>
+    <div class="empty-state">No saved searches yet. Save one from the <a href="/products">marketplace filters</a>.</div>
+  <% } else { %>
+    <div class="stack">
+      <% savedSearches.forEach(function(s) {
+           var params = new URLSearchParams();
+           if (s.queryParams.q) params.set('q', s.queryParams.q);
+           if (s.queryParams.category) params.set('category', s.queryParams.category);
+           if (s.queryParams.condition) params.set('condition', s.queryParams.condition);
+           if (s.queryParams.minPrice) params.set('minPrice', s.queryParams.minPrice);
+           if (s.queryParams.maxPrice) params.set('maxPrice', s.queryParams.maxPrice); %>
+        <div class="card" data-saved-search-row="<%= s._id %>"><div class="card-body between">
+          <div>
+            <strong><%= s.label %></strong>
+            <p class="muted mono" style="font-size:12px;">saved <%= new Date(s.createdAt).toLocaleDateString() %></p>
+          </div>
+          <div class="row">
+            <a href="/products?<%= params.toString() %>" class="btn btn-secondary">Run search</a>
+            <button class="btn btn-danger" data-remove-saved-search="<%= s._id %>">Remove</button>
+          </div>
+        </div></div>
+      <% }) %>
+    </div>
+  <% } %>
 </div>
 <script src="/js/wishlist.js"></script>
 <%- include('../partials/footer') %>
