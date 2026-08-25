@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
 const moderationFlagSchema = new Schema({
-  targetType: { type: String, enum: ['review', 'forum_post', 'forum_reply', 'blog_post', 'blog_comment'] },
+  targetType: { type: String, enum: ['review', 'forum_post', 'forum_reply', 'blog_post', 'blog_comment', 'studio', 'studio_review'] },
   targetId: Schema.Types.ObjectId,
   targetSnapshot: Schema.Types.Mixed,
   flaggedBy: Schema.Types.ObjectId,

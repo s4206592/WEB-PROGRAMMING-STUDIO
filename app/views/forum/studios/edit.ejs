@@ -1,0 +1,25 @@
+<%- include('../../partials/header', { pageTitle: 'Edit your studio' }) %>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<div class="container" style="padding:40px 0; max-width:640px;">
+  <h1 class="section-title">Edit your studio</h1>
+  <% if (studio.status === 'rejected') { %>
+    <div class="alert alert-error">
+      <strong>Rejected<% if (studio.reviewNote) { %>:</strong> <%= studio.reviewNote %><% } else { %></strong> No reason was given.<% } %>
+      <br/>Saving changes below will resubmit this listing for another review.
+    </div>
+  <% } %>
+  <% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+  <%- include('_form', { studio, error, formAction: `/forum/studios/${studio._id}/edit`, submitLabel: studio.status === 'rejected' ? 'Save & resubmit for review' : 'Save changes' }) %>
+</div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="/js/studio-map.js"></script>
+<script src="/js/studio-form.js"></script>
+<script>
+  StudioMap.initAddressPicker({
+    searchInputId: 'address-search', resultsListId: 'address-results',
+    latFieldId: 'location-lat', lngFieldId: 'location-lng',
+    addressFieldId: 'location-address', osmIdFieldId: 'location-osmid',
+    previewMapId: 'address-preview-map'
+  });
+</script>
+<%- include('../../partials/footer') %>

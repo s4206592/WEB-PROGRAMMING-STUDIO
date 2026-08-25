@@ -1,0 +1,38 @@
+<% const eq = Array.isArray(studio.equipmentHighlights) ? studio.equipmentHighlights.join(', ') : (studio.equipmentHighlights || ''); %>
+<% const ph = Array.isArray(studio.photos) ? studio.photos.join(', ') : (studio.photos || ''); %>
+<% const oc = studio.ownerContact || {}; %>
+<% const rt = studio.rates || {}; %>
+<% const loc = studio.location || {}; %>
+<form id="studio-form" method="POST" action="<%= formAction %>" novalidate>
+  <div class="field"><label>Studio name</label><input name="name" value="<%= studio.name || '' %>" /><div class="field-error">Give your studio a name.</div></div>
+  <div class="field"><label>Description</label><textarea name="description" rows="4"><%= studio.description || '' %></textarea><div class="field-error">Add a bit more detail (10+ characters).</div></div>
+  <div class="field"><label>Equipment / setup highlights (comma-separated)</label><input name="equipmentHighlights" value="<%= eq %>" placeholder="4K cameras, Softbox kit, Green screen…" /></div>
+  <div class="field"><label>Photo URLs (comma-separated, optional)</label><input name="photos" value="<%= ph %>" /></div>
+
+  <div class="row" style="gap:16px;">
+    <div class="field field-flex"><label>Hourly rate (optional)</label><input name="rates[hourly]" type="number" min="0" value="<%= rt.hourly || '' %>" /></div>
+    <div class="field field-flex"><label>Daily rate (optional)</label><input name="rates[daily]" type="number" min="0" value="<%= rt.daily || '' %>" /></div>
+  </div>
+
+  <div class="row" style="gap:16px;">
+    <div class="field field-flex"><label>Business name (optional)</label><input name="ownerContact[businessName]" value="<%= oc.businessName || '' %>" /></div>
+    <div class="field field-flex"><label>Phone (optional)</label><input name="ownerContact[phone]" value="<%= oc.phone || '' %>" /></div>
+  </div>
+  <div class="field"><label>Contact email (optional)</label><input name="ownerContact[contactEmail]" type="email" value="<%= oc.contactEmail || '' %>" /></div>
+
+  <div class="field" id="address-field">
+    <label>Address</label>
+    <div class="address-search-wrap">
+      <input id="address-search" autocomplete="off" placeholder="Start typing an address…" value="<%= loc.formattedAddress || '' %>" />
+      <div id="address-results" class="address-results"></div>
+    </div>
+    <div class="field-error">Pick an address from the search suggestions — free-typed addresses aren't accepted.</div>
+    <input type="hidden" name="location[lat]" id="location-lat" value="<%= loc.lat || '' %>" />
+    <input type="hidden" name="location[lng]" id="location-lng" value="<%= loc.lng || '' %>" />
+    <input type="hidden" name="location[formattedAddress]" id="location-address" value="<%= loc.formattedAddress || '' %>" />
+    <input type="hidden" name="location[osmId]" id="location-osmid" value="<%= loc.osmId || '' %>" />
+    <div id="address-preview-map" class="map-box-small" style="margin-top:12px;"></div>
+  </div>
+
+  <button class="btn btn-primary btn-block" type="submit"><%= submitLabel %></button>
+</form>

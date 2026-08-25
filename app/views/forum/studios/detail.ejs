@@ -1,0 +1,102 @@
+<%- include('../../partials/header', { pageTitle: studio.name }) %>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<div class="container" style="padding:40px 0;">
+  <div class="two-col">
+    <div>
+      <div class="card-media" style="border-radius:3px; aspect-ratio:1;">
+        <% if (studio.photos[0]) { %><img src="<%= studio.photos[0] %>" alt="<%= studio.name %>"/><% } else { %>NO PHOTO<% } %>
+      </div>
+      <div id="studio-map" class="map-box-small" style="margin-top:16px;"></div>
+      <p class="muted" style="font-size:12px; margin-top:6px;">Click the map to open this location in Google Maps.</p>
+    </div>
+    <div>
+      <% if (studio.status !== 'approved') { %>
+        <span class="pill <%= studio.status === 'rejected' ? 'pill-flagged' : 'pill-pending' %>"><%= studio.status === 'rejected' ? 'rejected' : 'pending review' %> — only visible to you</span>
+      <% } %>
+      <h1 style="margin-top:10px;"><%= studio.name %></h1>
+      <p class="muted"><%= studio.location.formattedAddress %></p>
+      <p><%= studio.description %></p>
+
+      <% if (studio.equipmentHighlights.length > 0) { %>
+        <div style="margin:16px 0;">
+          <p class="eyebrow">Equipment &amp; setup</p>
+          <p><%= studio.equipmentHighlights.join(', ') %></p>
+        </div>
+      <% } %>
+
+      <% if (studio.rates && (studio.rates.hourly || studio.rates.daily)) { %>
+        <div style="margin:16px 0;">
+          <p class="eyebrow">Rates</p>
+          <p class="mono">
+            <% if (studio.rates.hourly) { %>₫<%= studio.rates.hourly.toLocaleString() %>/hr &nbsp;<% } %>
+            <% if (studio.rates.daily) { %>₫<%= studio.rates.daily.toLocaleString() %>/day<% } %>
+          </p>
+        </div>
+      <% } %>
+
+      <% if (studio.ownerContact && (studio.ownerContact.businessName || studio.ownerContact.phone || studio.ownerContact.contactEmail)) { %>
+        <div style="margin:16px 0;">
+          <p class="eyebrow">Contact</p>
+          <p class="muted" style="font-size:14px;">
+            <%= studio.ownerContact.businessName || studio.ownerSnapshot.username %><br/>
+            <% if (studio.ownerContact.phone) { %><%= studio.ownerContact.phone %><br/><% } %>
+            <% if (studio.ownerContact.contactEmail) { %><%= studio.ownerContact.contactEmail %><% } %>
+          </p>
+        </div>
+      <% } %>
+
+      <% if (canManage) { %>
+        <div class="row" style="margin:24px 0;">
+          <a href="/forum/studios/<%= studio._id %>/edit" class="btn btn-secondary">Edit listing</a>
+        </div>
+      <% } %>
+
+      <p class="muted mono" style="font-size:12px;">Rating: <%= studio.ratingSummary.avg || '—' %> (<%= studio.ratingSummary.count %> review<%= studio.ratingSummary.count === 1 ? '' : 's' %>)</p>
+    </div>
+  </div>
+
+  <div style="margin-top:56px; max-width:640px;">
+    <h2 class="section-title">Reviews</h2>
+    <% if (currentUser && studio.status === 'approved') { %>
+      <form id="review-form" method="POST" action="/forum/studios/<%= studio._id %>/reviews" style="margin-bottom:32px;">
+        <input type="hidden" id="rating" name="rating" value="" />
+        <div class="field" id="rating-field">
+          <label>Your rating</label>
+          <div class="row" style="font-size:28px;">
+            <% for (let i=1;i<=5;i++) { %><span data-star="<%= i %>" style="cursor:pointer; color:var(--line);">★</span><% } %>
+          </div>
+          <div class="field-error">Please choose a star rating.</div>
+        </div>
+        <div class="field"><label>Title (optional)</label><input name="title" /></div>
+        <div class="field" id="comment-field">
+          <label>Comment</label>
+          <textarea name="comment" rows="4"></textarea>
+          <div class="field-error">Comment must be at least 5 characters.</div>
+        </div>
+        <button class="btn btn-primary" type="submit">Submit review</button>
+      </form>
+    <% } %>
+    <% if (reviews.length === 0) { %>
+      <div class="empty-state">No reviews yet.</div>
+    <% } else { %>
+      <div class="stack">
+        <% reviews.forEach(function(r) { %>
+          <div class="card"><div class="card-body">
+            <div class="stars"><% for(let i=0;i<5;i++){ %><%= i < r.rating ? '★' : '☆' %><% } %></div>
+            <strong><%= r.title || '' %></strong>
+            <p><%= r.comment %></p>
+            <p class="muted" style="font-size:12px;">— <%= r.reviewerSnapshot.username %></p>
+          </div></div>
+        <% }) %>
+      </div>
+    <% } %>
+  </div>
+</div>
+<style>[data-star].active{ color: var(--neon) !important; }</style>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="/js/studio-map.js"></script>
+<script src="/js/review.js"></script>
+<script>
+  StudioMap.initDetailMap('studio-map', <%= studio.location.lat %>, <%= studio.location.lng %>, <%- JSON.stringify(studio.name) %>);
+</script>
+<%- include('../../partials/footer') %>

@@ -1,0 +1,20 @@
+<%- include('../../partials/header', { pageTitle: 'Submit your studio' }) %>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<div class="container" style="padding:40px 0; max-width:640px;">
+  <h1 class="section-title">Submit your studio</h1>
+  <p class="muted" style="margin-top:-10px;">Listings are reviewed by an admin before they appear on the forum. You'll be notified if it needs changes.</p>
+  <% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+  <%- include('_form', { studio: old, error, formAction: '/forum/studios/new', submitLabel: 'Submit for review' }) %>
+</div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="/js/studio-map.js"></script>
+<script src="/js/studio-form.js"></script>
+<script>
+  StudioMap.initAddressPicker({
+    searchInputId: 'address-search', resultsListId: 'address-results',
+    latFieldId: 'location-lat', lngFieldId: 'location-lng',
+    addressFieldId: 'location-address', osmIdFieldId: 'location-osmid',
+    previewMapId: 'address-preview-map'
+  });
+</script>
+<%- include('../../partials/footer') %>

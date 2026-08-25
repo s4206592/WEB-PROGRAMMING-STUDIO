@@ -38,6 +38,11 @@ const moduleRegistry = [
   ['wishlist', './routes/wishlist.routes'],
   ['checkout & orders', './routes/order.routes'],
   ['product review & rating', './routes/review.routes'],
+  // studio.routes must load before forum.routes: forum.routes' catch-all
+  // `GET /forum/:id` (an ObjectId lookup) would otherwise intercept
+  // `/forum/studios` first, since Express matches app.use()'d routers in
+  // registration order regardless of which file a route lives in.
+  ['studio map (forum)', './routes/studio.routes'],
   ['discussion forum & faq', './routes/forum.routes'],
   ['blog', './routes/blog.routes'],
   ['administration', './routes/admin.routes'],

@@ -3,6 +3,7 @@ const User = require('../models/user.model');
 const Product = require('../models/product.model');
 const Order = require('../models/order.model');
 const ModerationFlag = require('../models/moderationFlag.model');
+const { Studio } = require('../models/studio.model');
 const { requireAdmin } = require('../middleware/auth.middleware');
 
 // Administration module. Every read here is wrapped so that a missing
@@ -18,7 +19,8 @@ router.get('/admin', requireAdmin, async (req, res) => {
     users: await safeCount(User),
     listings: await safeCount(Product, { status: 'active' }),
     orders: await safeCount(Order),
-    openFlags: await safeCount(ModerationFlag, { status: 'open' })
+    openFlags: await safeCount(ModerationFlag, { status: 'open' }),
+    pendingStudios: await safeCount(Studio, { status: 'pending_review' })
   };
   res.render('admin/dashboard', { stats });
 });

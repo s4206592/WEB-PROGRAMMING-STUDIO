@@ -192,6 +192,23 @@ th { text-transform: uppercase; font-size: 11px; letter-spacing: 0.06em; color: 
 }
 .toast.show { transform: translateY(0); opacity: 1; }
 
+/* ---- Studio Map (forum sub-feature): Leaflet map boxes + address picker ---- */
+.map-box { height: 320px; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--line); }
+.map-box-small { height: 220px; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--line); }
+.map-box .leaflet-popup-content-wrapper, .map-box-small .leaflet-popup-content-wrapper {
+  background: var(--surface); color: var(--text); border-radius: var(--radius);
+}
+.map-box .leaflet-popup-tip, .map-box-small .leaflet-popup-tip { background: var(--surface); }
+.address-search-wrap { position: relative; }
+.address-results {
+  display: none; position: absolute; top: 100%; left: 0; right: 0; z-index: 20;
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+  margin-top: 4px; max-height: 220px; overflow-y: auto;
+}
+.address-suggestion { padding: 10px 12px; font-size: 13px; cursor: pointer; border-bottom: 1px solid var(--line); }
+.address-suggestion:last-child { border-bottom: none; }
+.address-suggestion:hover { background: var(--surface-2); color: var(--neon); }
+
 /* ---- Layout helpers used across pages (kept as classes, not inline
    styles, specifically so the mobile media query below can target them) ---- */
 .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 36px; }
@@ -215,6 +232,8 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
   .hero { padding: 44px 0 32px; }
   .form-card { max-width: none; width: 100%; padding: 22px; }
   .auth-wrap { padding: 32px 16px; }
+  .map-box { height: 220px; }
+  .map-box-small { height: 180px; }
 }
 
 @media (max-width: 640px) {
