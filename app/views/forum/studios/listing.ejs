@@ -1,0 +1,33 @@
+<%- include('../../partials/header', { pageTitle: 'Studios' }) %>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<div class="container" style="padding:40px 0;">
+  <div class="between" style="margin-bottom:24px;">
+    <h1 class="section-title" style="margin-bottom:0;">Studios</h1>
+    <% if (currentUser) { %><a href="/forum/studios/manage" class="btn btn-secondary">My studios</a> <a href="/forum/studios/new" class="btn btn-primary">Submit a studio</a><% } %>
+  </div>
+
+  <div id="studios-map" class="map-box" style="margin-bottom:32px;"></div>
+
+  <% if (studios.length === 0) { %>
+    <div class="empty-state">No studios have been promoted yet.</div>
+  <% } else { %>
+    <div class="grid">
+      <% studios.forEach(function(s) { %>
+        <a class="card" href="/forum/studios/<%= s._id %>" style="text-decoration:none; color:inherit;">
+          <div class="card-media"><% if (s.photos[0]) { %><img src="<%= s.photos[0] %>" alt="<%= s.name %>"/><% } else { %>NO PHOTO<% } %></div>
+          <div class="card-body">
+            <p class="card-title"><%= s.name %></p>
+            <p class="muted" style="font-size:13px;"><%= s.location.formattedAddress %></p>
+            <p class="mono" style="font-size:12px; color:var(--neon);"><%= s.ratingSummary.avg || '—' %> ★ (<%= s.ratingSummary.count %>)</p>
+          </div>
+        </a>
+      <% }) %>
+    </div>
+  <% } %>
+</div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="/js/studio-map.js"></script>
+<script>
+  StudioMap.initListWidget('studios-map', <%- JSON.stringify(mapStudios) %>);
+</script>
+<%- include('../../partials/footer') %>

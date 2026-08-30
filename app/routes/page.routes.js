@@ -20,7 +20,7 @@ router.get('/sitemap', (req, res) => {
     { module: 'Marketplace', links: [['Product Listing', '/products'], ['List an item', '/products/new']] },
     { module: 'Shopping Cart', links: [['Cart', '/cart']] },
     { module: 'Wishlist', links: [['Wishlist', '/wishlist']] },
-    { module: 'Discussion Forum & FAQ', links: [['FAQ', '/faq'], ['Forum', '/forum']] },
+    { module: 'Discussion Forum & FAQ', links: [['FAQ', '/faq'], ['Forum', '/forum'], ['Studios', '/forum/studios']] },
     { module: 'Blog', links: [['Blog', '/blog'], ['Submit an article', '/blog/submit']] },
     { module: 'Account', links: [['Register', '/register'], ['Log in', '/login'], ['Profile', '/profile']] },
     { module: 'Administration', links: [['Admin dashboard', '/admin']] }

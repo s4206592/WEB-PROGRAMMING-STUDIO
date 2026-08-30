@@ -1,0 +1,33 @@
+<%- include('../../partials/header', { pageTitle: 'Studio review queue' }) %>
+<div class="container" style="padding:40px 0;">
+  <h1 class="section-title">Pending studios</h1>
+  <% if (pending.length === 0) { %>
+    <div class="empty-state">Nothing waiting for review.</div>
+  <% } else { %>
+    <div class="stack">
+      <% pending.forEach(function(s) { %>
+        <div class="card"><div class="card-body">
+          <div class="between">
+            <strong><%= s.name %></strong> <span class="pill pill-pending">pending</span>
+          </div>
+          <p class="muted" style="font-size:13px;">Submitted by <%= s.ownerSnapshot.username %> &middot; <%= s.location.formattedAddress %></p>
+          <p><%= s.description.slice(0,220) %><%= s.description.length > 220 ? '…' : '' %></p>
+          <% if (s.reviewHistory && s.reviewHistory.some(function(h){ return h.action === 'resubmitted'; })) { %>
+            <p class="muted" style="font-size:12px;">↻ Resubmitted after a previous rejection.</p>
+          <% } %>
+          <div class="row" style="margin-top:12px; align-items:flex-start;">
+            <form method="POST" action="/forum/studios/staff/<%= s._id %>/approve" class="row" style="gap:6px;">
+              <input type="text" name="note" placeholder="Approval note (optional)" style="background:var(--surface-2); border:1px solid var(--line); color:var(--text); padding:10px 12px; border-radius:3px;" />
+              <button class="btn btn-primary" type="submit">Approve</button>
+            </form>
+            <form method="POST" action="/forum/studios/staff/<%= s._id %>/reject" class="row" style="gap:6px;" onsubmit="return this.reason.value.trim().length > 0;">
+              <input type="text" name="reason" required placeholder="Reason for rejection" style="background:var(--surface-2); border:1px solid var(--line); color:var(--text); padding:10px 12px; border-radius:3px;" />
+              <button class="btn btn-danger" type="submit">Reject</button>
+            </form>
+          </div>
+        </div></div>
+      <% }) %>
+    </div>
+  <% } %>
+</div>
+<%- include('../../partials/footer') %>

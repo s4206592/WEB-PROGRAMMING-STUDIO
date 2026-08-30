@@ -1,0 +1,31 @@
+<%- include('../../partials/header', { pageTitle: 'My studios' }) %>
+<div class="container" style="padding:40px 0; max-width:760px;">
+  <div class="between" style="margin-bottom:24px;">
+    <h1 class="section-title" style="margin-bottom:0;">My studios</h1>
+    <a href="/forum/studios/new" class="btn btn-primary">Submit a studio</a>
+  </div>
+  <% if (studios.length === 0) { %>
+    <div class="empty-state">You haven't submitted a studio yet. <a href="/forum/studios/new">Submit one</a>.</div>
+  <% } else { %>
+    <div class="stack">
+      <% studios.forEach(function(s) { %>
+        <div class="card"><div class="card-body">
+          <div class="between">
+            <strong><%= s.name %></strong>
+            <% if (s.status === 'approved') { %><span class="pill pill-active">approved</span>
+            <% } else if (s.status === 'rejected') { %><span class="pill pill-flagged">rejected</span>
+            <% } else { %><span class="pill pill-pending">pending review</span><% } %>
+          </div>
+          <% if (s.status === 'rejected' && s.reviewNote) { %>
+            <p class="muted" style="font-size:13px; margin-top:8px;">Admin note: <%= s.reviewNote %></p>
+          <% } %>
+          <div class="row" style="margin-top:12px;">
+            <% if (s.status === 'approved') { %><a href="/forum/studios/<%= s._id %>" class="btn btn-secondary">View</a><% } %>
+            <a href="/forum/studios/<%= s._id %>/edit" class="btn btn-secondary"><%= s.status === 'rejected' ? 'Edit & resubmit' : 'Edit' %></a>
+          </div>
+        </div></div>
+      <% }) %>
+    </div>
+  <% } %>
+</div>
+<%- include('../../partials/footer') %>
