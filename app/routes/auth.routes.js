@@ -16,7 +16,7 @@ router.post('/register', async (req, res) => {
   try {
     const { username, email, phone, password, confirmPassword } = req.body;
 
-    if (!username || !email || !password || !confirmPassword) {
+    if (!username || !email || !phone || !password || !confirmPassword) {
       return res.render('auth/register', { error: 'All required fields must be filled in.', old: req.body });
     }
     if (password.length < 8) {
@@ -27,7 +27,7 @@ router.post('/register', async (req, res) => {
     }
 
     const duplicate = await User.findOne({
-      $or: [{ username }, { email: email.toLowerCase() }, ...(phone ? [{ phone }] : [])]
+      $or: [{ username }, { email: email.toLowerCase() }, { phone }]
     });
     if (duplicate) {
       return res.render('auth/register', {
@@ -38,7 +38,7 @@ router.post('/register', async (req, res) => {
 
     const passwordHash = await bcrypt.hash(password, 10);
     const user = await User.create({
-      username, email: email.toLowerCase(), phone: phone || undefined, passwordHash,
+      username, email: email.toLowerCase(), phone, passwordHash,
       profile: { displayName: username }
     });
 

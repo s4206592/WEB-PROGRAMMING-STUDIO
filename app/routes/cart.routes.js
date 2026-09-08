@@ -17,6 +17,7 @@ router.post('/api/cart/add', requireLogin, async (req, res) => {
     const { productId, quantity } = req.body;
     const product = await Product.findById(productId).lean();
     if (!product) return res.status(404).json({ ok: false, message: 'Product not found.' });
+    if (product.status !== 'active') return res.status(409).json({ ok: false, message: 'This item is no longer available.' });
 
     let cart = await Cart.findOne({ userId: req.session.user.id });
     if (!cart) cart = new Cart({ userId: req.session.user.id, items: [] });

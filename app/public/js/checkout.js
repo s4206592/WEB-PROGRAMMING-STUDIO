@@ -12,18 +12,3 @@ if (checkoutForm) {
     if (!valid) e.preventDefault();
   });
 }
-
-document.addEventListener('click', async (e) => {
-  const advanceBtn = e.target.closest('[data-advance-order]');
-  if (advanceBtn) {
-    window.pressFeedback(advanceBtn);
-    const orderId = advanceBtn.dataset.advanceOrder;
-    try {
-      const res = await fetch(`/orders/${orderId}/advance`, { method: 'POST' });
-      const data = await res.json();
-      if (data.ok) window.location.reload();
-    } catch (err) {
-      window.showToast && window.showToast('Could not update delivery status.');
-    }
-  }
-});

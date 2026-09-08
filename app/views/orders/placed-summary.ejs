@@ -1,0 +1,18 @@
+<%- include('../partials/header', { pageTitle: 'Orders placed' }) %>
+<div class="container" style="padding:48px 0; max-width:560px;">
+  <p class="eyebrow">Orders placed</p>
+  <h1>Thanks — <%= orders.length %> orders sent to their sellers</h1>
+  <p class="muted">Your cart had items from <%= orders.length %> different sellers, so it was split into <%= orders.length %> separate orders — each seller confirms and ships their own.</p>
+  <div class="stack" style="margin-top:24px;">
+    <% orders.forEach(function(order) { %>
+      <div class="card"><div class="card-body between">
+        <div>
+          <strong class="mono">#<%= order.orderNumber %></strong>
+          <p class="muted" style="font-size:13px;">₫<%= order.totals.total.toLocaleString() %> · <%= order.items[0].productSnapshot.sellerName %></p>
+        </div>
+        <a href="/orders/<%= order._id %>/delivery" class="btn btn-secondary">Track</a>
+      </div></div>
+    <% }) %>
+  </div>
+</div>
+<%- include('../partials/footer') %>

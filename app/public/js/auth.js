@@ -24,6 +24,7 @@ if (registerForm) {
     let valid = true;
     const username = registerForm.querySelector('#username');
     const email = registerForm.querySelector('#email');
+    const phone = registerForm.querySelector('#phone');
     const password = registerForm.querySelector('#password');
     const confirm = registerForm.querySelector('#confirmPassword');
 
@@ -34,6 +35,10 @@ if (registerForm) {
     const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim());
     if (!emailOk) { setError(email.closest('.field'), 'Enter a valid email address.'); valid = false; }
     else setError(email.closest('.field'), '');
+
+    const phoneOk = /^[0-9+()\-\s]{7,}$/.test(phone.value.trim());
+    if (!phoneOk) { setError(phone.closest('.field'), 'Enter a valid phone number — it\'s required to trade on the platform.'); valid = false; }
+    else setError(phone.closest('.field'), '');
 
     if (password.value.length < 8) {
       setError(password.closest('.field'), 'Password must be at least 8 characters.'); valid = false;

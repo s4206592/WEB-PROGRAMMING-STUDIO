@@ -1,9 +1,10 @@
 <%- include('../partials/header', { pageTitle: 'Order confirmed' }) %>
 <div class="container" style="padding:48px 0; max-width:560px;">
   <p class="eyebrow">Order placed</p>
-  <h1>Thanks — it's confirmed</h1>
+  <h1>Thanks — order sent to the seller</h1>
   <p class="mono">Order #<%= order.orderNumber %></p>
-  <p class="muted">Total: <span class="mono">₫<%= order.totals.total.toLocaleString() %></span></p>
+  <p class="muted">Total: <span class="mono">₫<%= order.totals.total.toLocaleString() %></span> · Cash on Delivery</p>
+  <p class="muted">Waiting on the seller to confirm. You'll pay in cash when it arrives.</p>
   <a href="/orders/<%= order._id %>/delivery" class="btn btn-primary" style="margin-top:16px;">Track delivery</a>
 </div>
 <%- include('../partials/footer') %>

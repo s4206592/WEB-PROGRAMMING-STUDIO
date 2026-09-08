@@ -14,11 +14,11 @@ router.get('/products/:id/review', requireLogin, async (req, res) => {
   if (!product) return res.status(404).render('404', { message: 'Product not found.' });
 
   const eligibleOrder = await Order.findOne({
-    buyerId: req.session.user.id, status: 'received', 'items.productId': product._id
+    buyerId: req.session.user.id, status: 'delivered', 'items.productId': product._id
   }).lean();
 
   if (!eligibleOrder) {
-    return res.render('reviews/submit', { product, error: 'You can only review items from an order marked as received.', notEligible: true });
+    return res.render('reviews/submit', { product, error: 'You can only review items from an order the seller has marked delivered.', notEligible: true });
   }
   res.render('reviews/submit', { product, error: null, notEligible: false, orderId: eligibleOrder._id });
 });

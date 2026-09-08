@@ -1,0 +1,47 @@
+<% var other = convo.participantSnapshots.find(function(p) { return String(p.userId) !== String(myId); }); %>
+<%- include('../partials/header', { pageTitle: other ? other.username : 'Conversation' }) %>
+<div class="container" style="padding:40px 0; max-width:640px;">
+  <h1 class="section-title" style="margin-bottom:6px;"><%= other ? other.username : 'Conversation' %></h1>
+  <% if (convo.relatedProductSnapshot && convo.relatedProductSnapshot.title) { %>
+    <p class="muted" style="margin-top:-14px; margin-bottom:20px;">
+      Re: <a href="/products/<%= convo.relatedProductId %>"><%= convo.relatedProductSnapshot.title %></a>
+      · Listed at ₫<%= (convo.relatedProductSnapshot.listPrice || 0).toLocaleString() %>
+    </p>
+  <% } %>
+
+  <% if (isSeller && convo.relatedProductId) { %>
+    <div class="card" style="margin-bottom:20px;"><div class="card-body">
+      <p class="eyebrow">Negotiation</p>
+      <form method="POST" action="/messages/<%= convo._id %>/confirm-price" class="row" style="margin-top:8px;">
+        <input type="number" name="amount" min="1" placeholder="Agreed price (₫)" style="background:var(--surface-2); border:1px solid var(--line); color:var(--text); padding:10px 12px; border-radius:3px; flex:1;" />
+        <button class="btn btn-primary" type="submit">Confirm price</button>
+      </form>
+      <% if (convo.negotiation && convo.negotiation.agreedPrice) { %>
+        <p class="muted" style="font-size:12px; margin-top:8px;">Currently confirmed at ₫<%= convo.negotiation.agreedPrice.toLocaleString() %>.</p>
+      <% } %>
+    </div></div>
+  <% } else if (!isSeller && convo.negotiation && convo.negotiation.agreedPrice) { %>
+    <div class="card" style="margin-bottom:20px;"><div class="card-body between">
+      <span>Seller confirmed <strong class="mono">₫<%= convo.negotiation.agreedPrice.toLocaleString() %></strong></span>
+      <a href="/messages/<%= convo._id %>/checkout" class="btn btn-primary">Checkout at this price</a>
+    </div></div>
+  <% } %>
+
+  <div id="message-list" class="stack" style="margin-bottom:20px; max-height:420px; overflow-y:auto;"
+       data-conversation-id="<%= convo._id %>" data-my-id="<%= myId %>"
+       data-last-sent-at="<%= messages.length ? messages[messages.length - 1].sentAt.toISOString() : '' %>">
+    <% messages.forEach(function(m) { %>
+      <div class="card" style="align-self:<%= String(m.senderId) === String(myId) ? 'flex-end' : 'flex-start' %>;"><div class="card-body">
+        <p class="muted" style="font-size:11px; margin-bottom:2px;"><%= m.senderSnapshot.username %></p>
+        <p style="margin:0;"><%= m.body %></p>
+      </div></div>
+    <% }) %>
+  </div>
+
+  <form id="message-form" method="POST" action="/messages/<%= convo._id %>/send" class="row">
+    <input name="body" placeholder="Type a message…" autocomplete="off" style="background:var(--surface-2); border:1px solid var(--line); color:var(--text); padding:11px 12px; border-radius:3px; flex:1;" required />
+    <button class="btn btn-primary" type="submit">Send</button>
+  </form>
+</div>
+<script src="/js/messages.js"></script>
+<%- include('../partials/footer') %>

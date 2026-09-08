@@ -38,6 +38,7 @@ const moduleRegistry = [
   ['wishlist', './routes/wishlist.routes'],
   ['checkout & orders', './routes/order.routes'],
   ['product review & rating', './routes/review.routes'],
+  ['buyer-seller chat & negotiation', './routes/chat.routes'],
   // studio.routes must load before forum.routes: forum.routes' catch-all
   // `GET /forum/:id` (an ObjectId lookup) would otherwise intercept
   // `/forum/studios` first, since Express matches app.use()'d routers in

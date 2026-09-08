@@ -154,8 +154,11 @@ document.addEventListener('click', async (e) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ productId, quantity: 1 })
       });
-      if (!res.ok) throw new Error('cart module unavailable');
       const data = await res.json();
+      if (!data.ok) {
+        window.showToast ? window.showToast(data.message || 'Could not add to cart') : console.warn(data.message);
+        return;
+      }
       const badge = document.querySelector('[data-cart-count]');
       if (badge && typeof data.itemCount === 'number') badge.textContent = data.itemCount;
       window.showToast ? window.showToast('Added to cart') : console.log('Added to cart');

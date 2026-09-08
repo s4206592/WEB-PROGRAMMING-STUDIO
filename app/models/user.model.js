@@ -4,7 +4,11 @@ const { Schema } = mongoose;
 const userSchema = new Schema({
   username: { type: String, required: true, unique: true, trim: true },
   email: { type: String, required: true, unique: true, lowercase: true, trim: true },
-  phone: { type: String, unique: true, sparse: true },
+  // required: trading on the platform means a buyer/seller needs to be
+  // reachable by phone. sparse stays on so the one pre-existing account
+  // without a phone (created before this became mandatory) doesn't collide
+  // with the unique index.
+  phone: { type: String, required: true, unique: true, sparse: true },
   passwordHash: { type: String, required: true },
   role: { type: String, enum: ['buyer_seller', 'moderator', 'staff', 'admin'], default: 'buyer_seller' },
   profile: {

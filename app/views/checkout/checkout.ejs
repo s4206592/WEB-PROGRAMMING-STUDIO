@@ -2,8 +2,12 @@
 <div class="container" style="padding:40px 0; max-width:560px;">
   <h1 class="section-title">Checkout</h1>
   <% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
-  <p class="muted">Payment goes directly to the seller. Delivery, payment, and review are all on this one page for the class-project checkout flow.</p>
+  <p class="muted">Delivery and order review are on this one page for the class-project checkout flow.</p>
+  <% if (negotiatedConversationId) { %>
+    <p class="muted" style="font-size:13px;">Checking out at the price agreed in your <a href="/messages/<%= negotiatedConversationId %>">chat with the seller</a>.</p>
+  <% } %>
   <form id="checkout-form" method="POST" action="/checkout">
+    <% if (negotiatedConversationId) { %><input type="hidden" name="negotiatedConversationId" value="<%= negotiatedConversationId %>" /><% } %>
     <h3 style="margin-top:24px;">Delivery</h3>
     <div class="field"><label>Address</label><input name="address" required /></div>
     <div class="field"><label>Contact phone</label><input name="contactPhone" required /></div>
@@ -14,19 +18,20 @@
       </select>
     </div>
     <h3>Payment</h3>
-    <div class="field"><label>Payment method</label>
-      <select name="paymentMethod">
-        <option>Cash on delivery (simulated)</option>
-        <option>Bank transfer (simulated)</option>
-      </select>
-    </div>
+    <p class="muted" style="margin-top:-6px;">Cash on Delivery — pay the seller in cash when your order arrives. It's the only payment method right now.</p>
     <h3>Review order</h3>
     <div class="stack" style="margin-bottom:20px;">
-      <% var total = 0; %>
-      <% cart.items.forEach(function(i) { total += i.productSnapshot.price * i.quantity; %>
+      <% var subtotal = 0; %>
+      <% var sellerIds = new Set(); %>
+      <% cart.items.forEach(function(i) { subtotal += i.productSnapshot.price * i.quantity; sellerIds.add(String(i.productSnapshot.sellerId)); }) %>
+      <% cart.items.forEach(function(i) { %>
         <div class="between"><span><%= i.productSnapshot.title %> × <%= i.quantity %></span><span class="mono">₫<%= (i.productSnapshot.price * i.quantity).toLocaleString() %></span></div>
       <% }) %>
-      <div class="between" style="font-weight:700; border-top:1px solid var(--line); padding-top:8px;"><span>Total (+ ₫30,000 shipping)</span><span class="mono">₫<%= (total + 30000).toLocaleString() %></span></div>
+      <% var shippingTotal = sellerIds.size * 30000; %>
+      <% if (sellerIds.size > 1) { %>
+        <p class="muted" style="font-size:12px;">Items are from <%= sellerIds.size %> different sellers, so this will be placed as <%= sellerIds.size %> separate orders — each with its own ₫30,000 shipping.</p>
+      <% } %>
+      <div class="between" style="font-weight:700; border-top:1px solid var(--line); padding-top:8px;"><span>Total (+ ₫<%= shippingTotal.toLocaleString() %> shipping)</span><span class="mono">₫<%= (subtotal + shippingTotal).toLocaleString() %></span></div>
     </div>
     <button class="btn btn-primary btn-block" type="submit">Place order</button>
   </form>
