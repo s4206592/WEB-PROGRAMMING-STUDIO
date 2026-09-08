@@ -15,8 +15,9 @@
         <div class="field-error"></div>
       </div>
       <div class="field">
-        <label for="phone">Phone (optional)</label>
-        <input id="phone" name="phone" value="<%= old.phone || '' %>" />
+        <label for="phone">Phone</label>
+        <input id="phone" name="phone" value="<%= old.phone || '' %>" required minlength="7" />
+        <div class="field-error"></div>
       </div>
       <div class="field">
         <label for="password">Password</label>
