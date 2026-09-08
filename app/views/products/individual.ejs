@@ -9,18 +9,41 @@
     <div>
       <span class="condition-badge <%= product.condition === 'new' ? 'new' : '' %>"><%= product.condition %></span>
       <h1 style="margin-top:10px;"><%= product.title %></h1>
-      <p class="mono" style="font-size:22px; color:var(--neon);">₫<%= product.pricing.listPrice.toLocaleString() %><% if (product.pricing.negotiable) { %> <span class="muted mono" style="font-size:12px;">(negotiable)</span><% } %></p>
+      <p class="mono" style="font-size:22px; color:var(--neon);">₫<%= product.pricing.listPrice.toLocaleString() %><% if (product.pricing.negotiable && product.status === 'active') { %> <span class="muted mono" style="font-size:12px;">(negotiable)</span><% } %></p>
       <p class="muted">Sold by <strong><%= product.sellerSnapshot.username %></strong></p>
       <p><%= product.description %></p>
 
-      <div class="row" style="margin:24px 0;">
-        <% if (currentUser) { %>
-          <button class="btn btn-primary" data-add-to-cart="<%= product._id %>">Add to cart</button>
-          <button class="btn btn-secondary" data-add-to-wishlist="<%= product._id %>">Save to wishlist</button>
-        <% } else { %>
-          <a href="/login?next=/products/<%= product._id %>" class="btn btn-primary">Log in to buy</a>
-        <% } %>
-      </div>
+      <% if (product.status === 'sold') { %>
+        <p class="pill pill-flagged" style="margin:24px 0; display:inline-block;">Sold out</p>
+      <% } else if (product.status !== 'active') { %>
+        <p class="pill pill-pending" style="margin:24px 0; display:inline-block;">Not currently available</p>
+      <% } else { %>
+        <div class="row" style="margin:24px 0;">
+          <% if (currentUser) { %>
+            <button class="btn btn-primary" data-add-to-cart="<%= product._id %>">Add to cart</button>
+            <button class="btn btn-secondary" data-add-to-wishlist="<%= product._id %>">Save to wishlist</button>
+          <% } else { %>
+            <a href="/login?next=/products/<%= product._id %>" class="btn btn-primary">Log in to buy</a>
+          <% } %>
+        </div>
+      <% } %>
+
+      <% if (currentUser && String(currentUser.id) !== String(product.sellerId)) { %>
+        <div class="row" style="margin-bottom:24px;">
+          <form method="POST" action="/messages/start">
+            <input type="hidden" name="toUserId" value="<%= product.sellerId %>" />
+            <input type="hidden" name="productId" value="<%= product._id %>" />
+            <button class="btn btn-secondary" type="submit">Message seller</button>
+          </form>
+          <% if (product.pricing.negotiable && product.status === 'active') { %>
+            <form method="POST" action="/messages/start">
+              <input type="hidden" name="toUserId" value="<%= product.sellerId %>" />
+              <input type="hidden" name="productId" value="<%= product._id %>" />
+              <button class="btn btn-secondary" type="submit">Negotiate price</button>
+            </form>
+          <% } %>
+        </div>
+      <% } %>
 
       <% if (canManage) { %>
         <div class="row" style="margin-bottom:24px;">

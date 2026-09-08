@@ -1,0 +1,26 @@
+<%- include('../partials/header', { pageTitle: 'Messages' }) %>
+<div class="container" style="padding:40px 0; max-width:680px;">
+  <h1 class="section-title">Messages</h1>
+  <% if (conversations.length === 0) { %>
+    <div class="empty-state">No conversations yet. Message a seller from any product page to start one.</div>
+  <% } else { %>
+    <div class="stack">
+      <% conversations.forEach(function(c) {
+           var other = c.participantSnapshots.find(function(p) { return String(p.userId) !== String(myId); }); %>
+        <a class="card" href="/messages/<%= c._id %>" style="text-decoration:none; color:inherit;"><div class="card-body between">
+          <div>
+            <strong><%= other ? other.username : 'Unknown user' %></strong>
+            <% if (c.relatedProductSnapshot && c.relatedProductSnapshot.title) { %>
+              <p class="muted" style="font-size:12px;">Re: <%= c.relatedProductSnapshot.title %></p>
+            <% } %>
+            <p class="muted" style="font-size:13px;"><%= c.lastMessagePreview || 'No messages yet' %></p>
+          </div>
+          <% if (c.negotiation && c.negotiation.agreedPrice) { %>
+            <span class="pill pill-active">₫<%= c.negotiation.agreedPrice.toLocaleString() %></span>
+          <% } %>
+        </div></a>
+      <% }) %>
+    </div>
+  <% } %>
+</div>
+<%- include('../partials/footer') %>

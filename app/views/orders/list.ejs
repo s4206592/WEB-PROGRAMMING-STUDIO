@@ -1,0 +1,20 @@
+<%- include('../partials/header', { pageTitle: 'My orders' }) %>
+<div class="container" style="padding:40px 0; max-width:760px;">
+  <h1 class="section-title">My orders</h1>
+  <% if (orders.length === 0) { %>
+    <div class="empty-state">No orders yet. <a href="/products">Browse the marketplace</a>.</div>
+  <% } else { %>
+    <div class="stack">
+      <% orders.forEach(function(order) { %>
+        <a class="card" href="/orders/<%= order._id %>/delivery" style="text-decoration:none; color:inherit;"><div class="card-body between">
+          <div>
+            <strong class="mono">#<%= order.orderNumber %></strong>
+            <p class="muted" style="font-size:13px;"><%= order.items.length %> item<%= order.items.length === 1 ? '' : 's' %> · ₫<%= order.totals.total.toLocaleString() %></p>
+          </div>
+          <span class="pill <%= order.status === 'delivered' ? 'pill-active' : order.status === 'cancelled' ? 'pill-flagged' : 'pill-pending' %>"><%= order.status %></span>
+        </div></a>
+      <% }) %>
+    </div>
+  <% } %>
+</div>
+<%- include('../partials/footer') %>

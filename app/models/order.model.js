@@ -13,14 +13,16 @@ const orderSchema = new Schema({
   }],
   delivery: { address: String, contactPhone: String, shippingMethod: String },
   payment: {
-    method: { type: String, default: 'Cash on delivery (simulated)' },
-    status: { type: String, enum: ['pending', 'paid', 'failed'], default: 'pending' },
-    simulatedRef: String
+    // Cash on Delivery is the only method for now. status stays 'pending'
+    // until the seller marks the order delivered — that's the real moment
+    // cash changes hands, not the moment the order is placed.
+    method: { type: String, enum: ['cod'], default: 'cod' },
+    status: { type: String, enum: ['pending', 'paid', 'failed'], default: 'pending' }
   },
   totals: { subtotal: Number, shippingFee: Number, total: Number },
   status: {
     type: String,
-    enum: ['placed', 'confirmed', 'shipped', 'delivered', 'received', 'disputed', 'completed'],
+    enum: ['placed', 'confirmed', 'shipped', 'delivered', 'received', 'cancelled', 'disputed', 'completed'],
     default: 'placed'
   },
   deliveryMilestones: [{ stage: String, at: { type: Date, default: Date.now } }],

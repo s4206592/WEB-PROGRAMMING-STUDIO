@@ -18,7 +18,8 @@ router.get('/', async (req, res) => {
 router.get('/sitemap', (req, res) => {
   const structure = [
     { module: 'Marketplace', links: [['Product Listing', '/products'], ['List an item', '/products/new']] },
-    { module: 'Shopping Cart', links: [['Cart', '/cart']] },
+    { module: 'Shopping Cart', links: [['Cart', '/cart'], ['Checkout', '/checkout'], ['My orders', '/orders'], ['Orders to fulfill', '/orders/selling']] },
+    { module: 'Buyer-Seller Chat & Negotiation', links: [['Messages', '/messages']] },
     { module: 'Wishlist', links: [['Wishlist', '/wishlist']] },
     { module: 'Discussion Forum & FAQ', links: [['FAQ', '/faq'], ['Forum', '/forum'], ['Studios', '/forum/studios']] },
     { module: 'Blog', links: [['Blog', '/blog'], ['Submit an article', '/blog/submit']] },
