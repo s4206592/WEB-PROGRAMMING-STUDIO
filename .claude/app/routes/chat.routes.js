@@ -74,15 +74,13 @@ router.post('/messages/:id/send', requireLogin, async (req, res) => {
 
   const body = (req.body.body || '').trim();
   if (body) {
-    try {
-      await Message.create({
-        conversationId: convo._id, senderId: req.session.user.id,
-        senderSnapshot: { username: req.session.user.username }, body
-      });
-      convo.lastMessageAt = new Date();
-      convo.lastMessagePreview = body.slice(0, 140);
-      await convo.save();
-    } catch (err) { console.error(err); }
+    await Message.create({
+      conversationId: convo._id, senderId: req.session.user.id,
+      senderSnapshot: { username: req.session.user.username }, body
+    });
+    convo.lastMessageAt = new Date();
+    convo.lastMessagePreview = body.slice(0, 140);
+    await convo.save();
   }
   res.redirect(`/messages/${convo._id}`);
 });
@@ -98,17 +96,15 @@ router.post('/messages/:id/confirm-price', requireLogin, async (req, res) => {
 
   const amount = Number(req.body.amount);
   if (amount > 0) {
-    try {
-      convo.negotiation = { agreedPrice: amount, confirmedAt: new Date() };
-      const preview = `Confirmed price: ₫${amount.toLocaleString()}`;
-      convo.lastMessageAt = new Date();
-      convo.lastMessagePreview = preview;
-      await convo.save();
-      await Message.create({
-        conversationId: convo._id, senderId: req.session.user.id,
-        senderSnapshot: { username: req.session.user.username }, body: preview
-      });
-    } catch (err) { console.error(err); }
+    convo.negotiation = { agreedPrice: amount, confirmedAt: new Date() };
+    const preview = `Confirmed price: ₫${amount.toLocaleString()}`;
+    convo.lastMessageAt = new Date();
+    convo.lastMessagePreview = preview;
+    await convo.save();
+    await Message.create({
+      conversationId: convo._id, senderId: req.session.user.id,
+      senderSnapshot: { username: req.session.user.username }, body: preview
+    });
   }
   res.redirect(`/messages/${convo._id}`);
 });

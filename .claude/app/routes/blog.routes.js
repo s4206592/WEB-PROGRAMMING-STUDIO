@@ -25,16 +25,11 @@ router.post('/blog/submit', requireLogin, async (req, res) => {
   if (!title || !category || !body) {
     return res.render('blog/submit', { error: 'All fields are required.', old: req.body });
   }
-  try {
-    await BlogPost.create({
-      authorId: req.session.user.id, authorSnapshot: { username: req.session.user.username },
-      title, category, body
-    });
-    res.render('blog/submit', { error: null, old: {}, success: true });
-  } catch (err) {
-    console.error(err);
-    res.render('blog/submit', { error: 'Could not submit your article. Please try again.', old: req.body });
-  }
+  await BlogPost.create({
+    authorId: req.session.user.id, authorSnapshot: { username: req.session.user.username },
+    title, category, body
+  });
+  res.render('blog/submit', { error: null, old: {}, success: true });
 });
 
 // Staff Review Dashboard — staff/admin only, reachable even if the public
@@ -45,19 +40,19 @@ router.get('/blog/staff', requireAdmin, async (req, res) => {
 });
 
 router.post('/blog/staff/:id/approve', requireAdmin, async (req, res) => {
-  try { await BlogPost.findByIdAndUpdate(req.params.id, { status: 'published', publishedAt: new Date() }); } catch (err) { console.error(err); }
+  await BlogPost.findByIdAndUpdate(req.params.id, { status: 'published', publishedAt: new Date() });
   res.redirect('/blog/staff');
 });
 
 router.post('/blog/staff/:id/reject', requireAdmin, async (req, res) => {
-  try { await BlogPost.findByIdAndUpdate(req.params.id, { status: 'rejected' }); } catch (err) { console.error(err); }
+  await BlogPost.findByIdAndUpdate(req.params.id, { status: 'rejected' });
   res.redirect('/blog/staff');
 });
 
 router.get('/blog/:id', async (req, res) => {
   const post = await BlogPost.findById(req.params.id).lean();
   if (!post) return res.status(404).render('404', { message: 'Article not found.' });
-  BlogPost.findByIdAndUpdate(req.params.id, { $inc: { viewCount: 1 } }).exec().catch(err => console.error(err));
+  BlogPost.findByIdAndUpdate(req.params.id, { $inc: { viewCount: 1 } }).exec();
   const comments = await BlogComment.find({ postId: post._id }).sort({ createdAt: 1 }).lean();
   res.render('blog/post', { post, comments });
 });
@@ -65,13 +60,11 @@ router.get('/blog/:id', async (req, res) => {
 router.post('/blog/:id/comment', requireLogin, async (req, res) => {
   const post = await BlogPost.findById(req.params.id).lean();
   if (!post || !req.body.body) return res.redirect(`/blog/${req.params.id}`);
-  try {
-    await BlogComment.create({
-      postId: post._id, postSnapshot: { title: post.title },
-      authorId: req.session.user.id, authorSnapshot: { username: req.session.user.username },
-      body: req.body.body
-    });
-  } catch (err) { console.error(err); }
+  await BlogComment.create({
+    postId: post._id, postSnapshot: { title: post.title },
+    authorId: req.session.user.id, authorSnapshot: { username: req.session.user.username },
+    body: req.body.body
+  });
   res.redirect(`/blog/${req.params.id}`);
 });
 

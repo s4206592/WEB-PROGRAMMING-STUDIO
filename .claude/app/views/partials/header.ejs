@@ -25,7 +25,7 @@
         <a href="/orders">Orders</a>
         <a href="/orders/selling">Selling</a>
         <a href="/messages">Messages</a>
-        <a href="/profile"><%= currentUser.username %></a>
+        <a href="/profile" class="nav-username" title="<%= currentUser.username %>"><%= currentUser.username %></a>
         <% if (currentUser.role === 'admin') { %><a href="/admin">Admin</a><% } %>
         <form action="/logout" method="POST" class="nav-logout-form"><button class="btn btn-secondary" type="submit" style="padding:8px 14px;">Log out</button></form>
       <% } else { %>

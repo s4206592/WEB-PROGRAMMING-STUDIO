@@ -85,7 +85,7 @@ const REVIEW_SORT_OPTIONS = {
 router.get('/products/:id', async (req, res) => {
   const product = await Product.findById(req.params.id).lean();
   if (!product) return res.status(404).render('404', { message: 'That listing could not be found.' });
-  Product.findByIdAndUpdate(req.params.id, { $inc: { viewCount: 1 } }).exec().catch(err => console.error(err));
+  Product.findByIdAndUpdate(req.params.id, { $inc: { viewCount: 1 } }).exec();
 
   // Reviews are read defensively: if the Review module/collection is gone,
   // the product page still renders with an empty reviews list.
@@ -122,29 +122,24 @@ router.post('/products/:id/edit', requireLogin, async (req, res) => {
   if (!title || !description || !category || !listPrice) {
     return res.render('products/edit-listing', { product: { ...product.toObject(), ...req.body }, error: 'Please fill in all required fields.' });
   }
-  try {
-    product.title = title;
-    product.description = description;
-    product.category = category;
-    product.condition = condition === 'new' ? 'new' : 'secondhand';
-    product.pricing.listPrice = Number(listPrice);
-    product.pricing.negotiable = negotiable === 'on';
-    product.quantityAvailable = Number(quantity) || 1;
-    product.images = images ? images.split(',').map(s => s.trim()).filter(Boolean) : [];
-    product.tags = tags ? tags.split(',').map(s => s.trim()).filter(Boolean) : [];
-    await product.save();
-    res.redirect(`/products/${product._id}`);
-  } catch (err) {
-    console.error(err);
-    res.render('products/edit-listing', { product: { ...product.toObject(), ...req.body }, error: 'Could not save your changes. Please try again.' });
-  }
+  product.title = title;
+  product.description = description;
+  product.category = category;
+  product.condition = condition === 'new' ? 'new' : 'secondhand';
+  product.pricing.listPrice = Number(listPrice);
+  product.pricing.negotiable = negotiable === 'on';
+  product.quantityAvailable = Number(quantity) || 1;
+  product.images = images ? images.split(',').map(s => s.trim()).filter(Boolean) : [];
+  product.tags = tags ? tags.split(',').map(s => s.trim()).filter(Boolean) : [];
+  await product.save();
+  res.redirect(`/products/${product._id}`);
 });
 
 router.post('/products/:id/delete', requireLogin, async (req, res) => {
   const product = await Product.findById(req.params.id).lean();
   if (!product) return res.redirect('/products');
   if (!canManageListing(req, product)) return res.status(403).render('404', { message: "You don't have access to delete this listing." });
-  try { await Product.deleteOne({ _id: product._id }); } catch (err) { console.error(err); }
+  await Product.deleteOne({ _id: product._id });
   res.redirect('/products');
 });
 

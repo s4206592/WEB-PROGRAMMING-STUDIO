@@ -78,6 +78,10 @@ h2 { font-size: clamp(22px, 3vw, 32px); }
 .nav-links { display: flex; gap: 22px; align-items: center; flex-wrap: wrap; font-size: 14px; }
 .nav-links a { text-decoration: none; color: var(--muted); }
 .nav-links a:hover { color: var(--text); }
+.nav-links .nav-username {
+  max-width: 140px; overflow: hidden; text-overflow: ellipsis;
+  white-space: nowrap; display: inline-block; vertical-align: bottom;
+}
 .nav-links .badge-count {
   background: var(--neon); color: #0b0c0e; font-family: var(--font-mono);
   font-size: 11px; padding: 1px 6px; border-radius: 10px; margin-left: 4px;
@@ -250,6 +254,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
   }
   .nav-links a { border-bottom: 1px solid var(--line); }
   .nav-links a:last-of-type { border-bottom: none; }
+  .nav-links .nav-username { max-width: none; }
 
   .grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
   .between { flex-wrap: wrap; gap: 8px; }
