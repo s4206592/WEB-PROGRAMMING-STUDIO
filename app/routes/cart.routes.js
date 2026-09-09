@@ -45,20 +45,30 @@ router.post('/api/cart/add', requireLogin, async (req, res) => {
 });
 
 router.post('/api/cart/update', requireLogin, async (req, res) => {
-  const { productId, quantity } = req.body;
-  const cart = await Cart.findOne({ userId: req.session.user.id });
-  if (!cart) return res.json({ ok: false });
-  const item = cart.items.find(i => String(i.productId) === String(productId));
-  if (item) item.quantity = Math.max(1, Number(quantity) || 1);
-  cart.updatedAt = new Date();
-  await cart.save();
-  res.json({ ok: true });
+  try {
+    const { productId, quantity } = req.body;
+    const cart = await Cart.findOne({ userId: req.session.user.id });
+    if (!cart) return res.json({ ok: false });
+    const item = cart.items.find(i => String(i.productId) === String(productId));
+    if (item) item.quantity = Math.max(1, Number(quantity) || 1);
+    cart.updatedAt = new Date();
+    await cart.save();
+    res.json({ ok: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ ok: false, message: 'Could not update cart.' });
+  }
 });
 
 router.post('/api/cart/remove', requireLogin, async (req, res) => {
-  const { productId } = req.body;
-  await Cart.updateOne({ userId: req.session.user.id }, { $pull: { items: { productId } } });
-  res.json({ ok: true });
+  try {
+    const { productId } = req.body;
+    await Cart.updateOne({ userId: req.session.user.id }, { $pull: { items: { productId } } });
+    res.json({ ok: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ ok: false, message: 'Could not remove item.' });
+  }
 });
 
 module.exports = router;

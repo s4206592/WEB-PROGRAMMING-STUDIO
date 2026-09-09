@@ -8,6 +8,16 @@ const { attachUser } = require('./middleware/auth.middleware');
 
 const app = express();
 
+// Last-resort safety net: an async route handler that forgets a try/catch
+// rejects a promise Express never sees, which by default crashes the whole
+// Node process — taking the site down for every concurrent user over one
+// bad request. Route handlers should still catch their own errors (that's
+// what returns a proper error page to the one affected user); this just
+// stops an uncaught one from ending the process for everyone else.
+process.on('unhandledRejection', (err) => {
+  console.error('Unhandled rejection (recovered, process kept alive):', err);
+});
+
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.urlencoded({ extended: true }));

@@ -31,13 +31,18 @@ router.post('/forum/new', requireLogin, async (req, res) => {
   if (!title || !body) {
     return res.render('forum/new-post', { error: 'Title and body are required.', old: req.body });
   }
-  const post = await ForumPost.create({
-    authorId: req.session.user.id,
-    authorSnapshot: { username: req.session.user.username },
-    title, body,
-    tags: tags ? tags.split(',').map(s => s.trim()).filter(Boolean) : []
-  });
-  res.redirect(`/forum/${post._id}`);
+  try {
+    const post = await ForumPost.create({
+      authorId: req.session.user.id,
+      authorSnapshot: { username: req.session.user.username },
+      title, body,
+      tags: tags ? tags.split(',').map(s => s.trim()).filter(Boolean) : []
+    });
+    res.redirect(`/forum/${post._id}`);
+  } catch (err) {
+    console.error(err);
+    res.render('forum/new-post', { error: 'Could not create your post. Please try again.', old: req.body });
+  }
 });
 
 // Post Management page (named in the original design doc) — lists only the
@@ -68,18 +73,25 @@ router.post('/forum/:id/edit', requireLogin, async (req, res) => {
   if (!title || !body) {
     return res.render('forum/edit-post', { post: { ...post.toObject(), title, body }, error: 'Title and body are required.' });
   }
-  post.title = title;
-  post.body = body;
-  post.tags = tags ? tags.split(',').map(s => s.trim()).filter(Boolean) : [];
-  await post.save();
-  res.redirect(`/forum/${post._id}`);
+  try {
+    post.title = title;
+    post.body = body;
+    post.tags = tags ? tags.split(',').map(s => s.trim()).filter(Boolean) : [];
+    await post.save();
+    res.redirect(`/forum/${post._id}`);
+  } catch (err) {
+    console.error(err);
+    res.render('forum/edit-post', { post: { ...post.toObject(), title, body }, error: 'Could not save your changes. Please try again.' });
+  }
 });
 
 router.post('/forum/:id/delete', requireLogin, async (req, res) => {
   const post = await ForumPost.findById(req.params.id).lean();
   if (!post) return res.redirect('/forum');
   if (!canManagePost(req, post)) return res.status(403).render('404', { message: "You don't have access to delete this post." });
-  await ForumPost.deleteOne({ _id: post._id });
+  try {
+    await ForumPost.deleteOne({ _id: post._id });
+  } catch (err) { console.error(err); }
   res.redirect('/forum/manage');
 });
 
@@ -94,11 +106,13 @@ router.get('/forum/:id', async (req, res) => {
 router.post('/forum/:id/reply', requireLogin, async (req, res) => {
   const post = await ForumPost.findById(req.params.id).lean();
   if (!post || !req.body.body) return res.redirect(`/forum/${req.params.id}`);
-  await ForumReply.create({
-    postId: post._id, postSnapshot: { title: post.title },
-    authorId: req.session.user.id, authorSnapshot: { username: req.session.user.username },
-    body: req.body.body
-  });
+  try {
+    await ForumReply.create({
+      postId: post._id, postSnapshot: { title: post.title },
+      authorId: req.session.user.id, authorSnapshot: { username: req.session.user.username },
+      body: req.body.body
+    });
+  } catch (err) { console.error(err); }
   res.redirect(`/forum/${req.params.id}`);
 });
 

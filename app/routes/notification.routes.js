@@ -11,8 +11,13 @@ router.get('/notifications', requireLogin, async (req, res) => {
 });
 
 router.post('/notifications/:id/read', requireLogin, async (req, res) => {
-  await Notification.findByIdAndUpdate(req.params.id, { isRead: true });
-  res.json({ ok: true });
+  try {
+    await Notification.findByIdAndUpdate(req.params.id, { isRead: true });
+    res.json({ ok: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ ok: false });
+  }
 });
 
 module.exports = router;

@@ -10,10 +10,36 @@ const Product = require('../models/product.model');
 const Faq = require('../models/faq.model');
 
 const FAQ_SEED = [
-  { category: 'Purchasing & Shipping', question: 'How do I buy an item?', answer: 'Open a listing, make an offer or buy at the listed price, then complete checkout.', order: 1 },
-  { category: 'Returns & Refunds', question: 'What is the 15-day window?', answer: 'You have 15 days after delivery to raise a dispute before the sale is treated as final.', order: 1 },
-  { category: 'Payments', question: 'How does payment work?', answer: 'Payment goes directly to the seller at checkout; there is no platform-held escrow.', order: 1 },
-  { category: 'Account & General', question: 'How do I reset my password?', answer: 'Use "Forgot password?" on the log in page.', order: 1 }
+  // Purchasing & Shipping
+  { category: 'Purchasing & Shipping', question: 'How do I buy an item?', answer: 'Open a listing, add it to your cart (or negotiate a price with the seller first via chat), then complete checkout.', order: 1 },
+  { category: 'Purchasing & Shipping', question: 'What happens if my cart has items from different sellers?', answer: 'Checkout automatically splits it into one order per seller, each with its own ₫30,000 shipping — every seller only ever confirms and ships their own order.', order: 2 },
+  { category: 'Purchasing & Shipping', question: 'How do I know when my order has shipped?', answer: 'Check "Orders" in the nav for live status. Since there’s no courier integration, the seller manually marks each order confirmed, shipped, and delivered.', order: 3 },
+  { category: 'Purchasing & Shipping', question: 'Why can’t I add an item to my cart anymore?', answer: 'It’s sold out — once a seller confirms an order, that item’s stock is deducted and the listing is marked sold when it hits zero.', order: 4 },
+
+  // Payments
+  { category: 'Payments', question: 'How does payment work?', answer: 'Cash on Delivery is the only payment method right now — you pay the seller in cash when the order arrives. There’s no platform-held escrow or online payment gateway.', order: 1 },
+  { category: 'Payments', question: 'When does my order actually get paid?', answer: 'Payment is marked complete the moment the seller confirms delivery — that’s the real point cash changes hands for a Cash on Delivery order.', order: 2 },
+  { category: 'Payments', question: 'Is my order protected if the seller never confirms it?', answer: 'Nothing is charged or deducted from stock until the seller confirms, so there’s no financial risk while it’s pending. If a seller is unresponsive, message them directly from the order’s chat thread.', order: 3 },
+
+  // Returns & Refunds
+  { category: 'Returns & Refunds', question: 'What is the 15-day window?', answer: 'You have 15 days after the seller marks your order delivered to raise a dispute before the sale is treated as final.', order: 1 },
+  { category: 'Returns & Refunds', question: 'When can I leave a review?', answer: 'Reviewing unlocks once the seller marks your order delivered — go to the product page and click "Review" from your order.', order: 2 },
+
+  // Account & General
+  { category: 'Account & General', question: 'How do I reset my password?', answer: 'Use "Forgot password?" on the log in page.', order: 1 },
+  { category: 'Account & General', question: 'Why do I need to give a phone number to sign up?', answer: 'A phone number is required for every account since buyers and sellers need a way to coordinate a trade beyond in-app chat.', order: 2 },
+  { category: 'Account & General', question: 'What’s the difference between a buyer and a seller account?', answer: 'There isn’t one — every account can both list gear for sale and buy from other sellers. Admin accounts additionally review studio submissions and moderate the forum.', order: 3 },
+
+  // Studios (Discussion Forum sub-feature)
+  { category: 'Studios', question: 'What is Studio Map?', answer: 'A forum feature where studio owners promote their space to the community — an admin-approved listing with a map, equipment highlights, and ratings.', order: 1 },
+  { category: 'Studios', question: 'How do I list my studio?', answer: 'Go to Forum → Studios → "Submit a studio," fill in the details, and pick your address from the map search suggestions — free-typed addresses aren’t accepted.', order: 2 },
+  { category: 'Studios', question: 'How long does approval take?', answer: 'An admin reviews every new submission before it appears on the map or studio list — there’s no fixed turnaround time.', order: 3 },
+  { category: 'Studios', question: 'My studio was rejected — can I fix it and resubmit?', answer: 'Yes. Open it from "My studios," you’ll see the admin’s note explaining why, and saving your edits automatically resubmits it for another review.', order: 4 },
+
+  // Messaging & Negotiation
+  { category: 'Messaging & Negotiation', question: 'How do I negotiate a price with a seller?', answer: 'On any listing marked "negotiable," click "Negotiate price" to open a chat with the seller. Once you agree on a number, the seller confirms it in the thread and you can check out at that price.', order: 1 },
+  { category: 'Messaging & Negotiation', question: 'Can I message a seller without making an offer?', answer: 'Yes — "Message seller" opens the same kind of chat thread without involving price at all.', order: 2 },
+  { category: 'Messaging & Negotiation', question: 'Do other buyers see my conversation with a seller?', answer: 'No. Each conversation is private between you and the seller, even if the seller is chatting with several buyers about the same listing at once.', order: 3 }
 ];
 
 const SAMPLE_USERS = [

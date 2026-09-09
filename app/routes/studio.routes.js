@@ -128,25 +128,29 @@ router.get('/forum/studios/staff', requireAdmin, async (req, res) => {
 });
 
 router.post('/forum/studios/staff/:id/approve', requireAdmin, async (req, res) => {
-  await Studio.findByIdAndUpdate(req.params.id, {
-    status: 'approved',
-    reviewNote: req.body.note || '',
-    reviewedBy: req.session.user.id,
-    reviewedAt: new Date(),
-    $push: { reviewHistory: { action: 'approved', note: req.body.note || '', byId: req.session.user.id } }
-  });
+  try {
+    await Studio.findByIdAndUpdate(req.params.id, {
+      status: 'approved',
+      reviewNote: req.body.note || '',
+      reviewedBy: req.session.user.id,
+      reviewedAt: new Date(),
+      $push: { reviewHistory: { action: 'approved', note: req.body.note || '', byId: req.session.user.id } }
+    });
+  } catch (err) { console.error(err); }
   res.redirect('/forum/studios/staff');
 });
 
 router.post('/forum/studios/staff/:id/reject', requireAdmin, async (req, res) => {
   if (!req.body.reason) return res.redirect('/forum/studios/staff');
-  await Studio.findByIdAndUpdate(req.params.id, {
-    status: 'rejected',
-    reviewNote: req.body.reason,
-    reviewedBy: req.session.user.id,
-    reviewedAt: new Date(),
-    $push: { reviewHistory: { action: 'rejected', note: req.body.reason, byId: req.session.user.id } }
-  });
+  try {
+    await Studio.findByIdAndUpdate(req.params.id, {
+      status: 'rejected',
+      reviewNote: req.body.reason,
+      reviewedBy: req.session.user.id,
+      reviewedAt: new Date(),
+      $push: { reviewHistory: { action: 'rejected', note: req.body.reason, byId: req.session.user.id } }
+    });
+  } catch (err) { console.error(err); }
   res.redirect('/forum/studios/staff');
 });
 
@@ -175,24 +179,29 @@ router.post('/forum/studios/:id/edit', requireLogin, async (req, res) => {
   const ownerContact = req.body.ownerContact || {};
   const rates = req.body.rates || {};
 
-  studio.name = name;
-  studio.description = description;
-  studio.equipmentHighlights = splitList(req.body.equipmentHighlights);
-  studio.photos = splitList(req.body.photos);
-  studio.rates = { hourly: rates.hourly ? Number(rates.hourly) : undefined, daily: rates.daily ? Number(rates.daily) : undefined };
-  studio.ownerContact = { businessName: ownerContact.businessName, phone: ownerContact.phone, contactEmail: ownerContact.contactEmail };
-  studio.location = location;
+  try {
+    studio.name = name;
+    studio.description = description;
+    studio.equipmentHighlights = splitList(req.body.equipmentHighlights);
+    studio.photos = splitList(req.body.photos);
+    studio.rates = { hourly: rates.hourly ? Number(rates.hourly) : undefined, daily: rates.daily ? Number(rates.daily) : undefined };
+    studio.ownerContact = { businessName: ownerContact.businessName, phone: ownerContact.phone, contactEmail: ownerContact.contactEmail };
+    studio.location = location;
 
-  // Resubmit loop: an edit after rejection re-enters the review queue.
-  // An edit to an already-approved listing keeps its current status —
-  // only the reject -> edit -> resubmit cycle is in scope here.
-  if (studio.status === 'rejected') {
-    studio.status = 'pending_review';
-    studio.reviewHistory.push({ action: 'resubmitted', byId: req.session.user.id });
+    // Resubmit loop: an edit after rejection re-enters the review queue.
+    // An edit to an already-approved listing keeps its current status —
+    // only the reject -> edit -> resubmit cycle is in scope here.
+    if (studio.status === 'rejected') {
+      studio.status = 'pending_review';
+      studio.reviewHistory.push({ action: 'resubmitted', byId: req.session.user.id });
+    }
+
+    await studio.save();
+    res.redirect('/forum/studios/manage');
+  } catch (err) {
+    console.error(err);
+    res.render('forum/studios/edit', { studio: { ...studio.toObject(), ...req.body }, error: 'Could not save your changes. Please try again.' });
   }
-
-  await studio.save();
-  res.redirect('/forum/studios/manage');
 });
 
 router.get('/forum/studios/:id', async (req, res) => {

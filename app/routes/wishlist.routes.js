@@ -51,9 +51,14 @@ router.post('/api/wishlist/add', requireLogin, async (req, res) => {
 });
 
 router.post('/api/wishlist/remove', requireLogin, async (req, res) => {
-  const { productId } = req.body;
-  await Wishlist.updateOne({ userId: req.session.user.id }, { $pull: { items: { productId } } });
-  res.json({ ok: true });
+  try {
+    const { productId } = req.body;
+    await Wishlist.updateOne({ userId: req.session.user.id }, { $pull: { items: { productId } } });
+    res.json({ ok: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ ok: false, message: 'Could not remove item.' });
+  }
 });
 
 // Move a saved item straight into the cart. If the Cart module has been
@@ -105,8 +110,13 @@ router.get('/api/wishlist/searches', requireLogin, async (req, res) => {
 });
 
 router.post('/api/wishlist/searches/:id/delete', requireLogin, async (req, res) => {
-  await SavedSearch.deleteOne({ _id: req.params.id, userId: req.session.user.id });
-  res.json({ ok: true });
+  try {
+    await SavedSearch.deleteOne({ _id: req.params.id, userId: req.session.user.id });
+    res.json({ ok: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ ok: false });
+  }
 });
 
 module.exports = router;

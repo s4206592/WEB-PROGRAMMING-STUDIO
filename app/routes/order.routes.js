@@ -210,20 +210,21 @@ router.post('/orders/:id/confirm', requireLogin, async (req, res) => {
   if (!isOrderSeller(req, order)) return res.status(403).render('404', { message: "You don't have access to this order." });
   if (order.status !== 'placed') return res.redirect('/orders/selling');
 
-  order.status = 'confirmed';
-  order.deliveryMilestones.push({ stage: 'confirmed' });
-  await order.save();
+  try {
+    order.status = 'confirmed';
+    order.deliveryMilestones.push({ stage: 'confirmed' });
+    await order.save();
 
-  // Confirming is what marks the item sold out — not checkout itself, since
-  // nothing is guaranteed until the seller actually agrees to fulfill it.
-  for (const item of order.items) {
-    const product = await Product.findById(item.productId);
-    if (!product) continue;
-    product.quantityAvailable = Math.max(0, (product.quantityAvailable || 0) - item.quantity);
-    if (product.quantityAvailable === 0) product.status = 'sold';
-    await product.save();
-  }
-
+    // Confirming is what marks the item sold out — not checkout itself, since
+    // nothing is guaranteed until the seller actually agrees to fulfill it.
+    for (const item of order.items) {
+      const product = await Product.findById(item.productId);
+      if (!product) continue;
+      product.quantityAvailable = Math.max(0, (product.quantityAvailable || 0) - item.quantity);
+      if (product.quantityAvailable === 0) product.status = 'sold';
+      await product.save();
+    }
+  } catch (err) { console.error(err); }
   res.redirect('/orders/selling');
 });
 
@@ -232,9 +233,11 @@ router.post('/orders/:id/decline', requireLogin, async (req, res) => {
   if (!order) return res.status(404).render('404', { message: 'Order not found.' });
   if (!isOrderSeller(req, order)) return res.status(403).render('404', { message: "You don't have access to this order." });
   if (order.status === 'placed') {
-    order.status = 'cancelled';
-    order.deliveryMilestones.push({ stage: 'cancelled' });
-    await order.save();
+    try {
+      order.status = 'cancelled';
+      order.deliveryMilestones.push({ stage: 'cancelled' });
+      await order.save();
+    } catch (err) { console.error(err); }
   }
   res.redirect('/orders/selling');
 });
@@ -244,9 +247,11 @@ router.post('/orders/:id/ship', requireLogin, async (req, res) => {
   if (!order) return res.status(404).render('404', { message: 'Order not found.' });
   if (!isOrderSeller(req, order)) return res.status(403).render('404', { message: "You don't have access to this order." });
   if (order.status !== 'confirmed') return res.redirect('/orders/selling');
-  order.status = 'shipped';
-  order.deliveryMilestones.push({ stage: 'shipped' });
-  await order.save();
+  try {
+    order.status = 'shipped';
+    order.deliveryMilestones.push({ stage: 'shipped' });
+    await order.save();
+  } catch (err) { console.error(err); }
   res.redirect('/orders/selling');
 });
 
@@ -256,15 +261,16 @@ router.post('/orders/:id/mark-delivered', requireLogin, async (req, res) => {
   if (!isOrderSeller(req, order)) return res.status(403).render('404', { message: "You don't have access to this order." });
   if (order.status !== 'shipped') return res.redirect('/orders/selling');
 
-  order.status = 'delivered';
-  order.deliveryMilestones.push({ stage: 'delivered' });
-  // Cash on Delivery: this is the real moment payment happens.
-  order.payment.status = 'paid';
-  const eligibleUntil = new Date();
-  eligibleUntil.setDate(eligibleUntil.getDate() + 15);
-  order.returnWindow = { deliveredAt: new Date(), eligibleUntil, disputeRaised: false };
-  await order.save();
-
+  try {
+    order.status = 'delivered';
+    order.deliveryMilestones.push({ stage: 'delivered' });
+    // Cash on Delivery: this is the real moment payment happens.
+    order.payment.status = 'paid';
+    const eligibleUntil = new Date();
+    eligibleUntil.setDate(eligibleUntil.getDate() + 15);
+    order.returnWindow = { deliveredAt: new Date(), eligibleUntil, disputeRaised: false };
+    await order.save();
+  } catch (err) { console.error(err); }
   res.redirect('/orders/selling');
 });
 

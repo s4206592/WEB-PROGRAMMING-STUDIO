@@ -31,12 +31,12 @@ router.get('/admin/users', requireAdmin, async (req, res) => {
 });
 
 router.post('/admin/users/:id/suspend', requireAdmin, async (req, res) => {
-  await User.findByIdAndUpdate(req.params.id, { status: 'suspended' });
+  try { await User.findByIdAndUpdate(req.params.id, { status: 'suspended' }); } catch (err) { console.error(err); }
   res.redirect('/admin/users');
 });
 
 router.post('/admin/users/:id/activate', requireAdmin, async (req, res) => {
-  await User.findByIdAndUpdate(req.params.id, { status: 'active' });
+  try { await User.findByIdAndUpdate(req.params.id, { status: 'active' }); } catch (err) { console.error(err); }
   res.redirect('/admin/users');
 });
 
@@ -46,7 +46,7 @@ router.get('/admin/moderation', requireAdmin, async (req, res) => {
 });
 
 router.post('/admin/moderation/:id/resolve', requireAdmin, async (req, res) => {
-  await ModerationFlag.findByIdAndUpdate(req.params.id, { status: 'resolved' });
+  try { await ModerationFlag.findByIdAndUpdate(req.params.id, { status: 'resolved' }); } catch (err) { console.error(err); }
   res.redirect('/admin/moderation');
 });
 
