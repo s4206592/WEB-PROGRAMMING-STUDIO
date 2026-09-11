@@ -11,18 +11,25 @@
             <strong class="mono">#<%= order.orderNumber %></strong>
             <span class="pill <%= order.status === 'delivered' ? 'pill-active' : order.status === 'cancelled' ? 'pill-flagged' : 'pill-pending' %>"><%= order.status %></span>
           </div>
-          <p class="muted" style="font-size:13px;">Buyer: <%= order.buyerSnapshot.username %> · ₫<%= order.totals.total.toLocaleString() %> (Cash on Delivery)</p>
+          <% var isPickup = order.payment.method === 'pickup'; %>
+          <p class="muted" style="font-size:13px;">Buyer: <%= order.buyerSnapshot.username %> · ₫<%= order.totals.total.toLocaleString() %> (<%= isPickup ? 'Cash on Pickup' : 'Cash on Delivery' %>)</p>
           <div class="stack" style="margin:10px 0; gap:4px;">
             <% order.items.forEach(function(i) { %>
               <span style="font-size:13px;"><%= i.productSnapshot.title %> × <%= i.quantity %></span>
             <% }) %>
           </div>
-          <p class="muted" style="font-size:12px;">Ship to: <%= order.delivery.address %> · <%= order.delivery.contactPhone %> · <%= order.delivery.shippingMethod %></p>
+          <% if (isPickup) { %>
+            <p class="muted" style="font-size:12px;">Contact: <%= order.delivery.contactPhone %> — coordinate pickup with the buyer directly.</p>
+          <% } else { %>
+            <p class="muted" style="font-size:12px;">Ship to: <%= order.delivery.address %> · <%= order.delivery.contactPhone %> · <%= order.delivery.shippingMethod %></p>
+          <% } %>
 
           <div class="row" style="margin-top:12px;">
             <% if (order.status === 'placed') { %>
               <form method="POST" action="/orders/<%= order._id %>/confirm"><button class="btn btn-primary" type="submit">Confirm order</button></form>
               <form method="POST" action="/orders/<%= order._id %>/decline" onsubmit="return confirm('Decline this order? This cannot be undone.');"><button class="btn btn-danger" type="submit">Decline</button></form>
+            <% } else if (order.status === 'confirmed' && isPickup) { %>
+              <form method="POST" action="/orders/<%= order._id %>/mark-delivered"><button class="btn btn-primary" type="submit">Mark picked up</button></form>
             <% } else if (order.status === 'confirmed') { %>
               <form method="POST" action="/orders/<%= order._id %>/ship"><button class="btn btn-primary" type="submit">Mark as shipped</button></form>
             <% } else if (order.status === 'shipped') { %>
