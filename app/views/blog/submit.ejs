@@ -3,14 +3,7 @@
   <h1 class="section-title">Submit an article</h1>
   <% if (typeof success !== 'undefined' && success) { %><div class="alert alert-success">Submitted — a staff member will review it before it's published.</div><% } %>
   <% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
-  <% if (relatedProduct) { %>
-    <div class="card" style="padding:12px 16px; margin-bottom:16px; display:flex; gap:10px; align-items:center;">
-      <% if (relatedProduct.images[0]) { %><img src="<%= relatedProduct.images[0] %>" alt="" style="width:40px; height:40px; object-fit:cover; border-radius:3px;" /><% } %>
-      <span style="font-size:13px;">Writing about: <strong><%= relatedProduct.title %></strong></span>
-    </div>
-  <% } %>
   <form id="blog-submit-form" method="POST" action="/blog/submit">
-    <% if (relatedProduct) { %><input type="hidden" name="relatedProductId" value="<%= relatedProduct._id %>" /><% } %>
     <div class="field"><label>Title</label><input name="title" value="<%= old.title || '' %>" /></div>
     <div class="field"><label>Category</label>
       <select name="category">

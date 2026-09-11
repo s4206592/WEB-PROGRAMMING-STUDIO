@@ -9,7 +9,10 @@ const wishlistSchema = new Schema({
     priceHistory: [{ price: Number, at: { type: Date, default: Date.now } }],
     inspectionNotes: String,
     addedAt: { type: Date, default: Date.now }
-  }]
+  }],
+  sampleData: { type: Boolean, default: false }
 });
+
+wishlistSchema.index({ 'items.productId': 1 });
 
 module.exports = mongoose.model('Wishlist', wishlistSchema);

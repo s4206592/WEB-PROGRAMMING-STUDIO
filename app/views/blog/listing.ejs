@@ -24,9 +24,6 @@
         <a class="card" href="/blog/<%= p._id %>" style="text-decoration:none; color:inherit;"><div class="card-body">
           <span class="condition-badge"><%= p.category %></span>
           <div class="card-title" style="margin-top:8px;"><%= p.title %></div>
-          <% if (p.relatedProductSnapshot && p.relatedProductSnapshot.title) { %>
-            <span class="muted" style="display:block; font-size:12px; margin-top:4px;">About: <%= p.relatedProductSnapshot.title %></span>
-          <% } %>
         </div></a>
       <% }) %>
     </div>

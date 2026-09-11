@@ -253,6 +253,7 @@ No websockets — the conversation view polls `GET /messages/:id/poll` every ~4 
 ```
 
 ### `adminAuditLog`
+**Not implemented in this build.** This collection was in the original design (an audit trail of admin actions — suspend/reactivate, approve/reject, resolve flag) but no `AdminAuditLog` model or write path exists in the current codebase; `admin.routes.js` performs those actions directly without logging them anywhere. Documented here so the gap between design and implementation is explicit rather than silently dropped. Planned shape, if implemented:
 ```js
 { _id, adminId, action, targetType, targetId, notes, timestamp }
 ```
@@ -272,4 +273,45 @@ No dedicated collection — generated from the Express route registry at request
 - **Core exception (by necessity):** `users` and `products` are the only collections every module reads from.
 
 ## 13. Seed state
-`npm run seed` creates one admin account, starter FAQ entries, 2 sample users, and 5 sample listings — flagged `sampleData: true` so `npm run unseed` can remove just the sample data later. **Currently broken** — see §1b; the admin/sample-user creation calls don't pass the now-required `phone` field.
+
+`npm run seed` creates one admin account, starter FAQ entries, and realistic sample data across every collection in the schema (see §16). Every seeded document is flagged `sampleData: true` so `npm run unseed` can remove just the sample data later without touching real accounts.
+
+## 14. Relationship cardinality summary
+
+Every relationship in this schema falls into one of three shapes. Listed explicitly here (rather than left implicit in the field-by-field sections above) because MongoDB doesn't enforce any of them at the database level — each is enforced in application code instead, which is exactly why this table matters for understanding the design:
+
+| Cardinality | Relationship | How it's represented |
+|---|---|---|
+| **One-to-One** | User ↔ Cart | `carts.userId` has a `unique` index — each user has at most one cart document. |
+| **One-to-One** | User ↔ Wishlist | `wishlists.userId` has a `unique` index — same pattern as Cart. |
+| **One-to-Many** | User → Products | one seller, many listings (`products.sellerId`). |
+| **One-to-Many** | User → Orders | one buyer, many orders (`orders.buyerId`). |
+| **One-to-Many** | Product → Reviews | one product, many reviews (`reviews.productId`). |
+| **One-to-Many** | Order → Reviews | one delivered order unlocks reviews for the products in it (`reviews.orderId`). |
+| **One-to-Many** | ForumPost → ForumReplies | one thread, many replies (`forumReplies.postId`). |
+| **One-to-Many** | BlogPost → BlogComments | one article, many comments (`blogComments.postId`). |
+| **One-to-Many** | Studio → StudioReviews | one studio, many reviews (`studioReviews.studioId`). |
+| **One-to-Many** | Conversation → Messages | one thread, many messages (`chatMessages.conversationId`). |
+| **Many-to-Many** | Users ↔ Products (Wishlist) | many users can wishlist many products — represented as an embedded array (`wishlists.items[]`), not a join collection, since a wishlist entry also carries per-user data (price history, notes) that wouldn't belong on the product itself. |
+| **Many-to-Many** | Users ↔ Products (Cart) | same shape as Wishlist — embedded `carts.items[]`. |
+| **Many-to-Many** | Users ↔ Conversations | many users participate in many conversations — `chatConversations.participantIds[]` is an array of user references rather than a single foreign key, because a conversation always has two (or more) participants at once. |
+
+**Why embedded arrays instead of a join collection for the many-to-many cases:** a traditional relational join table (e.g. a separate `cart_items` collection with `cartId`/`productId` columns) would need an extra query and a client-side join to reconstruct one cart. Embedding `items[]` inside the `cart`/`wishlist` document lets the app read a user's entire cart or wishlist in a single `findOne`, which is both simpler and faster for the access pattern this app actually has (always read a whole cart/wishlist at once, never a single item in isolation).
+
+## 15. Indexes, and why some duplication here is intentional
+
+Every collection above that the application actually queries by a field other than `_id` has an explicit index (see each model file's `.index()` calls, listed inline in the sections above). These aren't decorative — they map directly to real query patterns in the route handlers:
+
+| Query pattern in the app | Index that serves it |
+|---|---|
+| Marketplace search/filter/sort (`GET /products`) | `{ category: 1, status: 1 }`, `{ 'pricing.listPrice': 1 }`, `{ 'ratingSummary.avg': -1 }`, `{ status: 1, createdAt: -1 }`, plus a text index on title/description/tags |
+| A seller's "Selling" dashboard (`GET /orders/selling`) | `{ 'items.productSnapshot.sellerId': 1, status: 1 }` |
+| Sorting reviews by newest/highest/lowest (`GET /products/:id?reviewSort=`) | `{ productId: 1, rating: -1 }` and `{ productId: 1, createdAt: -1 }` |
+| Forum/blog listing pages with search + sort | `{ status: 1, createdAt: -1 }`, `{ status: 1, viewCount: -1 }`, plus text indexes |
+| A user's unread notifications | `{ userId: 1, isRead: 1, createdAt: -1 }` |
+
+**On duplication specifically:** the `xSnapshot` fields throughout this schema (`productSnapshot`, `sellerSnapshot`, `authorSnapshot`, etc.) are, strictly speaking, duplicated data — the same username or product title exists in both `users`/`products` and in every document that references them. This is a deliberate trade-off, not an oversight: it's the mechanism that makes every module independently droppable (§12) and it avoids a `$lookup`/join on every page render. The alternative — storing only an `ObjectId` and populating it at read time — would remove the duplication but would also mean a dropped or slow `users` collection breaks every other module's pages, which was an explicit requirement for this project. Core fields that change often and must stay authoritative (price, stock, order status) are **never** duplicated — they're read fresh from their owning collection every time; only slow-changing display fields (a username, a product title, a thumbnail) are cached in snapshots.
+
+## 16. Sample data coverage
+
+`npm run seed` populates every collection in the schema with realistic sample records — not just Users and Products — so the implemented database can be inspected end-to-end against this document rather than showing empty collections for anything beyond the two core ones. See §13 for what's included; every seeded document is flagged `sampleData: true` so it can be removed independently of real user data via `npm run unseed`.

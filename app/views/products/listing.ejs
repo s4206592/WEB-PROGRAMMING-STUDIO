@@ -41,22 +41,14 @@
   <% } else { %>
     <div class="grid">
       <% products.forEach(function(p) { %>
-        <div class="card">
-          <a href="/products/<%= p._id %>" style="text-decoration:none; color:inherit;">
-            <div class="card-media"><% if (p.images[0]) { %><img src="<%= p.images[0] %>" alt="<%= p.title %>"/><% } else { %>NO IMAGE<% } %></div>
-            <div class="gear-tag">₫<%= p.pricing.listPrice.toLocaleString() %></div>
-            <div class="card-body" style="padding-bottom:0;">
-              <div class="card-title"><%= p.title %></div>
-              <span class="condition-badge <%= p.condition === 'new' ? 'new' : '' %>"><%= p.condition %></span>
-              <% if (p.pickup && p.pickup.available && p.pickup.city) { %>
-                <span class="muted" style="display:block; font-size:12px; margin-top:4px;">📍 Pickup in <%= p.pickup.city %></span>
-              <% } %>
-            </div>
-          </a>
-          <div class="card-body" style="padding-top:6px;">
-            <a href="/sellers/<%= p.sellerId %>" class="muted" style="font-size:12px;">by <%= p.sellerSnapshot.username %></a>
+        <a class="card" href="/products/<%= p._id %>" style="text-decoration:none; color:inherit;">
+          <div class="card-media"><% if (p.images[0]) { %><img src="<%= p.images[0] %>" alt="<%= p.title %>"/><% } else { %>NO IMAGE<% } %></div>
+          <div class="gear-tag">₫<%= p.pricing.listPrice.toLocaleString() %></div>
+          <div class="card-body">
+            <div class="card-title"><%= p.title %></div>
+            <span class="condition-badge <%= p.condition === 'new' ? 'new' : '' %>"><%= p.condition %></span>
           </div>
-        </div>
+        </a>
       <% }) %>
     </div>
   <% } %>

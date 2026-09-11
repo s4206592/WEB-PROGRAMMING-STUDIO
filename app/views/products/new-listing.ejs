@@ -1,29 +1,10 @@
 <%- include('../partials/header', { pageTitle: 'List gear' }) %>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <div class="container" style="padding:48px 0; max-width:680px;">
   <h1 class="section-title">List your gear</h1>
   <p class="muted" style="margin-top:-10px;">List one item or several at once — each row gets its own price and condition.</p>
   <% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
 
   <form id="listing-form" method="POST" action="/products/new" novalidate>
-    <div class="card" style="padding:20px; margin-bottom:20px;">
-      <label style="display:flex; gap:8px; align-items:center; font-size:13px; margin-bottom:12px;">
-        <input type="checkbox" id="pickup-available" name="pickupAvailable" <%= oldPickup.available ? 'checked' : '' %> style="width:auto;" />
-        This gear is available for local pickup
-      </label>
-      <p class="muted" style="font-size:12px; margin-top:-6px;">Applies to every item in this listing — only the city is ever shown to buyers, never the full address.</p>
-      <div id="pickup-address-field" <%= oldPickup.available ? '' : 'hidden' %>>
-        <div class="address-search-wrap">
-          <input id="pickup-address-search" autocomplete="off" placeholder="Start typing an address…" value="<%= oldPickup.formattedAddress || '' %>" />
-          <div id="pickup-address-results" class="address-results"></div>
-        </div>
-        <input type="hidden" name="pickup[lat]" id="pickup-lat" value="<%= oldPickup.lat || '' %>" />
-        <input type="hidden" name="pickup[lng]" id="pickup-lng" value="<%= oldPickup.lng || '' %>" />
-        <input type="hidden" name="pickup[formattedAddress]" id="pickup-formattedAddress" value="<%= oldPickup.formattedAddress || '' %>" />
-        <input type="hidden" name="pickup[osmId]" id="pickup-osmid" value="<%= oldPickup.osmId || '' %>" />
-        <div id="pickup-preview-map" class="map-box-small" style="margin-top:12px;"></div>
-      </div>
-    </div>
     <div id="listing-rows">
       <% items.forEach(function(item, idx) { %>
         <div class="card listing-row" style="padding:20px; margin-bottom:16px;">
@@ -59,20 +40,5 @@
     <button class="btn btn-primary btn-block" type="submit">Publish listing(s)</button>
   </form>
 </div>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="/js/studio-map.js"></script>
 <script src="/js/product.js"></script>
-<script>
-  const pickupCheckbox = document.getElementById('pickup-available');
-  const pickupField = document.getElementById('pickup-address-field');
-  if (pickupCheckbox && pickupField) {
-    pickupCheckbox.addEventListener('change', () => { pickupField.hidden = !pickupCheckbox.checked; });
-  }
-  StudioMap.initAddressPicker({
-    searchInputId: 'pickup-address-search', resultsListId: 'pickup-address-results',
-    latFieldId: 'pickup-lat', lngFieldId: 'pickup-lng',
-    addressFieldId: 'pickup-formattedAddress', osmIdFieldId: 'pickup-osmid',
-    previewMapId: 'pickup-preview-map'
-  });
-</script>
 <%- include('../partials/footer') %>

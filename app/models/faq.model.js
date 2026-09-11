@@ -8,4 +8,6 @@ const faqSchema = new Schema({
   order: { type: Number, default: 0 }
 });
 
+faqSchema.index({ category: 1, order: 1 });
+
 module.exports = mongoose.model('Faq', faqSchema);

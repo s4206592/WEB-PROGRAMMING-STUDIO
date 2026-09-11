@@ -16,7 +16,8 @@ const conversationSchema = new Schema({
   },
   lastMessageAt: { type: Date, default: Date.now },
   lastMessagePreview: String,
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now },
+  sampleData: { type: Boolean, default: false }
 });
 conversationSchema.index({ participantIds: 1, lastMessageAt: -1 });
 

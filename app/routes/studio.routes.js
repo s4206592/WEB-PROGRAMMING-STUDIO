@@ -1,7 +1,6 @@
 const express = require('express');
 const { Studio, StudioReview } = require('../models/studio.model');
 const { requireLogin, requireAdmin } = require('../middleware/auth.middleware');
-const { confirmAddress } = require('../utils/geocode');
 
 // Studio Map — a sub-feature of the Discussion Forum module, kept in its own
 // route file/moduleRegistry entry so it can be deleted (file + registry line)
@@ -16,6 +15,21 @@ function splitList(value) {
 function canManageStudio(req, studio) {
   if (!req.session.user) return false;
   return String(studio.ownerId) === String(req.session.user.id) || req.session.user.role === 'admin';
+}
+
+// Confirms a client-picked lat/lng against Nominatim's reverse-geocode
+// endpoint server-side, so the stored address is never taken from free text
+// or a tampered request — only from coordinates that resolve to a real place.
+// A custom User-Agent is required by Nominatim's usage policy for server-side
+// callers (browsers can't set this header, which is fine — theirs carries a
+// Referer instead, which is what the policy expects from client-side calls).
+async function confirmAddress(lat, lng) {
+  const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`;
+  const res = await fetch(url, { headers: { 'User-Agent': 'StudioTrade-StudioMap/1.0 (class project)' } });
+  if (!res.ok) throw new Error('Nominatim reverse geocode request failed');
+  const data = await res.json();
+  if (!data || !data.display_name) throw new Error('No address found for that location');
+  return { formattedAddress: data.display_name, osmId: data.osm_id ? String(data.osm_id) : undefined };
 }
 
 // Builds the location subdocument from form fields. The hidden lat/lng/

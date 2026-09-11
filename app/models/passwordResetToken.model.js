@@ -12,4 +12,6 @@ const passwordResetTokenSchema = new Schema({
   createdAt: { type: Date, default: Date.now }
 });
 
+passwordResetTokenSchema.index({ userId: 1 });
+
 module.exports = mongoose.model('PasswordResetToken', passwordResetTokenSchema);

@@ -33,10 +33,12 @@ const studioSchema = new Schema({
 
   ratingSummary: { avg: { type: Number, default: 0 }, count: { type: Number, default: 0 } },
 
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now },
+  sampleData: { type: Boolean, default: false }
 });
 
 studioSchema.index({ status: 1, createdAt: -1 });
+studioSchema.index({ ownerId: 1 }); // "My studios" management page
 
 const studioReviewSchema = new Schema({
   studioId: { type: Schema.Types.ObjectId, required: true },

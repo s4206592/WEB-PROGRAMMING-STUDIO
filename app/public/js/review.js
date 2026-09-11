@@ -2,13 +2,24 @@
 document.addEventListener('DOMContentLoaded', () => {
   const stars = document.querySelectorAll('[data-star]');
   const ratingInput = document.getElementById('rating');
+
+  function paint(upTo) {
+    stars.forEach((s) => s.classList.toggle('active', Number(s.dataset.star) <= upTo));
+  }
+
   stars.forEach((star) => {
+    star.addEventListener('mouseenter', () => paint(Number(star.dataset.star)));
     star.addEventListener('click', () => {
       const value = Number(star.dataset.star);
       if (ratingInput) ratingInput.value = value;
-      stars.forEach((s) => s.classList.toggle('active', Number(s.dataset.star) <= value));
+      paint(value);
     });
   });
+
+  const starRow = stars[0] ? stars[0].parentElement : null;
+  if (starRow) {
+    starRow.addEventListener('mouseleave', () => paint(Number(ratingInput?.value) || 0));
+  }
 
   const form = document.getElementById('review-form');
   if (form) {

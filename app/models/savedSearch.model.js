@@ -15,7 +15,10 @@ const savedSearchSchema = new Schema({
   label: { type: String, default: '' }, // short human-readable summary, e.g. "Cameras under ₫20,000,000"
   alertsEnabled: { type: Boolean, default: true },
   lastNotifiedAt: Date,
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now },
+  sampleData: { type: Boolean, default: false }
 });
+
+savedSearchSchema.index({ userId: 1 });
 
 module.exports = mongoose.model('SavedSearch', savedSearchSchema);

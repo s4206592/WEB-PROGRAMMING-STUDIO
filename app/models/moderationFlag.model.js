@@ -8,7 +8,11 @@ const moderationFlagSchema = new Schema({
   flaggedBy: Schema.Types.ObjectId,
   reason: String,
   status: { type: String, enum: ['open', 'resolved', 'dismissed'], default: 'open' },
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now },
+  sampleData: { type: Boolean, default: false }
 });
+
+moderationFlagSchema.index({ status: 1, targetType: 1 });
+moderationFlagSchema.index({ flaggedBy: 1 });
 
 module.exports = mongoose.model('ModerationFlag', moderationFlagSchema);

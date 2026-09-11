@@ -6,41 +6,10 @@ const { requireLogin } = require('../middleware/auth.middleware');
 
 const router = express.Router();
 
-const SHIPPING_FEE = 30000;
-
-// Groups cart items by seller and looks up each seller's current pickup
-// eligibility (all items in the group must have pickup.available — checked
-// against the live Product, never a stale cart snapshot, since pickup can
-// change after an item was added to the cart). Cash on Pickup is only
-// offered to a seller group when every item in it qualifies.
-async function groupBySellerWithPickup(cartItems) {
-  const productIds = cartItems.map(i => i.productId);
-  const products = await Product.find({ _id: { $in: productIds } }).lean();
-  const productMap = new Map(products.map(p => [String(p._id), p]));
-
-  const bySeller = new Map();
-  cartItems.forEach(i => {
-    const sellerId = String(i.productSnapshot.sellerId);
-    if (!bySeller.has(sellerId)) {
-      bySeller.set(sellerId, { sellerId, sellerName: i.productSnapshot.sellerName, items: [], pickupEligible: true, pickupCity: null });
-    }
-    const group = bySeller.get(sellerId);
-    group.items.push(i);
-    const product = productMap.get(String(i.productId));
-    if (!product || !product.pickup || !product.pickup.available) {
-      group.pickupEligible = false;
-    } else if (!group.pickupCity) {
-      group.pickupCity = product.pickup.city;
-    }
-  });
-  return Array.from(bySeller.values());
-}
-
 router.get('/checkout', requireLogin, async (req, res) => {
   const cart = await Cart.findOne({ userId: req.session.user.id }).lean();
   if (!cart || cart.items.length === 0) return res.redirect('/cart');
-  const sellerGroups = await groupBySellerWithPickup(cart.items);
-  res.render('checkout/checkout', { sellerGroups, shippingFee: SHIPPING_FEE, error: null, negotiatedConversationId: null });
+  res.render('checkout/checkout', { cart, error: null, negotiatedConversationId: null });
 });
 
 // Reads a chat conversation's confirmed price defensively (module-independence
@@ -64,34 +33,30 @@ router.get('/messages/:id/checkout', requireLogin, async (req, res) => {
     return res.status(404).render('404', { message: 'That listing is no longer available.' });
   }
 
-  const negotiatedItems = [{
-    productId: product._id,
-    productSnapshot: {
-      title: product.title, image: product.images[0] || '', price: convo.negotiation.agreedPrice,
-      sellerId: product.sellerId, sellerName: product.sellerSnapshot.username
-    },
-    quantity: 1
-  }];
-  const sellerGroups = await groupBySellerWithPickup(negotiatedItems);
-  res.render('checkout/checkout', { sellerGroups, shippingFee: SHIPPING_FEE, error: null, negotiatedConversationId: convo._id });
+  const negotiatedCart = {
+    items: [{
+      productId: product._id,
+      productSnapshot: {
+        title: product.title, image: product.images[0] || '', price: convo.negotiation.agreedPrice,
+        sellerId: product.sellerId, sellerName: product.sellerSnapshot.username
+      },
+      quantity: 1
+    }]
+  };
+  res.render('checkout/checkout', { cart: negotiatedCart, error: null, negotiatedConversationId: convo._id });
 });
 
-// Cash on Delivery or Cash on Pickup. A cart can hold items from several
-// sellers, but fulfillment (confirm/ship/deliver) is a per-seller action —
-// so checkout splits the cart into one Order per seller. Each seller group
-// picks its own shipping method (Standard/Express/Pickup); "Pickup" is only
-// honored when every item in that seller's group actually has pickup
-// enabled, re-checked here server-side rather than trusting the submitted
-// choice.
-const SHIPPING_METHODS = ['Standard', 'Express', 'Pickup'];
-
+// Cash on Delivery only. A cart can hold items from several sellers, but
+// fulfillment (confirm/ship/deliver) is a per-seller action — so checkout
+// splits the cart into one Order per seller, each shipped ₫30,000 flat,
+// rather than one shared order no single seller fully controls.
 router.post('/checkout', requireLogin, async (req, res) => {
   try {
-    const { address, contactPhone, negotiatedConversationId } = req.body;
+    const { address, contactPhone, shippingMethod, negotiatedConversationId } = req.body;
 
     // Negotiated single-item checkout: re-derive the item from the
     // conversation's confirmed price server-side, never trust the form.
-    let cartItems;
+    let cart;
     if (negotiatedConversationId) {
       const { Conversation } = require('../models/chat.model');
       const convo = await Conversation.findById(negotiatedConversationId).lean();
@@ -101,34 +66,33 @@ router.post('/checkout', requireLogin, async (req, res) => {
       }
       const product = await Product.findById(convo.relatedProductId).lean();
       if (!product || product.status !== 'active') return res.redirect('/messages');
-      cartItems = [{
-        productId: product._id,
-        productSnapshot: { title: product.title, image: product.images[0] || '', price: convo.negotiation.agreedPrice, sellerId: product.sellerId, sellerName: product.sellerSnapshot.username },
-        quantity: 1
-      }];
+      cart = {
+        items: [{
+          productId: product._id,
+          productSnapshot: { title: product.title, image: product.images[0] || '', price: convo.negotiation.agreedPrice, sellerId: product.sellerId, sellerName: product.sellerSnapshot.username }
+        , quantity: 1 }]
+      };
     } else {
-      const cart = await Cart.findOne({ userId: req.session.user.id }).lean();
-      cartItems = cart ? cart.items : [];
+      cart = await Cart.findOne({ userId: req.session.user.id }).lean();
     }
 
-    if (cartItems.length === 0) return res.redirect(negotiatedConversationId ? '/messages' : '/cart');
-    const sellerGroups = await groupBySellerWithPickup(cartItems);
-
-    if (!address || !contactPhone) {
-      return res.render('checkout/checkout', { sellerGroups, shippingFee: SHIPPING_FEE, error: 'Please complete delivery details.', negotiatedConversationId: negotiatedConversationId || null });
+    if (!address || !contactPhone || !shippingMethod) {
+      return res.render('checkout/checkout', { cart: cart || { items: [] }, error: 'Please complete delivery details.', negotiatedConversationId: negotiatedConversationId || null });
     }
+    if (!cart || cart.items.length === 0) return res.redirect(negotiatedConversationId ? '/messages' : '/cart');
 
+    const bySeller = new Map();
+    cart.items.forEach(i => {
+      const sellerId = String(i.productSnapshot.sellerId);
+      if (!bySeller.has(sellerId)) bySeller.set(sellerId, []);
+      bySeller.get(sellerId).push(i);
+    });
+
+    const shippingFee = 30000;
+    const sellerGroups = Array.from(bySeller.values());
     const orders = [];
     for (let idx = 0; idx < sellerGroups.length; idx++) {
-      const group = sellerGroups[idx];
-      const items = group.items;
-      const requested = req.body['shippingMethod_' + group.sellerId];
-      const requestedShipping = SHIPPING_METHODS.includes(requested) ? requested : 'Standard';
-      // Never trust the client's choice of "Pickup" — only honor it when
-      // this seller's group is actually pickup-eligible.
-      const shippingMethod = (requestedShipping === 'Pickup' && !group.pickupEligible) ? 'Standard' : requestedShipping;
-      const method = shippingMethod === 'Pickup' ? 'pickup' : 'cod';
-      const shippingFee = method === 'pickup' ? 0 : SHIPPING_FEE;
+      const items = sellerGroups[idx];
       const subtotal = items.reduce((sum, i) => sum + i.productSnapshot.price * i.quantity, 0);
       const order = await Order.create({
         orderNumber: 'ST' + Date.now() + '-' + idx,
@@ -140,7 +104,7 @@ router.post('/checkout', requireLogin, async (req, res) => {
           quantity: i.quantity, priceAtPurchase: i.productSnapshot.price
         })),
         delivery: { address, contactPhone, shippingMethod },
-        payment: { method, status: 'pending' },
+        payment: { method: 'cod', status: 'pending' },
         totals: { subtotal, shippingFee, total: subtotal + shippingFee }
       });
       orders.push(order);
@@ -279,9 +243,7 @@ router.post('/orders/:id/ship', requireLogin, async (req, res) => {
   const order = await Order.findById(req.params.id);
   if (!order) return res.status(404).render('404', { message: 'Order not found.' });
   if (!isOrderSeller(req, order)) return res.status(403).render('404', { message: "You don't have access to this order." });
-  // Cash on Pickup orders have no shipping leg — they skip straight from
-  // 'confirmed' to 'delivered' via mark-delivered ("mark picked up").
-  if (order.status !== 'confirmed' || order.payment.method === 'pickup') return res.redirect('/orders/selling');
+  if (order.status !== 'confirmed') return res.redirect('/orders/selling');
   order.status = 'shipped';
   order.deliveryMilestones.push({ stage: 'shipped' });
   await order.save();
@@ -292,15 +254,11 @@ router.post('/orders/:id/mark-delivered', requireLogin, async (req, res) => {
   const order = await Order.findById(req.params.id);
   if (!order) return res.status(404).render('404', { message: 'Order not found.' });
   if (!isOrderSeller(req, order)) return res.status(403).render('404', { message: "You don't have access to this order." });
-  // Cash on Delivery must have shipped first; Cash on Pickup has no
-  // shipping leg, so it can be marked delivered ("picked up") right after
-  // the seller confirms.
-  const validFrom = order.payment.method === 'pickup' ? 'confirmed' : 'shipped';
-  if (order.status !== validFrom) return res.redirect('/orders/selling');
+  if (order.status !== 'shipped') return res.redirect('/orders/selling');
 
   order.status = 'delivered';
   order.deliveryMilestones.push({ stage: 'delivered' });
-  // This is the real moment cash changes hands, for either method.
+  // Cash on Delivery: this is the real moment payment happens.
   order.payment.status = 'paid';
   const eligibleUntil = new Date();
   eligibleUntil.setDate(eligibleUntil.getDate() + 15);

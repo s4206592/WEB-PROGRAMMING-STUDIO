@@ -8,15 +8,11 @@ const blogPostSchema = new Schema({
   category: { type: String, required: true },
   coverImage: String,
   body: { type: String, required: true },
-  // Optional link back to the listing that inspired this post — set when
-  // the author started writing from a product page's "Write a blog about
-  // this" button rather than the standalone /blog/submit flow.
-  relatedProductId: Schema.Types.ObjectId,
-  relatedProductSnapshot: { title: String, image: String },
   status: { type: String, enum: ['pending_review', 'published', 'rejected'], default: 'pending_review' },
   publishedAt: Date,
   viewCount: { type: Number, default: 0 },
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now },
+  sampleData: { type: Boolean, default: false }
 });
 
 const blogCommentSchema = new Schema({
@@ -27,6 +23,14 @@ const blogCommentSchema = new Schema({
   body: { type: String, required: true },
   createdAt: { type: Date, default: Date.now }
 });
+
+blogPostSchema.index({ status: 1, publishedAt: -1 });
+blogPostSchema.index({ status: 1, viewCount: -1 });
+blogPostSchema.index({ category: 1, status: 1 });
+blogPostSchema.index({ authorId: 1 });
+blogPostSchema.index({ title: 'text', body: 'text' });
+blogCommentSchema.index({ postId: 1, createdAt: 1 });
+blogCommentSchema.index({ authorId: 1 });
 
 module.exports = {
   BlogPost: mongoose.model('BlogPost', blogPostSchema),

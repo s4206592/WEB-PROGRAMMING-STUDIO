@@ -13,11 +13,10 @@ const orderSchema = new Schema({
   }],
   delivery: { address: String, contactPhone: String, shippingMethod: String },
   payment: {
-    // Cash on Delivery or Cash on Pickup — both cash-in-hand methods, no
-    // gateway involved. status stays 'pending' until the seller marks the
-    // order delivered (cod) or picked up (pickup) — that's the real moment
+    // Cash on Delivery is the only method for now. status stays 'pending'
+    // until the seller marks the order delivered — that's the real moment
     // cash changes hands, not the moment the order is placed.
-    method: { type: String, enum: ['cod', 'pickup'], default: 'cod' },
+    method: { type: String, enum: ['cod'], default: 'cod' },
     status: { type: String, enum: ['pending', 'paid', 'failed'], default: 'pending' }
   },
   totals: { subtotal: Number, shippingFee: Number, total: Number },
@@ -28,7 +27,12 @@ const orderSchema = new Schema({
   },
   deliveryMilestones: [{ stage: String, at: { type: Date, default: Date.now } }],
   returnWindow: { deliveredAt: Date, eligibleUntil: Date, disputeRaised: { type: Boolean, default: false } },
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now },
+  sampleData: { type: Boolean, default: false }
 });
+
+orderSchema.index({ buyerId: 1, createdAt: -1 });
+orderSchema.index({ 'items.productSnapshot.sellerId': 1, status: 1 }); // seller's "Selling" dashboard
+orderSchema.index({ status: 1 });
 
 module.exports = mongoose.model('Order', orderSchema);

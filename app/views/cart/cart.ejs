@@ -7,9 +7,12 @@
     <div class="stack">
       <% cart.items.forEach(function(i) { %>
         <div class="card" data-cart-row data-price="<%= i.productSnapshot.price %>"><div class="card-body between">
-          <div>
-            <strong><%= i.productSnapshot.title %></strong>
-            <p class="muted mono" style="font-size:13px;">₫<%= i.productSnapshot.price.toLocaleString() %> × <input data-qty-input="<%= i.productId %>" type="number" min="1" value="<%= i.quantity %>" style="width:50px; background:var(--surface-2); border:1px solid var(--line); color:var(--text); padding:4px;" /></p>
+          <div class="row-with-thumb">
+            <div class="row-thumb"><% if (i.productSnapshot.image) { %><img src="<%= i.productSnapshot.image %>" alt=""/><% } else { %>NO IMAGE<% } %></div>
+            <div>
+              <strong><%= i.productSnapshot.title %></strong>
+              <p class="muted mono" style="font-size:13px;">₫<%= i.productSnapshot.price.toLocaleString() %> × <input data-qty-input="<%= i.productId %>" type="number" min="1" value="<%= i.quantity %>" style="width:50px; background:var(--surface-2); border:1px solid var(--line); color:var(--text); padding:4px;" /></p>
+            </div>
           </div>
           <button class="btn btn-danger" data-remove-item="<%= i.productId %>">Remove</button>
         </div></div>

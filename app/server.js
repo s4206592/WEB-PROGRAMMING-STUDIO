@@ -68,15 +68,6 @@ app.use((err, req, res, next) => {
   res.status(500).render('404', { message: 'Something went wrong on our end.' });
 });
 
-// Defense-in-depth: an async route handler that throws without a try/catch
-// would otherwise crash the entire Node process on the next request, taking
-// every module down at once (this happened once already — see the forum/
-// blog route try/catch blocks). This keeps the server alive even if a
-// handler is missed.
-process.on('unhandledRejection', (err) => {
-  console.error('Unhandled rejection (recovered, process kept alive):', err);
-});
-
 const PORT = process.env.PORT || 3000;
 connectDB().then(() => {
   app.listen(PORT, () => console.log(`StudioTrade running on port ${PORT}`));

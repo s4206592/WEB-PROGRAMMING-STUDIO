@@ -7,9 +7,14 @@
     <div class="stack">
       <% orders.forEach(function(order) { %>
         <a class="card" href="/orders/<%= order._id %>/delivery" style="text-decoration:none; color:inherit;"><div class="card-body between">
-          <div>
-            <strong class="mono">#<%= order.orderNumber %></strong>
-            <p class="muted" style="font-size:13px;"><%= order.items.length %> item<%= order.items.length === 1 ? '' : 's' %> · ₫<%= order.totals.total.toLocaleString() %></p>
+          <div class="row-with-thumb">
+            <div class="row-thumb">
+              <% if (order.items[0] && order.items[0].productSnapshot.image) { %><img src="<%= order.items[0].productSnapshot.image %>" alt=""/><% } else { %>NO IMAGE<% } %>
+            </div>
+            <div>
+              <strong class="mono">#<%= order.orderNumber %></strong>
+              <p class="muted" style="font-size:13px;"><%= order.items[0] ? order.items[0].productSnapshot.title : '' %><%= order.items.length > 1 ? ' + ' + (order.items.length - 1) + ' more' : '' %> · ₫<%= order.totals.total.toLocaleString() %></p>
+            </div>
           </div>
           <span class="pill <%= order.status === 'delivered' ? 'pill-active' : order.status === 'cancelled' ? 'pill-flagged' : 'pill-pending' %>"><%= order.status %></span>
         </div></a>

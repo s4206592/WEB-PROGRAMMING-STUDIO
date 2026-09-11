@@ -2,24 +2,22 @@
 <div class="container" style="padding:48px 0; max-width:640px;">
   <h1 class="section-title">Order #<%= order.orderNumber %></h1>
 
-  <% var isPickup = order.payment.method === 'pickup'; %>
-  <% var stages = isPickup ? ['confirmed','delivered'] : ['confirmed','shipped','delivered']; %>
-  <% var stageLabels = { confirmed: 'confirmed', shipped: 'shipped', delivered: isPickup ? 'picked up' : 'delivered' }; %>
-
   <% if (order.status === 'cancelled') { %>
     <div class="alert alert-error">This order was declined by the seller and won't be fulfilled.</div>
   <% } else { %>
-    <div class="row" style="margin-bottom:24px;">
-      <% stages.forEach(function(stage) {
+    <div class="stepper" id="delivery-stepper">
+      <% ['confirmed','shipped','delivered'].forEach(function(stage, idx) {
          var reached = order.deliveryMilestones.some(function(m){ return m.stage === stage; }); %>
-        <span class="pill <%= reached ? 'pill-active' : '' %>" style="<%= reached ? '' : 'opacity:0.4;' %>"><%= stageLabels[stage] %></span>
+        <% if (idx > 0) { %>
+          <div class="stepper-line"><div class="stepper-line-fill" data-fill="<%= reached ? '1' : '0' %>"></div></div>
+        <% } %>
+        <div class="stepper-step <%= reached ? 'reached' : '' %>">
+          <div class="stepper-dot"><%= reached ? '✓' : (idx + 1) %></div>
+          <div class="stepper-label"><%= stage %></div>
+        </div>
       <% }) %>
     </div>
-    <p class="muted mono" style="font-size:12px;">
-      Payment: <%= order.payment.status === 'paid'
-        ? ('Cash collected on ' + (isPickup ? 'pickup' : 'delivery'))
-        : ('Pending — Cash on ' + (isPickup ? 'Pickup' : 'Delivery')) %>
-    </p>
+    <p class="muted mono" style="font-size:12px;">Payment: <%= order.payment.status === 'paid' ? 'Cash collected on delivery' : 'Pending — Cash on Delivery' %></p>
   <% } %>
 
   <% if (isSeller) { %>
@@ -27,8 +25,6 @@
       <% if (order.status === 'placed') { %>
         <form method="POST" action="/orders/<%= order._id %>/confirm"><button class="btn btn-primary" type="submit">Confirm order</button></form>
         <form method="POST" action="/orders/<%= order._id %>/decline" onsubmit="return confirm('Decline this order? This cannot be undone.');"><button class="btn btn-danger" type="submit">Decline</button></form>
-      <% } else if (order.status === 'confirmed' && isPickup) { %>
-        <form method="POST" action="/orders/<%= order._id %>/mark-delivered"><button class="btn btn-primary" type="submit">Mark picked up</button></form>
       <% } else if (order.status === 'confirmed') { %>
         <form method="POST" action="/orders/<%= order._id %>/ship"><button class="btn btn-primary" type="submit">Mark as shipped</button></form>
       <% } else if (order.status === 'shipped') { %>
@@ -41,9 +37,20 @@
     <div class="stack" style="margin-top:24px;">
       <p class="muted">Delivered. You can now review each product you bought.</p>
       <% order.items.forEach(function(i) { %>
-        <a href="/products/<%= i.productId %>/review" class="btn btn-primary">Review "<%= i.productSnapshot.title %>"</a>
+        <div class="row-with-thumb" style="margin-bottom:8px;">
+          <div class="row-thumb"><% if (i.productSnapshot.image) { %><img src="<%= i.productSnapshot.image %>" alt=""/><% } else { %>NO IMAGE<% } %></div>
+          <a href="/products/<%= i.productId %>/review" class="btn btn-primary">Review "<%= i.productSnapshot.title %>"</a>
+        </div>
       <% }) %>
     </div>
   <% } %>
 </div>
+<script>
+  // Animate the stepper's connector lines filling in on load, instead of
+  // rendering already-full — the CSS transition needs the width to change
+  // *after* the initial paint, not be set to its final value up front.
+  document.querySelectorAll('.stepper-line-fill[data-fill="1"]').forEach((el) => {
+    requestAnimationFrame(() => requestAnimationFrame(() => { el.style.width = '100%'; }));
+  });
+</script>
 <%- include('../partials/footer') %>

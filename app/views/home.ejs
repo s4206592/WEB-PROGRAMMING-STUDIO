@@ -1,6 +1,15 @@
 <%- include('partials/header', { pageTitle: 'Home' }) %>
 <section class="hero">
   <div class="container">
+    <% if (personalized) { %>
+      <div class="greeting-banner">
+        <span>Welcome back, <strong><%= currentUser.username %></strong> — <%= personalized.cartItemCount %> item<%= personalized.cartItemCount === 1 ? '' : 's' %> in your cart, <%= personalized.activeOrderCount %> order<%= personalized.activeOrderCount === 1 ? '' : 's' %> in progress.</span>
+        <div class="row">
+          <a href="/cart" class="btn btn-secondary" style="padding:8px 14px;">View cart</a>
+          <a href="/orders" class="btn btn-secondary" style="padding:8px 14px;">My orders</a>
+        </div>
+      </div>
+    <% } %>
     <p class="eyebrow">Secondhand studio gear, Vietnam</p>
     <h1>Buy and sell<br/>studio equipment<br/>without the guesswork</h1>
     <p class="lede">Verified listings, direct negotiation with sellers, and a 15-day return window on every order.</p>
@@ -8,8 +17,55 @@
       <a href="/products" class="btn btn-primary">Browse listings</a>
       <a href="/products/new" class="btn btn-secondary">Sell your gear</a>
     </div>
+
+    <!-- Live counts, pulled straight from the Product/User collections at
+         request time — not hardcoded copy. Animated on load via home.js. -->
+    <div class="stat-bar" id="stat-bar">
+      <div class="stat"><span class="stat-number" data-count-to="<%= stats.listingCount %>">0</span><span class="stat-label">Active listings</span></div>
+      <div class="stat"><span class="stat-number" data-count-to="<%= stats.categoryCount %>">0</span><span class="stat-label">Categories</span></div>
+      <div class="stat"><span class="stat-number" data-count-to="<%= stats.sellerCount %>">0</span><span class="stat-label">Sellers</span></div>
+      <div class="stat"><span class="stat-number" data-count-to="<%= stats.avgRating %>" data-decimal="1">0</span><span class="stat-label">Avg. rating</span></div>
+    </div>
+
+    <% if (categories.length > 0) { %>
+      <div class="category-chips">
+        <% categories.slice(0, 8).forEach(function(c) { %>
+          <a href="/products?category=<%= encodeURIComponent(c) %>" class="chip"><%= c %></a>
+        <% }) %>
+      </div>
+    <% } %>
   </div>
 </section>
+
+<% if (featuredProducts.length > 0) { %>
+<div class="container" style="padding:48px 0 8px;">
+  <h2 class="section-title">Top picks right now</h2>
+  <p class="muted" style="margin-top:-16px; margin-bottom:24px;">Sorted by rating, then by views — the marketplace's own filter/sort logic, just surfaced here.</p>
+  <div class="carousel" id="featured-carousel">
+    <div class="carousel-track" id="featured-track">
+      <% featuredProducts.forEach(function(p) { %>
+        <a class="carousel-card" href="/products/<%= p._id %>">
+          <div class="card-media"><% if (p.images[0]) { %><img src="<%= p.images[0] %>" alt="<%= p.title %>"/><% } else { %>NO IMAGE<% } %></div>
+          <div class="gear-tag">₫<%= p.pricing.listPrice.toLocaleString() %></div>
+          <div class="card-body">
+            <div class="card-title"><%= p.title %></div>
+            <% if (p.ratingSummary && p.ratingSummary.count > 0) { %>
+              <span class="stars" style="font-size:13px;"><% for(let i=0;i<5;i++){ %><%= i < Math.round(p.ratingSummary.avg) ? '★' : '☆' %><% } %></span>
+              <span class="muted mono" style="font-size:11px;">(<%= p.ratingSummary.count %>)</span>
+            <% } else { %>
+              <span class="condition-badge">trending</span>
+            <% } %>
+          </div>
+        </a>
+      <% }) %>
+    </div>
+    <button type="button" class="carousel-nav carousel-prev" id="carousel-prev" aria-label="Previous">‹</button>
+    <button type="button" class="carousel-nav carousel-next" id="carousel-next" aria-label="Next">›</button>
+    <div class="carousel-dots" id="carousel-dots"></div>
+  </div>
+</div>
+<% } %>
+
 <div class="container" style="padding:48px 0;">
   <h2 class="section-title">Recently listed</h2>
   <% if (recentProducts.length === 0) { %>
@@ -31,4 +87,5 @@
     </div>
   <% } %>
 </div>
+<script src="/js/home.js"></script>
 <%- include('partials/footer') %>

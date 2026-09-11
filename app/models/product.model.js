@@ -21,18 +21,6 @@ const productSchema = new Schema({
   },
   quantityAvailable: { type: Number, default: 1 },
   status: { type: String, enum: ['active', 'pending', 'sold', 'removed'], default: 'active' },
-  // City-level pickup info, shown publicly on the item list/detail page so
-  // buyers know if local pickup is realistic. formattedAddress/lat/lng are
-  // kept for future use but never rendered to buyers directly — a seller's
-  // home address is private in a way a Studio's business address isn't.
-  pickup: {
-    available: { type: Boolean, default: false },
-    city: String,
-    formattedAddress: String,
-    lat: Number,
-    lng: Number,
-    osmId: String
-  },
   ratingSummary: {
     avg: { type: Number, default: 0 },
     count: { type: Number, default: 0 }
@@ -43,5 +31,10 @@ const productSchema = new Schema({
 });
 
 productSchema.index({ title: 'text', description: 'text', tags: 'text' });
+productSchema.index({ sellerId: 1 });
+productSchema.index({ category: 1, status: 1 });
+productSchema.index({ status: 1, createdAt: -1 }); // supports "newest first" sort
+productSchema.index({ 'pricing.listPrice': 1 });   // supports price sort/filter
+productSchema.index({ 'ratingSummary.avg': -1 });  // supports "top rated" sort
 
 module.exports = mongoose.model('Product', productSchema);

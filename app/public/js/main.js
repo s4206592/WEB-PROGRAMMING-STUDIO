@@ -45,3 +45,29 @@ if (navToggle && navLinks) {
     }
   });
 }
+
+// Scroll-reveal: fades + rises .card, .carousel-card, and .stat elements
+// into place as they enter the viewport. Purely additive — the .reveal
+// class (and its opacity:0 starting state) is only added here, in JS, so
+// if this script fails to load every element just renders fully visible
+// with no animation, never hidden.
+if (window.IntersectionObserver) {
+  const revealTargets = document.querySelectorAll('.card, .carousel-card, .stat, .empty-state');
+  if (revealTargets.length) {
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('reveal-visible');
+          revealObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+
+    revealTargets.forEach((el, i) => {
+      el.classList.add('reveal');
+      // Small stagger so a grid of cards doesn't all pop in at once.
+      el.style.transitionDelay = `${Math.min(i % 8, 8) * 40}ms`;
+      revealObserver.observe(el);
+    });
+  }
+}

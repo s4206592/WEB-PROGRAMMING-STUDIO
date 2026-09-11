@@ -13,7 +13,13 @@ const reviewSchema = new Schema({
   media: [String],
   helpfulVotes: { type: Number, default: 0 },
   status: { type: String, enum: ['published', 'flagged', 'removed'], default: 'published' },
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now },
+  sampleData: { type: Boolean, default: false }
 });
+
+reviewSchema.index({ productId: 1, rating: -1 });  // supports "highest rated" sort
+reviewSchema.index({ productId: 1, createdAt: -1 }); // supports "newest" sort
+reviewSchema.index({ reviewerId: 1 });
+reviewSchema.index({ orderId: 1 });
 
 module.exports = mongoose.model('Review', reviewSchema);

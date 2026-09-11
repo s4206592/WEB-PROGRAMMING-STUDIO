@@ -9,7 +9,8 @@ const forumPostSchema = new Schema({
   tags: [String],
   upvotes: { type: Number, default: 0 },
   status: { type: String, enum: ['active', 'flagged', 'removed'], default: 'active' },
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now },
+  sampleData: { type: Boolean, default: false }
 });
 
 const forumReplySchema = new Schema({
@@ -21,6 +22,12 @@ const forumReplySchema = new Schema({
   votes: { type: Number, default: 0 },
   createdAt: { type: Date, default: Date.now }
 });
+
+forumPostSchema.index({ status: 1, createdAt: -1 });
+forumPostSchema.index({ authorId: 1 });
+forumPostSchema.index({ title: 'text', body: 'text' });
+forumReplySchema.index({ postId: 1, createdAt: 1 });
+forumReplySchema.index({ authorId: 1 });
 
 module.exports = {
   ForumPost: mongoose.model('ForumPost', forumPostSchema),
