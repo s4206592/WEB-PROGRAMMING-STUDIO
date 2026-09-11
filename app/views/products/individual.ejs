@@ -10,7 +10,10 @@
       <span class="condition-badge <%= product.condition === 'new' ? 'new' : '' %>"><%= product.condition %></span>
       <h1 style="margin-top:10px;"><%= product.title %></h1>
       <p class="mono" style="font-size:22px; color:var(--neon);">₫<%= product.pricing.listPrice.toLocaleString() %><% if (product.pricing.negotiable && product.status === 'active') { %> <span class="muted mono" style="font-size:12px;">(negotiable)</span><% } %></p>
-      <p class="muted">Sold by <strong><%= product.sellerSnapshot.username %></strong></p>
+      <p class="muted">Sold by <a href="/sellers/<%= product.sellerId %>"><strong><%= product.sellerSnapshot.username %></strong></a></p>
+      <% if (product.pickup && product.pickup.available && product.pickup.city) { %>
+        <p class="muted" style="font-size:13px;">📍 Pickup available in <%= product.pickup.city %></p>
+      <% } %>
       <p><%= product.description %></p>
 
       <% if (product.status === 'sold') { %>
@@ -42,6 +45,12 @@
               <button class="btn btn-secondary" type="submit">Negotiate price</button>
             </form>
           <% } %>
+        </div>
+      <% } %>
+
+      <% if (currentUser) { %>
+        <div class="row" style="margin-bottom:24px;">
+          <a href="/blog/submit?productId=<%= product._id %>" class="btn btn-secondary">Write a blog about this</a>
         </div>
       <% } %>
 

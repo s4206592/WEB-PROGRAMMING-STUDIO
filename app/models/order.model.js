@@ -13,10 +13,11 @@ const orderSchema = new Schema({
   }],
   delivery: { address: String, contactPhone: String, shippingMethod: String },
   payment: {
-    // Cash on Delivery is the only method for now. status stays 'pending'
-    // until the seller marks the order delivered — that's the real moment
+    // Cash on Delivery or Cash on Pickup — both cash-in-hand methods, no
+    // gateway involved. status stays 'pending' until the seller marks the
+    // order delivered (cod) or picked up (pickup) — that's the real moment
     // cash changes hands, not the moment the order is placed.
-    method: { type: String, enum: ['cod'], default: 'cod' },
+    method: { type: String, enum: ['cod', 'pickup'], default: 'cod' },
     status: { type: String, enum: ['pending', 'paid', 'failed'], default: 'pending' }
   },
   totals: { subtotal: Number, shippingFee: Number, total: Number },

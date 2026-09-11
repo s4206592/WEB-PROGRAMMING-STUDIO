@@ -11,27 +11,37 @@
     <h3 style="margin-top:24px;">Delivery</h3>
     <div class="field"><label>Address</label><input name="address" required /></div>
     <div class="field"><label>Contact phone</label><input name="contactPhone" required /></div>
-    <div class="field"><label>Shipping method</label>
-      <select name="shippingMethod">
-        <option value="Standard">Standard (3–5 days)</option>
-        <option value="Express">Express (1–2 days)</option>
-      </select>
-    </div>
-    <h3>Payment</h3>
-    <p class="muted" style="margin-top:-6px;">Cash on Delivery — pay the seller in cash when your order arrives. It's the only payment method right now.</p>
-    <h3>Review order</h3>
-    <div class="stack" style="margin-bottom:20px;">
-      <% var subtotal = 0; %>
-      <% var sellerIds = new Set(); %>
-      <% cart.items.forEach(function(i) { subtotal += i.productSnapshot.price * i.quantity; sellerIds.add(String(i.productSnapshot.sellerId)); }) %>
-      <% cart.items.forEach(function(i) { %>
-        <div class="between"><span><%= i.productSnapshot.title %> × <%= i.quantity %></span><span class="mono">₫<%= (i.productSnapshot.price * i.quantity).toLocaleString() %></span></div>
+
+    <h3>Shipping &amp; review</h3>
+    <% var grandSubtotal = 0; %>
+    <div class="stack" style="margin-bottom:20px; gap:16px;">
+      <% sellerGroups.forEach(function(group) { %>
+        <% var groupSubtotal = 0; %>
+        <% group.items.forEach(function(i) { groupSubtotal += i.productSnapshot.price * i.quantity; }) %>
+        <% grandSubtotal += groupSubtotal; %>
+        <div class="card" style="padding:16px;">
+          <p class="muted" style="font-size:12px; margin-top:0;">Sold by <strong><%= group.sellerName %></strong></p>
+          <% group.items.forEach(function(i) { %>
+            <div class="between"><span><%= i.productSnapshot.title %> × <%= i.quantity %></span><span class="mono">₫<%= (i.productSnapshot.price * i.quantity).toLocaleString() %></span></div>
+          <% }) %>
+
+          <div class="field" style="margin-top:10px; margin-bottom:0;">
+            <label>Shipping method</label>
+            <select name="shippingMethod_<%= group.sellerId %>">
+              <option value="Standard">Standard delivery (3–5 days) — ₫30,000, Cash on Delivery</option>
+              <option value="Express">Express delivery (1–2 days) — ₫30,000, Cash on Delivery</option>
+              <% if (group.pickupEligible) { %>
+                <option value="Pickup">Local pickup in <%= group.pickupCity || 'person' %> — free, Cash on Pickup</option>
+              <% } %>
+            </select>
+          </div>
+        </div>
       <% }) %>
-      <% var shippingTotal = sellerIds.size * 30000; %>
-      <% if (sellerIds.size > 1) { %>
-        <p class="muted" style="font-size:12px;">Items are from <%= sellerIds.size %> different sellers, so this will be placed as <%= sellerIds.size %> separate orders — each with its own ₫30,000 shipping.</p>
+      <% if (sellerGroups.length > 1) { %>
+        <p class="muted" style="font-size:12px;">Items are from <%= sellerGroups.length %> different sellers, so this will be placed as <%= sellerGroups.length %> separate orders, each with its own shipping method.</p>
       <% } %>
-      <div class="between" style="font-weight:700; border-top:1px solid var(--line); padding-top:8px;"><span>Total (+ ₫<%= shippingTotal.toLocaleString() %> shipping)</span><span class="mono">₫<%= (subtotal + shippingTotal).toLocaleString() %></span></div>
+      <div class="between" style="font-weight:700; border-top:1px solid var(--line); padding-top:8px;"><span>Items subtotal</span><span class="mono">₫<%= grandSubtotal.toLocaleString() %></span></div>
+      <p class="muted" style="font-size:12px; margin-top:-8px;">Shipping is ₫30,000 per order for Standard/Express, ₫0 for local pickup — the exact total per order shows on your order confirmation once placed.</p>
     </div>
     <button class="btn btn-primary btn-block" type="submit">Place order</button>
   </form>
