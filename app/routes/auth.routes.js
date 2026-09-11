@@ -149,7 +149,7 @@ function withDefaults(user) {
 
 router.get('/profile', requireLogin, async (req, res) => {
   const user = withDefaults(await User.findById(req.session.user.id).lean());
-  res.render('account/profile', { user, error: null, success: null });
+  res.render('account/profile', { user, error: null, success: null, passwordError: null, passwordSuccess: null });
 });
 
 router.post('/profile', requireLogin, async (req, res) => {
@@ -162,11 +162,44 @@ router.post('/profile', requireLogin, async (req, res) => {
       'contact.city': city
     });
     const user = withDefaults(await User.findById(req.session.user.id).lean());
-    res.render('account/profile', { user, error: null, success: 'Settings saved.' });
+    res.render('account/profile', { user, error: null, success: 'Settings saved.', passwordError: null, passwordSuccess: null });
   } catch (err) {
     console.error(err);
     const user = withDefaults(await User.findById(req.session.user.id).lean());
-    res.render('account/profile', { user, error: 'Could not save changes.', success: null });
+    res.render('account/profile', { user, error: 'Could not save changes.', success: null, passwordError: null, passwordSuccess: null });
+  }
+});
+
+// Change password while logged in — distinct from the forgot-password flow:
+// this requires knowing the *current* password rather than proving email
+// ownership, so it belongs on the profile page as a normal account setting.
+router.post('/profile/password', requireLogin, async (req, res) => {
+  const user = await User.findById(req.session.user.id);
+  const rerender = (passwordError, passwordSuccess) => {
+    const leanUser = withDefaults(user.toObject());
+    res.render('account/profile', { user: leanUser, error: null, success: null, passwordError, passwordSuccess });
+  };
+
+  try {
+    const { currentPassword, newPassword, confirmNewPassword } = req.body;
+    if (!currentPassword || !newPassword || !confirmNewPassword) {
+      return rerender('Fill in all three password fields.', null);
+    }
+    if (!(await bcrypt.compare(currentPassword, user.passwordHash))) {
+      return rerender('Current password is incorrect.', null);
+    }
+    if (newPassword.length < 8) {
+      return rerender('New password must be at least 8 characters.', null);
+    }
+    if (newPassword !== confirmNewPassword) {
+      return rerender('New passwords do not match.', null);
+    }
+    user.passwordHash = await bcrypt.hash(newPassword, 10);
+    await user.save();
+    rerender(null, 'Password changed.');
+  } catch (err) {
+    console.error(err);
+    rerender('Could not change password. Please try again.', null);
   }
 });
 

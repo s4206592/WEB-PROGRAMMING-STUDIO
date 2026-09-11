@@ -23,5 +23,38 @@
     </div>
     <button class="btn btn-primary" type="submit">Save changes</button>
   </form>
+
+  <h2 class="section-title" style="margin-top:48px;">Change password</h2>
+  <% if (passwordSuccess) { %><div class="alert alert-success"><%= passwordSuccess %></div><% } %>
+  <% if (passwordError) { %><div class="alert alert-error"><%= passwordError %></div><% } %>
+  <form id="change-password-form" method="POST" action="/profile/password" novalidate>
+    <div class="field" id="current-password-field">
+      <label>Current password</label>
+      <div class="row">
+        <input id="currentPassword" type="password" name="currentPassword" style="flex:1;" />
+        <button type="button" class="btn btn-secondary" data-toggle-password="currentPassword" style="padding:11px 14px;">Show</button>
+      </div>
+      <div class="field-error"></div>
+    </div>
+    <div class="field" id="new-password-field">
+      <label>New password</label>
+      <div class="row">
+        <input id="newPassword" type="password" name="newPassword" minlength="8" style="flex:1;" />
+        <button type="button" class="btn btn-secondary" data-toggle-password="newPassword" style="padding:11px 14px;">Show</button>
+      </div>
+      <div class="field-error"></div>
+    </div>
+    <div class="field" id="confirm-new-password-field">
+      <label>Confirm new password</label>
+      <div class="row">
+        <input id="confirmNewPassword" type="password" name="confirmNewPassword" minlength="8" style="flex:1;" />
+        <button type="button" class="btn btn-secondary" data-toggle-password="confirmNewPassword" style="padding:11px 14px;">Show</button>
+      </div>
+      <div class="field-error"></div>
+    </div>
+    <button class="btn btn-primary" type="submit">Change password</button>
+  </form>
+  <p class="muted" style="margin-top:14px; font-size:13px;">Forgot your current password instead? <a href="/forgot-password">Reset it by email</a>.</p>
 </div>
+<script src="/js/auth.js"></script>
 <%- include('../partials/footer') %>

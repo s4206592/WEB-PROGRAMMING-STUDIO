@@ -91,3 +91,27 @@ if (loginForm) {
     if (!valid) e.preventDefault();
   });
 }
+
+const changePasswordForm = document.getElementById('change-password-form');
+if (changePasswordForm) {
+  changePasswordForm.addEventListener('submit', (e) => {
+    let valid = true;
+    const current = changePasswordForm.querySelector('#currentPassword');
+    const next = changePasswordForm.querySelector('#newPassword');
+    const confirm = changePasswordForm.querySelector('#confirmNewPassword');
+
+    if (!current.value) {
+      setError(current.closest('.field'), 'Enter your current password.'); valid = false;
+    } else setError(current.closest('.field'), '');
+
+    if (next.value.length < 8) {
+      setError(next.closest('.field'), 'New password must be at least 8 characters.'); valid = false;
+    } else setError(next.closest('.field'), '');
+
+    if (confirm.value !== next.value) {
+      setError(confirm.closest('.field'), 'New passwords do not match.'); valid = false;
+    } else setError(confirm.closest('.field'), '');
+
+    if (!valid) e.preventDefault();
+  });
+}
