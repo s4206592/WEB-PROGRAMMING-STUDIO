@@ -1,143 +1,162 @@
 # StudioTrade
 
-**COSC3060 Web Programming Studio — Assignment 2: Web Application Prototype**
-**Team:** SG-G5 · **Project GitHub repo:** s4206592/WEB-PROGRAMMING-STUDIO
+**COSC3060 Web Programming Studio — Team SG-G5**
 
-StudioTrade is an online marketplace for buying and selling secondhand studio equipment (cameras, lighting, grip, audio gear), built for sellers and buyers in Vietnam. Sellers can list gear with individual pricing, and buyers can search, filter, wishlist, cart, check out, track delivery, and review purchases. Built with Node.js, Express, EJS, and MongoDB (Mongoose).
+StudioTrade is an online marketplace for buying and selling secondhand studio equipment (cameras, lighting, grip, audio gear) in Vietnam. Sellers list gear — solo or in bulk, with an optional pickup location — and buyers search, filter, wishlist, negotiate price directly with a seller in chat, check out by Cash on Delivery or Cash on Pickup, track fulfillment, and review purchases once delivered. A companion Studio Map lets studio owners advertise physical spaces, gated by admin approval. Built with Node.js, Express, EJS, and MongoDB (Mongoose).
+
+## Live application
+
+**https://web-programming-studio-studiotrade.onrender.com/**
+
+| Account | Username | Password |
+|---|---|---|
+| Admin | `admin` | `ChangeMe123!` |
+| Test user | `s4206592@rmit.edu.vn` | `12345678` |
+
+**GitHub repo:** s4206592/WEB-PROGRAMMING-STUDIO
 
 ---
 
 ## Team members and module responsibility
 
-| Team member | Student ID | Module(s) responsible for |
-|---|---|---|
-| Tran Hong Minh | S4206592 | Product Review and Rating module; Administration module (shared); User Account Management module (shared) |
-| Truong Gia Bao | S4139453 | Discussion Forum and FAQ module; Wishlist module (shared); User Account Management module (shared) |
-| Mai Thanh Ngu | S4163542 | Blog module; Wishlist module (shared); Administration module (shared) |
-| Nguyen Duy Dang Phong | S4183562 | Shopping Cart module (incl. shared Product Listing); Sitemap module (shared) |
+Modules were originally divided evenly, but as development went on, some modules needed more support than others, and helping a teammate debug their module made multiple people contributors to it too — several modules below list more than one name for that reason. The exact endpoint each person is responsible for is in the full feature tables in the Assignment report (§2).
 
-### Files and folders each member is responsible for
+| Team member | Modules |
+|---|---|
+| Tran Hong Minh | Core Pages (Home); Auth/Account (register, log in, log out); Product Review & Rating; Chat & Negotiation (shared); Administration (users, suspend/reactivate, resolve flag) |
+| Truong Gia Bao | Auth/Account (profile, password reset/change); Shopping Cart (shared); Checkout & Orders (shared); Chat & Negotiation (shared); Studio Map; Discussion Forum & FAQ; Wishlist (view only) |
+| Mai Thanh Ngu | Wishlist (add/remove/save search); Blog; Administration (dashboard, moderation queue) |
+| Nguyen Duy Dang Phong | Core Pages (Sitemap); Product Listing; Shopping Cart (shared); Checkout & Orders (shared) |
+| *Unconfirmed* | Notifications — implemented and reachable in the app, but not claimed by anyone in the team roster or the original report. Confirm ownership with the team before presenting it as complete. |
 
-Several modules share one route file because closely related actions (e.g. every `/admin/*` route, or every `/wishlist`-related route) live together — where that's the case, the specific route(s) each person owns within that shared file are listed.
+### Files and folders per module
 
-**Tran Hong Minh — Product Review and Rating, Administration (shared), User Account (shared)**
-- `routes/review.routes.js`, `models/review.model.js`, `views/reviews/submit.ejs`
-- `routes/admin.routes.js` — `GET /admin/users`, `POST /admin/users/:id/suspend`, `POST /admin/users/:id/activate`, `POST /admin/moderation/:id/resolve`
-- `views/admin/users.ejs`
-- `routes/auth.routes.js` — `GET/POST /register`, `GET/POST /login`, `POST /logout`
-- `views/auth/register.ejs`, `views/auth/login.ejs`
-- `models/user.model.js` (shared)
+Naming follows the project's convention throughout: `routes/<module>.routes.js`, `models/<module>.model.js`, `views/<module>/*.ejs`. Shared route files list the specific endpoint(s) each contributor owns within them.
 
-**Truong Gia Bao — Discussion Forum and FAQ, Wishlist (shared), User Account (shared)**
-- `routes/forum.routes.js`, `models/forumPost.model.js`, `models/faq.model.js`
-- `views/forum/faq.ejs`, `views/forum/landing.ejs`, `views/forum/new-post.ejs`, `views/forum/edit-post.ejs`, `views/forum/manage.ejs`, `views/forum/post.ejs`
-- `routes/wishlist.routes.js` — `GET /wishlist`
-- `views/wishlist/landing.ejs` (shared with Mai Thanh Ngu)
-- `routes/auth.routes.js` — `GET/POST /profile`, `GET/POST /forgot-password`, `GET/POST /reset-password/:token`
-- `views/account/profile.ejs`, `views/auth/forgot-password.ejs`, `views/auth/reset-password.ejs`, `views/auth/reset-link-sent.ejs`
-- `models/passwordResetToken.model.js`
+**Core Pages** (Minh: home · Phong: sitemap)
+`routes/page.routes.js` — `GET /` (Minh), `GET /sitemap` (Phong)
+`views/home.ejs`, `views/sitemap.ejs`
 
-**Mai Thanh Ngu — Blog, Wishlist (shared), Administration (shared)**
-- `routes/blog.routes.js`, `models/blogPost.model.js`
-- `views/blog/listing.ejs`, `views/blog/post.ejs`, `views/blog/staff-review.ejs`, `views/blog/submit.ejs`
-- `routes/wishlist.routes.js` — `POST /api/wishlist/add`, `POST /api/wishlist/remove`, `POST /wishlist/:productId/checkout`, `POST /api/wishlist/search`, `GET /api/wishlist/searches`, `POST /api/wishlist/searches/:id/delete`
-- `views/wishlist/landing.ejs` (shared with Truong Gia Bao)
-- `models/wishlist.model.js`, `models/savedSearch.model.js`
-- `routes/admin.routes.js` — `GET /admin`, `GET /admin/moderation`
-- `views/admin/dashboard.ejs`, `views/admin/moderation.ejs`
-- `models/moderationFlag.model.js`
+**Auth / Account — User Account Management** (Minh: register/login/logout · Bao: profile/password)
+`routes/auth.routes.js` — `GET/POST /register`, `GET/POST /login`, `POST /logout` (Minh); `GET/POST /profile`, `POST /profile/password`, `GET/POST /forgot-password`, `GET/POST /reset-password/:token` (Bao)
+`views/auth/`, `views/account/profile.ejs`
+`models/user.model.js`, `models/passwordResetToken.model.js`
 
-**Nguyen Duy Dang Phong — Shopping Cart (incl. shared Product Listing), Sitemap (shared)**
-- `routes/product.routes.js`, `models/product.model.js`
-- `views/products/listing.ejs`, `views/products/individual.ejs`, `views/products/new-listing.ejs`, `views/products/edit-listing.ejs`
-- `routes/cart.routes.js`, `models/cart.model.js`, `views/cart/cart.ejs`
-- `routes/order.routes.js`, `models/order.model.js`, `views/checkout/checkout.ejs`, `views/orders/confirmation.ejs`, `views/orders/delivery-progress.ejs`
-- `routes/page.routes.js` (home page + `/sitemap`), `views/home.ejs`, `views/sitemap.ejs`
+**Product Listing** (Phong)
+`routes/product.routes.js`, `models/product.model.js`
+`views/products/` (listing, individual, new-listing, edit-listing), `views/sellers/` (storefront — *new; confirm exact view path with Phong*)
 
-**Shared / not owned by a single member**
-- `server.js`, `config/db.js`, `middleware/auth.middleware.js` — application shell
-- `public/css/style.css`, `public/js/main.js` — shared design system and nav
-- `routes/notification.routes.js`, `models/notification.model.js`, `views/account/notifications.ejs` — Notification Center (cross-cutting utility used by several modules)
-- `views/partials/header.ejs`, `views/partials/footer.ejs`, `views/404.ejs`
-- `seed/seed.js`, `seed/unseed.js` — sample data
-- `studiotrade-database-schema.md`, `docs/database-schema-erd.pdf`, `docs/database-schema-erd-by-module.pdf` — schema documentation
+**Shopping Cart** (Bao + Phong)
+`routes/cart.routes.js`, `models/cart.model.js`, `views/cart/cart.ejs`
+
+**Wishlist** (Bao: view · Ngu: add/remove/search)
+`routes/wishlist.routes.js`, `models/wishlist.model.js`, `models/savedSearch.model.js`, `views/wishlist/landing.ejs`
+
+**Checkout & Orders** (Bao + Phong)
+`routes/order.routes.js`, `models/order.model.js`
+`views/checkout/checkout.ejs`, `views/orders/` (list, placed-summary, selling, confirmation, delivery-progress)
+
+**Product Review & Rating** (Minh)
+`routes/review.routes.js`, `models/review.model.js`, `views/reviews/submit.ejs`
+
+**Chat & Negotiation** (Minh + Bao)
+`routes/chat.routes.js`, `models/chat.model.js`, `views/messages/`, `public/js/messages.js`
+
+**Studio Map** (Bao) — sub-feature of Discussion Forum, kept in its own route file so it stays independently removable
+`routes/studio.routes.js`, `models/studio.model.js`, `views/forum/studios/`, `public/js/studio-map.js`, `public/js/studio-form.js`
+
+**Discussion Forum & FAQ** (Bao)
+`routes/forum.routes.js`, `models/forumPost.model.js`, `models/faq.model.js`, `views/forum/` (excl. `studios/`)
+
+**Blog** (Ngu)
+`routes/blog.routes.js`, `models/blogPost.model.js`, `views/blog/`
+
+**Administration** (Ngu: dashboard/moderation · Minh: users/suspend/activate/resolve)
+`routes/admin.routes.js`, `models/moderationFlag.model.js`, `views/admin/`
+
+**Notifications** (unconfirmed)
+`routes/notification.routes.js`, `models/notification.model.js`, `views/account/notifications.ejs`
+
+**Shared / not owned by a single module**
+`server.js`, `config/db.js`, `middleware/auth.middleware.js`, `public/css/style.css`, `public/js/main.js`, `views/partials/`, `views/404.ejs`, `seed/seed.js`, `seed/unseed.js`, `studiotrade-database-schema.md`, `docs/`
 
 ---
 
-## How to run the application
+## Instructions for configuration of the application
 
-### Prerequisites
-- Node.js 18+
-- A MongoDB connection string (MongoDB Atlas, or a local MongoDB instance)
+### 1. Prerequisites
+- **Node.js 18 or later** — the app uses the built-in `fetch` API for the Studio Map module's address lookup, which requires Node 18+. Check with `node -v`.
+- **npm** (bundled with Node.js).
+- **A MongoDB database** the server can reach — MongoDB Atlas (cloud, recommended) or a local/self-hosted instance. Any MongoDB 5+ compatible server works; the app only needs a connection string.
+- No other external services or API keys are required — Studio Map's address search uses Nominatim (OpenStreetMap), which needs no API key.
 
-### Setup
+### 2. Get the source code onto the target machine
+Clone the repository, or copy the project folder (excluding `node_modules`, regenerated in step 3) onto the new machine.
+
+### 3. Install required packages
 ```bash
 npm install
+```
+Installs every dependency from `package.json`: express, mongoose, ejs, express-session, connect-mongo, bcryptjs, dotenv.
+
+### 4. Configure environment variables
+```bash
 cp .env.example .env
 ```
-Open `.env` and fill in:
-- `MONGODB_URI` — your MongoDB connection string
-- `SESSION_SECRET` — any long random string
-- `ADMIN_EMAIL`, `ADMIN_USERNAME`, `ADMIN_PASSWORD` — credentials for the seeded admin account
+Then set in `.env`:
 
-### Seed the database
+| Variable | Purpose |
+|---|---|
+| `MONGODB_URI` | Connection string for this instance's database |
+| `SESSION_SECRET` | Any long random string, signs session cookies |
+| `PORT` | Server port (defaults to 3000 if omitted) |
+| `ADMIN_EMAIL`, `ADMIN_USERNAME`, `ADMIN_PASSWORD` | Credentials the seed script uses for the one administrator account |
+
+None of these are committed (`.env` is in `.gitignore`) — each environment keeps its own.
+
+### 5. Seed the database
 ```bash
 npm run seed
 ```
-This creates **one admin account** (credentials from `.env`), a starter set of FAQ entries, **2 sample users**, and **5 sample listings** — the terminal prints the sample users' usernames and passwords. Every other collection (orders, reviews, wishlists, forum posts, blog posts) starts empty. Run `npm run unseed` at any time to remove just the sample users/listings without touching the admin account or any real data.
+Creates the administrator account, starter FAQ entries, 2 sample users, and 5 sample listings. Every other collection (orders, reviews, wishlists, forum posts, blog posts, studio listings, chat conversations) starts empty. `npm run unseed` removes just the sample data at any time.
 
-### Start the server
+**Known issue:** the User model requires a `phone` field, but the seed script does not currently supply one for the administrator account or sample users, which causes `npm run seed` to fail schema validation on a completely fresh database. Fix by adding a `phone` value to each account created in `seed/seed.js` before relying on seeding.
+
+### 6. Start the application
 ```bash
 npm start
 ```
-Visit `http://localhost:3000`.
+Runs `server.js`, connects to MongoDB via `MONGODB_URI`, listens on `PORT`. Once the terminal shows "StudioTrade running on port …", visit `http://localhost:<PORT>`.
 
-### Deploying to Render.com
+### 7. Running on a different server machine or hosting environment
+Steps 1–6 are identical regardless of host — laptop, lab machine, cloud VM, or managed platform — since nothing hardcodes a machine-specific path, port, or credential; everything comes from `.env`. Only two things differ per environment:
+- **Where `MONGODB_URI` points** — local MongoDB is fine for same-machine development, but a remotely hosted server generally can't reach a database on another machine's `localhost`, so a cloud connection string (e.g. Atlas) is normally required once app and database aren't co-located.
+- **How the process is kept running** — `npm start` runs in the foreground and stops when that terminal session ends; for an always-on server, run it under a process manager (`pm2 start server.js`) or let the hosting platform manage the process.
 
-**1. Set up a MongoDB Atlas cluster (if you don't have one yet)**
-Create a free cluster at [mongodb.com/atlas](https://www.mongodb.com/atlas), add a database user, and allow network access from anywhere (`0.0.0.0/0`) so Render can reach it. Copy the connection string — this is your `MONGODB_URI`.
-
-**2. Push the project to a GitHub repo**
-Render deploys from a Git branch, so the code needs to be on GitHub first (`node_modules` is already excluded via `.gitignore`).
-
-**3. Create the Web Service on Render**
-- In the Render dashboard: **New → Web Service**, connect the GitHub repo.
-- **Build command:** `npm install`
-- **Start command:** `npm start`
-- (`render.yaml` is included if you'd rather use Render's Blueprint deploy instead of setting this up manually.)
-
-**4. Set environment variables**
-Under the service's **Environment** tab, add:
-- `MONGODB_URI` — your Atlas connection string
-- `SESSION_SECRET` — any long random string (Render can auto-generate one)
-- `ADMIN_EMAIL`, `ADMIN_USERNAME`, `ADMIN_PASSWORD` — credentials for the seeded admin account
-
-**5. Deploy and seed**
-Render deploys automatically after the first setup. Once it shows **Live**, open the **Shell** tab for the service and run:
-```bash
-npm run seed
-```
-This creates the admin account, starter FAQ entries, and the sample users/listings. Do this once — running it again is safe (it detects the admin account already exists and skips re-creating it).
-
-**6. Share the URL**
-The `/register` page is public, so anyone with the Render URL can create an account.
-
-**Keeping it up to date after the first deploy**
-- Go to **Settings → Build & Deploy** and confirm **Branch** matches what you actually push to (usually `main`), and **Auto-Deploy** is set to **On Commit**. With that on, every push to that branch redeploys automatically.
-- To deploy immediately without waiting on a push (or if auto-deploy is off), use the **Manual Deploy** dropdown on the service page and choose **Deploy latest commit**.
-- If changes don't seem to show up after a deploy that says "Live," check the **Events** tab to confirm a deploy actually ran — and try a hard refresh or a private/incognito tab, since browsers (and in-app browsers like Instagram/Facebook's) can aggressively cache CSS/JS.
-- A build that fails will show the error in the **Events**/**Logs** tab — usually a missing dependency or a typo in the build/start command.
+**Example — deploying to Render.com** (one concrete example of an "other server machine/environment"):
+1. Set up a MongoDB Atlas cluster; allow network access from anywhere (`0.0.0.0/0`); copy its connection string.
+2. Push the project to a GitHub repository.
+3. Render: **New → Web Service**, connect the repo. Build command: `npm install`. Start command: `npm start`.
+4. Set the same environment variables from step 4 in Render's environment configuration.
+5. Once deployed, open the service's Shell and run `npm run seed`.
+6. Confirm **Settings → Build & Deploy → Auto-Deploy** is **On Commit** for automatic redeploys, or use **Manual Deploy → Deploy latest commit** on demand.
 
 ---
 
 ## How to test each module
 
-1. **Register / log in** — go to `/register` to create an account, or log in at `/login` with a seeded sample user's credentials (printed by `npm run seed`).
-2. **Shopping Cart & Product Listing** — browse `/products`, open a listing, click "Add to cart," go to `/cart` to adjust quantities (subtotal updates live), then `/checkout` to place an order. Track it at `/orders/:id/delivery` — use the "Simulate next delivery step" button to move it through to "received."
-3. **Product Review and Rating** — once an order is "received," a "Review" link appears on the delivery page; submit a star rating and comment, then revisit the product page to see it listed and sortable by newest/highest/lowest rated.
-4. **Wishlist** — from any product page, click "Save to wishlist," then visit `/wishlist` to view, remove, or move an item into the cart. On `/products`, set any filter (search/category/condition/price) and click "Save this search" — it appears under "Saved searches" on `/wishlist`, where you can re-run it or remove it.
-5. **Discussion Forum and FAQ** — browse `/faq` and `/forum`; log in to post a new thread at `/forum/new`, reply to one, and manage your own posts at `/forum/manage`.
-6. **Blog** — browse `/blog`; log in to submit an article at `/blog/submit`. Log in as the **admin** account to review and approve/reject it at `/blog/staff` before it appears publicly.
-7. **User Account Management** — edit your profile at `/profile`; test the forgot-password flow at `/forgot-password` (since no email service is connected yet, the reset link is shown directly on the page instead of being emailed).
-8. **Administration** — log in as the admin account, view stats at `/admin`, manage users at `/admin/users`, and resolve flagged content at `/admin/moderation`.
-9. **Sitemap** — visit `/sitemap` to see every page across every module listed in one place; this works whether or not you're logged in.
+Each area below was verified end-to-end during development — see the Assignment report (§2) for the exact scenario each contributor tested. To re-verify after your own setup:
+
+1. **Core Pages** — load `/` and `/sitemap` logged in and logged out; confirm the sitemap only lists modules actually registered in `server.js`.
+2. **Auth/Account** — register with a duplicate username/email/phone (should be rejected); log in; suspend the account as admin and confirm login is then blocked; use "Forgot password?" to generate and use a reset link; change your password from `/profile` using the current password.
+3. **Product Listing** — publish a multi-item listing with a shared pickup location; confirm the pickup badge shows only the city, never the full address; visit the seller's storefront and confirm it lists only their active items.
+4. **Shopping Cart** — add an item, confirm `/api/cart/add` rejects an item that's since sold out.
+5. **Wishlist** — save a search with a price filter, reload, confirm it persists; move a saved item into the cart.
+6. **Checkout & Orders** — check out a cart spanning two sellers and confirm it splits into two separate orders; walk one order through confirm → ship → mark-delivered (Cash on Delivery) and another through confirm → mark-delivered (Cash on Pickup, no ship step); confirm payment only flips to `paid` at the final step and the review form unlocks then.
+7. **Product Review & Rating** — confirm the review form is blocked before an order reaches `delivered`, then submit one after and confirm the product's average rating recalculates.
+8. **Chat & Negotiation** — message a seller from a product page, negotiate a price in plain messages, have the seller confirm it, then check out at that price — confirm the order's `priceAtPurchase` matches the agreed price, not the listed price.
+9. **Studio Map** — submit a studio, reject it as admin with a reason, edit and resubmit as the owner, approve it, and confirm it only appears on the public map once approved.
+10. **Discussion Forum & FAQ** — post, reply, edit, and delete a forum post back-to-back (this flow previously crashed the server on a second post due to an orphaned unique index — confirm that's still fixed).
+11. **Blog** — submit an article via "Write a blog about this" from a product page and confirm the product link survives review to the published article; also confirm the standalone `/blog/submit` flow works with no product attached.
+12. **Administration** — suspend and reactivate a test account; resolve an open moderation flag.
+13. **Notifications** — visit `/notifications` while logged in and confirm your recent notifications list and mark-as-read works. *(Ownership unconfirmed — verify this is actually someone's responsibility before demo day.)*
